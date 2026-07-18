@@ -11,11 +11,13 @@ Linux/macOS (bash).
 1. Builds the production release tree into `dist/app` (Composer `--no-dev`,
    compiled frontend assets, dev tooling stripped).
 2. Injects a hardened root `.htaccess` that routes all traffic into `public/` and
-   blocks direct access to `.env`, `vendor/`, `app/`, `storage/`, etc. — so the
-   whole app can safely live inside `public_html`.
-3. Mirrors `dist/app` to the remote directory over FTPS (`mirror -R`).
-4. If SSH is enabled, runs remote maintenance: `optimize:clear`, `migrate --force`,
-   `storage:link`, and `config:cache`/`route:cache`.
+   blocks direct access to `.env` / source directories — so the whole app can
+   safely live inside `public_html`.
+3. **When SSH is enabled (recommended):** packages the tree into a single zip,
+   uploads it over SFTP, extracts on the server, preserves `storage/` and `.env`,
+   then runs `optimize:clear`, `migrate --force`, `storage:link`, and
+   `config:cache` / `route:cache`.
+4. **Fallback (SSH disabled):** mirrors `dist/app` over FTPS with `lftp`.
 
 ## One-time setup
 
@@ -36,7 +38,10 @@ Config reference:
 | `options.delete_remote` | `false` (safe). `true` removes remote files not present locally. |
 | `options.inject_root_htaccess` | Keep `true` for the single-folder `public_html` layout. |
 | `options.upload_env` | `true` uploads `options.env_source` to the remote `.env`. Off by default. |
+| `ssh.php_binary` | Absolute path to PHP ≥ 8.2. On Hostinger this is typically `/opt/alt/php83/usr/bin/php` (the default `php` is often 7.4). |
 | `ssh.run_migrations` | Runs `php artisan migrate --force` after upload. |
+
+Also set the **website PHP version to 8.2+** in hPanel → Advanced → PHP Configuration, otherwise the web app will still run under 7.4 even though CLI migrations use 8.3.
 
 ## Deploy
 

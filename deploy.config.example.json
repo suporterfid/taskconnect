@@ -16,7 +16,7 @@
     "username": "u250556264",
     "password": "REPLACE_WITH_SSH_PASSWORD",
     "app_dir": "/home/u250556264/domains/hub.taskconnect.com.br/public_html",
-    "php_binary": "php",
+    "php_binary": "/opt/alt/php83/usr/bin/php",
     "run_migrations": true,
     "run_optimize": true,
     "storage_link": true

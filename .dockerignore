@@ -3,9 +3,13 @@
 .idea
 .vscode
 node_modules
+**/node_modules
+frontend/node_modules
 vendor
+**/vendor
 dist
 *.zip
+deploy.config.json
 .env
 .env.*
 !.env.example

@@ -172,6 +172,7 @@ cmd_deploy() {
   fi
 
   echo "Building production release tree (dist/app)..."
+  rm -rf dist/app
   mkdir -p dist
   docker build -f docker/release/Dockerfile --target export --output "type=local,dest=./dist" .
 

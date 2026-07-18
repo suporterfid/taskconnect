@@ -219,6 +219,11 @@ function Invoke-Deploy {
     }
 
     Write-Output 'Building production release tree (dist/app)...'
+    if (Test-Path 'dist/app') {
+        # Exported vendor files can be read-only; clear the attribute before removal.
+        Get-ChildItem 'dist/app' -Recurse -Force | ForEach-Object { $_.Attributes = 'Normal' }
+        Remove-Item -Recurse -Force 'dist/app'
+    }
     New-Item -ItemType Directory -Force -Path 'dist' | Out-Null
     docker build -f docker/release/Dockerfile --target export --output "type=local,dest=./dist" .
     if ($LASTEXITCODE -ne 0) { throw "Release build failed with exit code $LASTEXITCODE" }

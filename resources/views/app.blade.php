@@ -12,8 +12,9 @@
         }
     }
 
-    $entryKey = 'src/main.ts';
-    $entry = $manifest[$entryKey] ?? null;
+    $entry = $manifest['src/main.ts']
+        ?? $manifest['index.html']
+        ?? null;
     $cssFiles = $entry['css'] ?? [];
     $jsFile = $entry['file'] ?? null;
 @endphp

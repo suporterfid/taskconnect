@@ -10,6 +10,7 @@ RUN apt-get update \
         openssh-client \
         sshpass \
         jq \
+        zip \
         ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
