@@ -1,0 +1,11 @@
+{
+  "title": "Painel",
+  "subtitle": "Visão geral das suas tarefas HTTP agendadas",
+  "stats": {
+    "activeTasks": "Tarefas ativas",
+    "pausedTasks": "Tarefas pausadas",
+    "recentRuns": "Execuções recentes",
+    "failedRuns": "Falhas (24h)"
+  },
+  "empty": "Nenhuma atividade ainda. Crie sua primeira tarefa para começar."
+}

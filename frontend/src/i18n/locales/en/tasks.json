@@ -1,0 +1,29 @@
+{
+  "title": "Tasks",
+  "subtitle": "Manage scheduled HTTP requests",
+  "create": "New task",
+  "wizard": {
+    "title": "Create task",
+    "editTitle": "Edit task",
+    "steps": {
+      "basics": "Basics",
+      "schedule": "Schedule",
+      "review": "Review"
+    }
+  },
+  "detail": {
+    "title": "Task details",
+    "schedule": "Schedule",
+    "endpoint": "Endpoint",
+    "lastRun": "Last run",
+    "nextRun": "Next run"
+  },
+  "status": {
+    "active": "Active",
+    "paused": "Paused",
+    "draft": "Draft",
+    "archived": "Archived"
+  },
+  "empty": "No tasks yet. Create one to schedule your first HTTP request.",
+  "loadError": "Unable to load tasks"
+}

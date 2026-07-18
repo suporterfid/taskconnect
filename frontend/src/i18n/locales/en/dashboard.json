@@ -1,0 +1,11 @@
+{
+  "title": "Dashboard",
+  "subtitle": "Overview of your scheduled HTTP tasks",
+  "stats": {
+    "activeTasks": "Active tasks",
+    "pausedTasks": "Paused tasks",
+    "recentRuns": "Recent runs",
+    "failedRuns": "Failed runs (24h)"
+  },
+  "empty": "No activity yet. Create your first task to get started."
+}

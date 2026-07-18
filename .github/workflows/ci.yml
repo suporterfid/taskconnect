@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+env:
+  TC_CI: "1"
+  COMPOSER_PACKAGIST_URL: "https://mirrors.cloud.tencent.com/composer/"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Compose configuration
+        run: docker compose -f compose.yaml -f compose.ci.yaml config
+
+      - name: Build images
+        run: docker compose -f compose.yaml -f compose.ci.yaml build
+
+      - name: Start core services
+        run: docker compose -f compose.yaml -f compose.ci.yaml up -d mysql mailpit receiver
+
+      - name: Wait for MySQL
+        run: |
+          for i in $(seq 1 30); do
+            if docker compose -f compose.yaml -f compose.ci.yaml exec -T mysql mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; then
+              echo "MySQL is healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MySQL failed to become healthy"
+          exit 1
+
+      - name: Install PHP dependencies
+        run: |
+          docker compose -f compose.yaml -f compose.ci.yaml run --rm app bash -lc \
+            'composer config -g repos.packagist composer "$COMPOSER_PACKAGIST_URL" && composer install --no-interaction --prefer-dist'
+
+      - name: Prepare environment
+        run: |
+          cp -n .env.example .env || true
+          docker compose -f compose.yaml -f compose.ci.yaml run --rm app php artisan key:generate --force
+          docker compose -f compose.yaml -f compose.ci.yaml run --rm app php artisan migrate --force
+
+      - name: Backend tests
+        run: docker compose -f compose.yaml -f compose.ci.yaml run --rm app php artisan test
+
+      - name: Frontend tests and build
+        run: |
+          docker compose -f compose.yaml -f compose.ci.yaml --profile dev run --rm node bash -lc \
+            'cd frontend && npm ci && npm test && npm run build'
+
+      - name: Smoke test HTTP receiver
+        run: |
+          curl -sf -X POST http://localhost:8090/webhook \
+            -H 'Content-Type: application/json' \
+            -d '{"hello":"world"}'
+          curl -sf http://localhost:8090/_requests | grep -q webhook
+          curl -sf -X DELETE http://localhost:8090/_requests
+
+      - name: Validate shell script syntax
+        run: bash -n scripts/tc.sh

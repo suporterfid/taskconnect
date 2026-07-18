@@ -1,0 +1,29 @@
+{
+  "title": "Settings",
+  "subtitle": "Tenant and account preferences",
+  "sections": {
+    "general": "General",
+    "notifications": "Notifications",
+    "security": "Security"
+  },
+  "apiKeys": {
+    "title": "API Keys",
+    "subtitle": "Machine access credentials",
+    "create": "Create API key",
+    "empty": "No API keys yet.",
+    "loadError": "Unable to load API keys"
+  },
+  "members": {
+    "title": "Members",
+    "subtitle": "People with access to this tenant",
+    "invite": "Invite member",
+    "empty": "No members found.",
+    "loadError": "Unable to load members"
+  },
+  "platformHealth": {
+    "title": "Platform Health",
+    "subtitle": "System status and diagnostics",
+    "loadError": "Unable to load platform health"
+  },
+  "saved": "Settings saved"
+}

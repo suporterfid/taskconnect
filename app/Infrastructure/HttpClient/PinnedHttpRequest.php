@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Infrastructure\HttpClient;
+
+use App\Domain\Execution\Outbound\ValidatedEndpoint;
+
+final readonly class PinnedHttpRequest
+{
+    /**
+     * @param  array<string, string>  $headers
+     */
+    public function __construct(
+        public string $method,
+        public ValidatedEndpoint $endpoint,
+        public array $headers = [],
+        public ?string $body = null,
+        public bool $verifyTls = true,
+        public bool $followRedirects = true,
+        public ?int $connectTimeout = null,
+        public ?int $totalTimeout = null,
+        public ?int $responseBodyLimit = null,
+    ) {
+    }
+}

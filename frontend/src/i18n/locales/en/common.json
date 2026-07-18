@@ -1,0 +1,45 @@
+{
+  "appName": "TaskConnect",
+  "loading": "Loading…",
+  "error": "Something went wrong",
+  "retry": "Try again",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "create": "Create",
+  "back": "Back",
+  "search": "Search",
+  "noResults": "No results found",
+  "actions": "Actions",
+  "status": "Status",
+  "name": "Name",
+  "description": "Description",
+  "createdAt": "Created",
+  "updatedAt": "Updated",
+  "nav": {
+    "dashboard": "Dashboard",
+    "tasks": "Tasks",
+    "endpointProfiles": "Endpoint Profiles",
+    "runs": "Runs",
+    "environments": "Environments",
+    "apiKeys": "API Keys",
+    "members": "Members",
+    "settings": "Settings",
+    "platformHealth": "Platform Health",
+    "logout": "Log out"
+  },
+  "locale": {
+    "label": "Language",
+    "en": "English",
+    "pt-BR": "Português (Brasil)"
+  },
+  "tenant": {
+    "label": "Tenant",
+    "select": "Select tenant"
+  },
+  "environment": {
+    "label": "Environment",
+    "select": "Select environment"
+  }
+}

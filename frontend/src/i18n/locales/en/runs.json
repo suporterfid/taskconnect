@@ -1,0 +1,19 @@
+{
+  "title": "Runs",
+  "subtitle": "Task execution history",
+  "detail": {
+    "title": "Run details",
+    "attempts": "Attempts",
+    "triggeredAt": "Triggered at",
+    "duration": "Duration"
+  },
+  "status": {
+    "pending": "Pending",
+    "running": "Running",
+    "succeeded": "Succeeded",
+    "failed": "Failed",
+    "cancelled": "Cancelled"
+  },
+  "empty": "No runs recorded yet.",
+  "loadError": "Unable to load runs"
+}

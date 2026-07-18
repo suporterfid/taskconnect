@@ -1,0 +1,7 @@
+{
+  "title": "Ambientes",
+  "subtitle": "Limites lógicos dentro do seu tenant",
+  "create": "Novo ambiente",
+  "empty": "Nenhum ambiente configurado.",
+  "loadError": "Não foi possível carregar os ambientes"
+}

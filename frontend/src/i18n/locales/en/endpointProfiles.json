@@ -1,0 +1,12 @@
+{
+  "title": "Endpoint Profiles",
+  "subtitle": "Reusable HTTP destination configurations",
+  "create": "New profile",
+  "detail": {
+    "title": "Profile details",
+    "baseUrl": "Base URL",
+    "test": "Test connection"
+  },
+  "empty": "No endpoint profiles yet.",
+  "loadError": "Unable to load endpoint profiles"
+}

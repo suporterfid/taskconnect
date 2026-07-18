@@ -1,0 +1,29 @@
+{
+  "title": "Tarefas",
+  "subtitle": "Gerencie requisições HTTP agendadas",
+  "create": "Nova tarefa",
+  "wizard": {
+    "title": "Criar tarefa",
+    "editTitle": "Editar tarefa",
+    "steps": {
+      "basics": "Básico",
+      "schedule": "Agendamento",
+      "review": "Revisão"
+    }
+  },
+  "detail": {
+    "title": "Detalhes da tarefa",
+    "schedule": "Agendamento",
+    "endpoint": "Endpoint",
+    "lastRun": "Última execução",
+    "nextRun": "Próxima execução"
+  },
+  "status": {
+    "active": "Ativa",
+    "paused": "Pausada",
+    "draft": "Rascunho",
+    "archived": "Arquivada"
+  },
+  "empty": "Nenhuma tarefa ainda. Crie uma para agendar sua primeira requisição HTTP.",
+  "loadError": "Não foi possível carregar as tarefas"
+}

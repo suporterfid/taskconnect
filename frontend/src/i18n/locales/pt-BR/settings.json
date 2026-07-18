@@ -1,0 +1,29 @@
+{
+  "title": "Configurações",
+  "subtitle": "Preferências da conta e do tenant",
+  "sections": {
+    "general": "Geral",
+    "notifications": "Notificações",
+    "security": "Segurança"
+  },
+  "apiKeys": {
+    "title": "Chaves de API",
+    "subtitle": "Credenciais de acesso para máquinas",
+    "create": "Criar chave de API",
+    "empty": "Nenhuma chave de API ainda.",
+    "loadError": "Não foi possível carregar as chaves de API"
+  },
+  "members": {
+    "title": "Membros",
+    "subtitle": "Pessoas com acesso a este tenant",
+    "invite": "Convidar membro",
+    "empty": "Nenhum membro encontrado.",
+    "loadError": "Não foi possível carregar os membros"
+  },
+  "platformHealth": {
+    "title": "Saúde da plataforma",
+    "subtitle": "Status e diagnósticos do sistema",
+    "loadError": "Não foi possível carregar a saúde da plataforma"
+  },
+  "saved": "Configurações salvas"
+}

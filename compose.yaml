@@ -1,0 +1,86 @@
+name: taskconnect
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    ports:
+      - "${APP_PORT:-8080}:80"
+    volumes:
+      - .:/var/www/html
+      - composer_cache:/root/.composer
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-taskconnect}
+      DB_USERNAME: ${DB_USERNAME:-taskconnect}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_ENCRYPTION: "null"
+      MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-hello@taskconnect.local}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-TaskConnect}
+      RECEIVER_URL: ${RECEIVER_URL:-http://receiver:8080}
+    env_file:
+      - path: .env
+        required: false
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-taskconnect}
+      MYSQL_USER: ${DB_USERNAME:-taskconnect}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+
+  receiver:
+    build:
+      context: .
+      dockerfile: docker/receiver/Dockerfile
+    ports:
+      - "${RECEIVER_PORT:-8090}:8080"
+
+  node:
+    profiles:
+      - dev
+    build:
+      context: .
+      dockerfile: docker/node/Dockerfile
+    ports:
+      - "${VITE_PORT:-5173}:5173"
+    volumes:
+      - .:/var/www/html
+      - npm_cache:/root/.npm
+    environment:
+      VITE_DEV_SERVER_HOST: 0.0.0.0
+    command: ["npm", "--prefix", "frontend", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+
+volumes:
+  mysql_data:
+  composer_cache:
+  npm_cache:

@@ -1,0 +1,12 @@
+{
+  "title": "Perfis de endpoint",
+  "subtitle": "Configurações reutilizáveis de destino HTTP",
+  "create": "Novo perfil",
+  "detail": {
+    "title": "Detalhes do perfil",
+    "baseUrl": "URL base",
+    "test": "Testar conexão"
+  },
+  "empty": "Nenhum perfil de endpoint ainda.",
+  "loadError": "Não foi possível carregar os perfis de endpoint"
+}

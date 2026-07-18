@@ -1,0 +1,19 @@
+{
+  "title": "Execuções",
+  "subtitle": "Histórico de execução de tarefas",
+  "detail": {
+    "title": "Detalhes da execução",
+    "attempts": "Tentativas",
+    "triggeredAt": "Disparada em",
+    "duration": "Duração"
+  },
+  "status": {
+    "pending": "Pendente",
+    "running": "Em execução",
+    "succeeded": "Sucesso",
+    "failed": "Falhou",
+    "cancelled": "Cancelada"
+  },
+  "empty": "Nenhuma execução registrada ainda.",
+  "loadError": "Não foi possível carregar as execuções"
+}
