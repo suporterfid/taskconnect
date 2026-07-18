@@ -1,0 +1,30 @@
+{
+  "site": "hub.taskconnect.com.br",
+  "ftp": {
+    "host": "62.72.52.123",
+    "port": 21,
+    "username": "u250556264.hub.taskconnect.com.br",
+    "password": "REPLACE_WITH_FTP_PASSWORD",
+    "secure": true,
+    "verify_certificate": false,
+    "remote_dir": "/home/u250556264/domains/hub.taskconnect.com.br/public_html"
+  },
+  "ssh": {
+    "enabled": true,
+    "host": "62.72.52.123",
+    "port": 65002,
+    "username": "u250556264",
+    "password": "REPLACE_WITH_SSH_PASSWORD",
+    "app_dir": "/home/u250556264/domains/hub.taskconnect.com.br/public_html",
+    "php_binary": "php",
+    "run_migrations": true,
+    "run_optimize": true,
+    "storage_link": true
+  },
+  "options": {
+    "inject_root_htaccess": true,
+    "delete_remote": false,
+    "upload_env": false,
+    "env_source": ".env.production"
+  }
+}

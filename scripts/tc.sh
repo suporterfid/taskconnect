@@ -70,6 +70,7 @@ Verbs:
   test         Run PHPUnit/Pest test suite
   e2e          Run end-to-end test suite
   release      Build production release zip into dist/
+  deploy       Build release and publish over FTP(S)+SSH (deploy.config.json)
   shell        Open shell in app container
   help         Show this help
 EOF
@@ -161,6 +162,27 @@ cmd_release() {
   echo "Release artifact written to dist/"
 }
 
+cmd_deploy() {
+  local config="${1:-deploy.config.json}"
+
+  if [[ ! -f "$config" ]]; then
+    echo "Deploy config '$config' not found." >&2
+    echo "Copy deploy.config.example.json to deploy.config.json and fill in your credentials." >&2
+    return 1
+  fi
+
+  echo "Building production release tree (dist/app)..."
+  mkdir -p dist
+  docker build -f docker/release/Dockerfile --target export --output "type=local,dest=./dist" .
+
+  echo "Building deploy image..."
+  docker build -f docker/deploy/Dockerfile -t taskconnect-deploy .
+
+  echo "Publishing to remote host..."
+  docker run --rm -v "$ROOT_DIR:/work" -w /work taskconnect-deploy \
+    -c "tr -d '\r' < scripts/deploy.sh > /tmp/deploy.sh && bash /tmp/deploy.sh '$config'"
+}
+
 cmd_shell() {
   compose run --rm app bash
 }
@@ -179,6 +201,7 @@ main() {
     test) cmd_test "$@" ;;
     e2e) cmd_e2e "$@" ;;
     release) cmd_release "$@" ;;
+    deploy) cmd_deploy "$@" ;;
     shell) cmd_shell "$@" ;;
     help|-h|--help) usage ;;
     *)

@@ -21,6 +21,7 @@
 /storage/pail
 /vendor
 /dist
+/deploy.config.json
 Homestead.json
 Homestead.yaml
 Thumbs.db

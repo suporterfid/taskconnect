@@ -60,5 +60,6 @@ RUN cd /release && zip -r /taskconnect-release.zip app \
 
 FROM scratch AS export
 
+COPY --from=release /release/app /app
 COPY --from=release /taskconnect-release.zip /taskconnect-release.zip
 COPY --from=release /taskconnect-release.zip.sha256 /taskconnect-release.zip.sha256

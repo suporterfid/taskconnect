@@ -92,6 +92,7 @@ Verbs:
   test         Run PHPUnit/Pest test suite
   e2e          Run end-to-end test suite
   release      Build production release zip into dist/
+  deploy       Build release and publish over FTP(S)+SSH (deploy.config.json)
   shell        Open shell in app container
   help         Show this help
 '@ | Write-Output
@@ -207,6 +208,31 @@ function Invoke-Release {
     Write-Output 'Release artifact written to dist/'
 }
 
+function Invoke-Deploy {
+    param([string[]]$Args)
+
+    $config = if ($Args.Count -gt 0) { $Args[0] } else { 'deploy.config.json' }
+
+    if (-not (Test-Path $config)) {
+        Write-Error "Deploy config '$config' not found. Copy deploy.config.example.json to deploy.config.json and fill in your credentials."
+        exit 1
+    }
+
+    Write-Output 'Building production release tree (dist/app)...'
+    New-Item -ItemType Directory -Force -Path 'dist' | Out-Null
+    docker build -f docker/release/Dockerfile --target export --output "type=local,dest=./dist" .
+    if ($LASTEXITCODE -ne 0) { throw "Release build failed with exit code $LASTEXITCODE" }
+
+    Write-Output 'Building deploy image...'
+    docker build -f docker/deploy/Dockerfile -t taskconnect-deploy .
+    if ($LASTEXITCODE -ne 0) { throw "Deploy image build failed with exit code $LASTEXITCODE" }
+
+    Write-Output 'Publishing to remote host...'
+    $remote = "tr -d '\r' < scripts/deploy.sh > /tmp/deploy.sh && bash /tmp/deploy.sh '$config'"
+    docker run --rm -v "${RootDir}:/work" -w /work taskconnect-deploy -c $remote
+    if ($LASTEXITCODE -ne 0) { throw "Deployment failed with exit code $LASTEXITCODE" }
+}
+
 function Invoke-Shell {
     Invoke-Compose @('run', '--rm', 'app', 'bash')
 }
@@ -224,6 +250,7 @@ switch ($Verb) {
     'test' { Invoke-Test -Args $VerbArgs }
     'e2e' { Invoke-E2E -Args $VerbArgs }
     'release' { Invoke-Release }
+    'deploy' { Invoke-Deploy -Args $VerbArgs }
     'shell' { Invoke-Shell }
     { $_ -in @('help', '-h', '--help') } { Show-Usage }
     default {
