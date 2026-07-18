@@ -10,8 +10,12 @@ import { useTenantStore } from '@/stores/tenant'
 const tenant = useTenantStore()
 
 const { data, loading, error, reload } = useAsyncData(async () => {
+  if (!tenant.currentTenantId) {
+    return []
+  }
+  // API keys are tenant-scoped (not environment-scoped).
   const { data: response } = await api.get<{ data: ApiKey[] }>(
-    tenant.tenantPath('/api-keys'),
+    `/tenants/${tenant.currentTenantId}/api-keys`,
   )
   return response.data ?? []
 })

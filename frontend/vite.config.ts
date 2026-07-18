@@ -9,6 +9,9 @@ const apiProxyTarget =
 
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
+  // Assets are served from /build/ (Laravel public/build). Without this, Vite
+  // emits absolute /assets/* URLs that miss the directory and return HTML.
+  base: '/build/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

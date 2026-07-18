@@ -7,5 +7,6 @@
     "recentRuns": "Recent runs",
     "failedRuns": "Failed runs (24h)"
   },
-  "empty": "No activity yet. Create your first task to get started."
+  "empty": "No activity yet. Create your first task to get started.",
+  "needsTenant": "No tenant or environment selected yet. Create a tenant to start scheduling tasks."
 }

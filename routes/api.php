@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\EndpointProfileController;
 use App\Http\Controllers\Api\V1\EnvironmentController;
 use App\Http\Controllers\Api\V1\MeController;
+use App\Http\Controllers\Api\V1\MemberController;
 use App\Http\Controllers\Api\V1\PlatformHealthController;
 use App\Http\Controllers\Api\V1\SecretController;
 use App\Http\Controllers\Api\V1\TaskController;
@@ -42,6 +43,8 @@ Route::prefix('v1')->group(function (): void {
             Route::get('tenants/{tenantId}/api-keys', [ApiKeyController::class, 'index']);
             Route::post('tenants/{tenantId}/api-keys', [ApiKeyController::class, 'store']);
             Route::delete('tenants/{tenantId}/api-keys/{apiKeyId}', [ApiKeyController::class, 'destroy']);
+
+            Route::get('tenants/{tenantId}/members', [MemberController::class, 'index']);
 
             Route::get('tenants/{tenantId}/environments/{environmentId}/dashboard', DashboardController::class);
 

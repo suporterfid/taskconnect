@@ -7,7 +7,7 @@
     "password": "REPLACE_WITH_FTP_PASSWORD",
     "secure": true,
     "verify_certificate": false,
-    "remote_dir": "/home/u250556264/domains/hub.taskconnect.com.br/public_html"
+    "remote_dir": "."
   },
   "ssh": {
     "enabled": true,

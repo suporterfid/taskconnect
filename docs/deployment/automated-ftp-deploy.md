@@ -34,7 +34,7 @@ Config reference:
 | --- | --- |
 | `ftp.secure` | `true` = FTPS (explicit TLS over port 21, Hostinger default). |
 | `ftp.verify_certificate` | `false` when connecting by raw IP (cert won't match). |
-| `ftp.remote_dir` | Absolute path to `public_html`. |
+| `ftp.remote_dir` | Path relative to the FTP account home. On Hostinger domain FTP this is usually `.` (home is already `public_html`). |
 | `options.delete_remote` | `false` (safe). `true` removes remote files not present locally. |
 | `options.inject_root_htaccess` | Keep `true` for the single-folder `public_html` layout. |
 | `options.upload_env` | `true` uploads `options.env_source` to the remote `.env`. Off by default. |

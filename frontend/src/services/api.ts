@@ -53,13 +53,26 @@ function parseErrorEnvelope(error: AxiosError): ApiError {
 
 let csrfInitialized = false
 
-export async function ensureCsrfCookie(client: AxiosInstance = api): Promise<void> {
+export async function ensureCsrfCookie(): Promise<void> {
   if (csrfInitialized) {
     return
   }
 
-  await client.get('/sanctum/csrf-cookie')
+  // Must hit /sanctum/csrf-cookie at the site root — not under /api/v1
+  // (axios would otherwise combine baseURL + path into /api/v1/sanctum/...).
+  await axios.get('/sanctum/csrf-cookie', {
+    withCredentials: true,
+    headers: {
+      Accept: 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+  })
   csrfInitialized = true
+}
+
+/** Force the next auth call to refresh the CSRF cookie (e.g. after logout). */
+export function resetCsrfCookie(): void {
+  csrfInitialized = false
 }
 
 export const api: AxiosInstance = axios.create({

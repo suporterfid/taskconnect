@@ -14,7 +14,7 @@ const tenant = useTenantStore()
 
 const { data, loading, error, reload } = useAsyncData(async () => {
   const { data: response } = await api.get<{ data: Run }>(
-    tenant.tenantPath(`/runs/${props.id}`),
+    tenant.tenantPath(`/task-runs/${props.id}`),
   )
   return response.data
 })

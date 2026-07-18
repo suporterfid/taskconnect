@@ -7,5 +7,6 @@
     "recentRuns": "Execuções recentes",
     "failedRuns": "Falhas (24h)"
   },
-  "empty": "Nenhuma atividade ainda. Crie sua primeira tarefa para começar."
+  "empty": "Nenhuma atividade ainda. Crie sua primeira tarefa para começar.",
+  "needsTenant": "Nenhum tenant ou ambiente selecionado. Crie um tenant para começar a agendar tarefas."
 }

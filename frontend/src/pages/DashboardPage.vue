@@ -14,10 +14,23 @@ const { t } = useI18n()
 const tenant = useTenantStore()
 
 const { data, loading, error, reload } = useAsyncData(async () => {
+  if (!tenant.currentTenantId || !tenant.currentEnvironmentId) {
+    return {
+      active_tasks: 0,
+      paused_tasks: 0,
+      recent_runs: 0,
+      failed_runs_24h: 0,
+    } satisfies DashboardStats
+  }
+
   const path = tenant.tenantPath('/dashboard')
   const { data: response } = await api.get<{ data: DashboardStats }>(path)
   return response.data
 })
+
+const needsTenant = computed(
+  () => !tenant.currentTenantId || !tenant.currentEnvironmentId,
+)
 
 const stats = computed(() => [
   { label: t('dashboard.stats.activeTasks'), value: data.value?.active_tasks ?? 0 },
@@ -33,6 +46,12 @@ const stats = computed(() => [
 
     <LoadingState v-if="loading" />
     <ErrorState v-else-if="error" :message="error" @retry="reload" />
+    <div
+      v-else-if="needsTenant"
+      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
+    >
+      {{ $t('dashboard.needsTenant') }}
+    </div>
     <template v-else>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div
