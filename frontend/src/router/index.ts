@@ -54,6 +54,17 @@ const router = createRouter({
           component: () => import('@/pages/EndpointProfileListPage.vue'),
         },
         {
+          path: 'endpoint-profiles/new',
+          name: 'endpoint-profiles-create',
+          component: () => import('@/pages/EndpointProfileFormPage.vue'),
+        },
+        {
+          path: 'endpoint-profiles/:id/edit',
+          name: 'endpoint-profiles-edit',
+          component: () => import('@/pages/EndpointProfileFormPage.vue'),
+          props: true,
+        },
+        {
           path: 'endpoint-profiles/:id',
           name: 'endpoint-profiles-detail',
           component: () => import('@/pages/EndpointProfileDetailPage.vue'),
@@ -127,6 +138,23 @@ router.beforeEach(async (to) => {
   }
 
   return true
+})
+
+// After a deploy, hashed chunk filenames change. A tab still running the old
+ // bundle will fail to lazy-load routes (404 HTML). Force a full navigation so
+ // the browser picks up the new HTML/manifest.
+router.onError((error, to) => {
+  const message = String(error?.message ?? error ?? '')
+  const isChunkLoadError =
+    message.includes('Failed to fetch dynamically imported module') ||
+    message.includes('error loading dynamically imported module') ||
+    message.includes('Importing a module script failed') ||
+    message.includes('Unable to preload CSS')
+
+  if (isChunkLoadError) {
+    const target = to?.fullPath || window.location.pathname
+    window.location.assign(target)
+  }
 })
 
 export default router

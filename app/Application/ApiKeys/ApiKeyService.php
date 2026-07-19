@@ -12,6 +12,31 @@ final class ApiKeyService
 {
     private const KEY_PREFIX = 'tc_';
 
+    /** @var list<string> */
+    public const ALLOWED_PERMISSIONS = [
+        '*',
+        'endpoint_profiles:read',
+        'endpoint_profiles:write',
+        'secrets:manage',
+        'api_keys:manage',
+        'tenant:admin',
+    ];
+
+    /**
+     * @param  list<string>  $permissions
+     * @return list<string>
+     */
+    public function normalizePermissions(array $permissions): array
+    {
+        $permissions = array_values(array_unique($permissions));
+
+        if (in_array('*', $permissions, true)) {
+            return ['*'];
+        }
+
+        return $permissions;
+    }
+
     /**
      * @param  list<string>  $permissions
      * @return array{api_key: ApiKey, plaintext: string}
@@ -33,7 +58,7 @@ final class ApiKeyService
             'name' => $name,
             'key_prefix' => $prefix,
             'key_hash' => $this->hashKey($plaintext),
-            'permissions' => $permissions,
+            'permissions' => $this->normalizePermissions($permissions),
             'created_by' => $actor->id,
             'expires_at' => $expiresAt,
         ]);
@@ -42,6 +67,28 @@ final class ApiKeyService
             'api_key' => $apiKey,
             'plaintext' => $plaintext,
         ];
+    }
+
+    /**
+     * @param  array{name?: string, permissions?: list<string>, expires_at?: \DateTimeInterface|null}  $attributes
+     */
+    public function update(ApiKey $apiKey, array $attributes): ApiKey
+    {
+        if (array_key_exists('name', $attributes)) {
+            $apiKey->name = $attributes['name'];
+        }
+
+        if (array_key_exists('permissions', $attributes)) {
+            $apiKey->permissions = $this->normalizePermissions($attributes['permissions']);
+        }
+
+        if (array_key_exists('expires_at', $attributes)) {
+            $apiKey->expires_at = $attributes['expires_at'];
+        }
+
+        $apiKey->save();
+
+        return $apiKey->fresh();
     }
 
     public function revoke(ApiKey $apiKey): ApiKey

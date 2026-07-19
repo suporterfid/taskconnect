@@ -7,6 +7,10 @@ import type { Environment, Tenant } from '@/services/types'
 const TENANT_KEY = 'taskconnect.tenant'
 const ENV_KEY = 'taskconnect.environment'
 
+function isActiveEnvironment(env: Environment): boolean {
+  return !env.archived_at
+}
+
 export const useTenantStore = defineStore('tenant', () => {
   const tenants = ref<Tenant[]>([])
   const environments = ref<Environment[]>([])
@@ -25,6 +29,10 @@ export const useTenantStore = defineStore('tenant', () => {
       null,
   )
 
+  const activeEnvironments = computed(() =>
+    environments.value.filter(isActiveEnvironment),
+  )
+
   watch(currentTenantId, (id) => {
     if (id) {
       localStorage.setItem(TENANT_KEY, id)
@@ -40,6 +48,17 @@ export const useTenantStore = defineStore('tenant', () => {
       localStorage.removeItem(ENV_KEY)
     }
   })
+
+  function selectActiveEnvironment(): void {
+    const active = activeEnvironments.value
+    const current = environments.value.find(
+      (e) => e.id === currentEnvironmentId.value,
+    )
+
+    if (!current || !isActiveEnvironment(current)) {
+      currentEnvironmentId.value = active[0]?.id ?? null
+    }
+  }
 
   async function fetchTenants(): Promise<void> {
     loading.value = true
@@ -73,15 +92,10 @@ export const useTenantStore = defineStore('tenant', () => {
         `/tenants/${tenantId}/environments`,
       )
       environments.value = data.data ?? []
-
-      if (
-        !currentEnvironmentId.value ||
-        !environments.value.some((e) => e.id === currentEnvironmentId.value)
-      ) {
-        currentEnvironmentId.value = environments.value[0]?.id ?? null
-      }
+      selectActiveEnvironment()
     } catch (err) {
       environments.value = []
+      currentEnvironmentId.value = null
       error.value =
         err instanceof ApiError ? err.message : 'Failed to load environments'
     } finally {
@@ -111,6 +125,7 @@ export const useTenantStore = defineStore('tenant', () => {
   return {
     tenants,
     environments,
+    activeEnvironments,
     currentTenantId,
     currentEnvironmentId,
     currentTenant,

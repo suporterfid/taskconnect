@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import api, { ApiError, ensureCsrfCookie } from '@/services/api'
+import api, { ApiError, ensureCsrfCookie, resetCsrfCookie } from '@/services/api'
 import type { User } from '@/services/types'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -35,6 +35,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
+      resetCsrfCookie()
       await ensureCsrfCookie()
       await api.post('/auth/login', { email, password })
       await fetchUser()
@@ -53,11 +54,15 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null
 
     try {
+      // Best-effort server logout. 401/419 are expected when the session
+      // already expired — always clear local state afterward.
+      await ensureCsrfCookie()
       await api.post('/auth/logout')
     } catch {
       // Ignore logout errors — clear local session regardless
     } finally {
       user.value = null
+      resetCsrfCookie()
       loading.value = false
     }
   }

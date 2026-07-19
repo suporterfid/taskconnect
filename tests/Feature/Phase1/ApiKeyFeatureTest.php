@@ -50,4 +50,88 @@ class ApiKeyFeatureTest extends TestCase
             ->getJson($this->tenantRoute($tenant, '/environments'))
             ->assertUnauthorized();
     }
+
+    public function test_index_includes_revoked_keys_with_active_first(): void
+    {
+        [$admin, $tenant] = $this->createTenantAdmin();
+
+        $active = $this->actingAs($admin)->postJson(
+            $this->tenantRoute($tenant, '/api-keys'),
+            ['name' => 'Active Key', 'permissions' => ['*']],
+        )->json('data.id');
+
+        $revoked = $this->actingAs($admin)->postJson(
+            $this->tenantRoute($tenant, '/api-keys'),
+            ['name' => 'Revoked Key', 'permissions' => ['endpoint_profiles:read']],
+        )->json('data.id');
+
+        $this->actingAs($admin)->deleteJson($this->tenantRoute($tenant, '/api-keys/'.$revoked))
+            ->assertNoContent();
+
+        $list = $this->actingAs($admin)->getJson($this->tenantRoute($tenant, '/api-keys'))
+            ->assertOk()
+            ->json('data');
+
+        $this->assertCount(2, $list);
+        $this->assertSame($active, $list[0]['id']);
+        $this->assertNull($list[0]['revoked_at']);
+        $this->assertSame($revoked, $list[1]['id']);
+        $this->assertNotNull($list[1]['revoked_at']);
+    }
+
+    public function test_update_changes_name_permissions_and_expiry(): void
+    {
+        [$admin, $tenant, $environment] = $this->createTenantAdmin();
+
+        $apiKeyId = $this->actingAs($admin)->postJson(
+            $this->tenantRoute($tenant, '/api-keys'),
+            [
+                'name' => 'Original',
+                'permissions' => ['*'],
+                'environment_id' => $environment->public_id,
+            ],
+        )->json('data.id');
+
+        $expiresAt = now()->addMonth()->utc()->toIso8601String();
+
+        $update = $this->actingAs($admin)->patchJson(
+            $this->tenantRoute($tenant, '/api-keys/'.$apiKeyId),
+            [
+                'name' => 'Renamed',
+                'permissions' => ['endpoint_profiles:read', 'endpoint_profiles:write', '*'],
+                'expires_at' => $expiresAt,
+            ],
+        );
+
+        $update->assertOk()
+            ->assertJsonPath('data.name', 'Renamed')
+            ->assertJsonPath('data.permissions', ['*'])
+            ->assertJsonPath('data.environment_id', $environment->public_id)
+            ->assertJsonMissingPath('data.plaintext');
+
+        $this->assertNotNull($update->json('data.expires_at'));
+    }
+
+    public function test_update_rejects_revoked_key_and_unknown_permissions(): void
+    {
+        [$admin, $tenant] = $this->createTenantAdmin();
+
+        $apiKeyId = $this->actingAs($admin)->postJson(
+            $this->tenantRoute($tenant, '/api-keys'),
+            ['name' => 'Soon Revoked', 'permissions' => ['secrets:manage']],
+        )->json('data.id');
+
+        $this->actingAs($admin)->postJson(
+            $this->tenantRoute($tenant, '/api-keys'),
+            ['name' => 'Bad Perms', 'permissions' => ['not:a:real:permission']],
+        )->assertUnprocessable();
+
+        $this->actingAs($admin)->deleteJson($this->tenantRoute($tenant, '/api-keys/'.$apiKeyId))
+            ->assertNoContent();
+
+        $this->actingAs($admin)->patchJson(
+            $this->tenantRoute($tenant, '/api-keys/'.$apiKeyId),
+            ['name' => 'Nope'],
+        )->assertUnprocessable();
+    }
 }

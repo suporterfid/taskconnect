@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 
 import { useAuthStore } from '@/stores/auth'
 import { useLocaleStore } from '@/stores/locale'
@@ -9,7 +9,6 @@ import { useTenantStore } from '@/stores/tenant'
 import type { SupportedLocale } from '@/i18n'
 
 const route = useRoute()
-const router = useRouter()
 const { t } = useI18n()
 const auth = useAuthStore()
 const tenant = useTenantStore()
@@ -45,7 +44,8 @@ function isActive(path: string): boolean {
 
 async function onLogout(): Promise<void> {
   await auth.logout()
-  await router.push({ name: 'login' })
+  // Full navigation avoids stale-tab chunk load failures after deploys.
+  window.location.assign('/login')
 }
 
 function onTenantChange(event: Event): void {
@@ -136,10 +136,14 @@ function onLocaleChange(event: Event): void {
             :value="tenant.currentEnvironmentId ?? ''"
             @change="onEnvironmentChange"
           >
-            <option v-if="tenant.environments.length === 0" value="">
+            <option v-if="tenant.activeEnvironments.length === 0" value="">
               {{ $t('common.environment.select') }}
             </option>
-            <option v-for="env in tenant.environments" :key="env.id" :value="env.id">
+            <option
+              v-for="env in tenant.activeEnvironments"
+              :key="env.id"
+              :value="env.id"
+            >
               {{ env.name }}
             </option>
           </select>

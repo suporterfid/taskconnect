@@ -10,8 +10,48 @@
     "title": "Chaves de API",
     "subtitle": "Credenciais de acesso para máquinas",
     "create": "Criar chave de API",
+    "createTitle": "Criar chave de API",
+    "editTitle": "Editar chave de API",
+    "save": "Salvar chave de API",
+    "revoke": "Revogar",
+    "revokeConfirm": "Revogar esta chave de API? Ela deixa de funcionar imediatamente e não pode ser restaurada.",
     "empty": "Nenhuma chave de API ainda.",
-    "loadError": "Não foi possível carregar as chaves de API"
+    "emptyHint": "Crie uma chave para automação ou integrações.",
+    "loadError": "Não foi possível carregar as chaves de API",
+    "saveError": "Não foi possível salvar a chave de API",
+    "revokeError": "Não foi possível revogar a chave de API",
+    "needsTenant": "Selecione um tenant antes de gerenciar chaves de API.",
+    "plaintextTitle": "Copie sua chave de API agora",
+    "plaintextWarning": "Este segredo é exibido apenas uma vez. Guarde-o com segurança antes de sair desta página.",
+    "plaintextCopy": "Copiar",
+    "plaintextCopied": "Copiado",
+    "plaintextDismiss": "Já salvei a chave",
+    "status": {
+      "active": "Ativa",
+      "expired": "Expirada",
+      "revoked": "Revogada"
+    },
+    "fields": {
+      "name": "Nome",
+      "prefix": "Prefixo",
+      "permissions": "Permissões",
+      "environment": "Ambiente",
+      "environmentAny": "Todos os ambientes",
+      "environmentHint": "Opcional. Não pode ser alterado após a criação.",
+      "environmentReadonly": "Ambiente (imutável)",
+      "expiresAt": "Expira em",
+      "expiresAtHint": "Opcional. Deixe vazio para sem expiração.",
+      "lastUsedAt": "Último uso",
+      "never": "Nunca"
+    },
+    "permissions": {
+      "full": "Acesso total (*)",
+      "endpoint_profiles_read": "Perfis de endpoint: leitura",
+      "endpoint_profiles_write": "Perfis de endpoint: escrita",
+      "secrets_manage": "Segredos: gerenciar",
+      "api_keys_manage": "Chaves de API: gerenciar",
+      "tenant_admin": "Admin do tenant"
+    }
   },
   "members": {
     "title": "Membros",

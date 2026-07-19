@@ -21,6 +21,11 @@ class ApiKeyPolicy
         return $this->actorCanManageApiKeys($tenant);
     }
 
+    public function update(Authenticatable $user, ApiKey $apiKey, Tenant $tenant): bool
+    {
+        return $apiKey->tenant_id === $tenant->id && $this->actorCanManageApiKeys($tenant);
+    }
+
     public function delete(Authenticatable $user, ApiKey $apiKey, Tenant $tenant): bool
     {
         return $apiKey->tenant_id === $tenant->id && $this->actorCanManageApiKeys($tenant);

@@ -30,9 +30,17 @@ export interface Tenant {
 
 export interface Environment {
   id: string
-  tenant_id: string
+  tenant_id?: string
   name: string
   slug: string
+  archived_at?: string | null
+  created_at?: string
+  updated_at?: string
+}
+
+export interface EnvironmentPayload {
+  name: string
+  slug?: string
 }
 
 export interface Task {
@@ -44,11 +52,68 @@ export interface Task {
   updated_at: string
 }
 
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+
+export type AuthMode =
+  | 'none'
+  | 'static_header'
+  | 'bearer'
+  | 'basic'
+  | 'query_token'
+
 export interface EndpointProfile {
   id: string
   name: string
+  description?: string | null
   base_url: string
+  method: HttpMethod
+  headers: Record<string, string>
+  auth_mode: AuthMode
+  auth_header_name?: string | null
+  auth_query_param?: string | null
+  secret_id?: string | null
+  connect_timeout: number
+  total_timeout: number
+  follow_redirects: boolean
+  verify_tls: boolean
+  allowed_path_prefix?: string | null
+  enabled: boolean
+  archived_at?: string | null
   created_at: string
+  updated_at?: string
+}
+
+export interface EndpointProfilePayload {
+  name: string
+  description?: string | null
+  base_url: string
+  method: HttpMethod
+  headers?: Record<string, string>
+  auth_mode: AuthMode
+  auth_header_name?: string | null
+  auth_query_param?: string | null
+  secret_id?: string | null
+  connect_timeout: number
+  total_timeout: number
+  follow_redirects: boolean
+  verify_tls: boolean
+  allowed_path_prefix?: string | null
+  enabled: boolean
+}
+
+export interface EndpointTestResult {
+  id: string
+  request_url_redacted: string
+  request_headers_redacted: Record<string, string> | null
+  response_status: number | null
+  response_body_truncated: string | null
+  transport_error_code: string | null
+  created_at: string
+}
+
+export interface SecretSummary {
+  id: string
+  name: string
 }
 
 export interface Run {
@@ -61,9 +126,21 @@ export interface Run {
 export interface ApiKey {
   id: string
   name: string
-  prefix: string
+  key_prefix: string
+  permissions: string[]
+  environment_id?: string | null
+  last_used_at?: string | null
+  expires_at?: string | null
+  revoked_at?: string | null
   created_at: string
-  last_used_at?: string
+  plaintext?: string
+}
+
+export interface ApiKeyPayload {
+  name: string
+  permissions: string[]
+  environment_id?: string | null
+  expires_at?: string | null
 }
 
 export interface Member {
