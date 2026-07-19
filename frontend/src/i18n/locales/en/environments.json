@@ -2,6 +2,25 @@
   "title": "Environments",
   "subtitle": "Logical boundaries within your tenant",
   "create": "New environment",
+  "edit": "Edit environment",
+  "createTitle": "Create environment",
+  "editTitle": "Edit environment",
+  "save": "Save environment",
+  "archive": "Archive",
+  "archiveConfirm": "Archive this environment? It will stay listed with an Archived badge but will no longer appear in the header selector.",
   "empty": "No environments configured.",
-  "loadError": "Unable to load environments"
+  "emptyHint": "Create an environment to organize tasks and secrets.",
+  "loadError": "Unable to load environments",
+  "saveError": "Unable to save environment",
+  "archiveError": "Unable to archive environment",
+  "needsTenant": "Select a tenant before managing environments.",
+  "status": {
+    "active": "Active",
+    "archived": "Archived"
+  },
+  "fields": {
+    "name": "Name",
+    "slug": "Slug",
+    "slugHint": "Leave blank to generate from the name."
+  }
 }

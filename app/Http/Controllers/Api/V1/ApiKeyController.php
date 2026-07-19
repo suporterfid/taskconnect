@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ApiKeyController extends Controller
 {
@@ -31,7 +32,7 @@ class ApiKeyController extends Controller
         $apiKeys = ApiKey::query()
             ->with('environment')
             ->where('tenant_id', $tenant->id)
-            ->whereNull('revoked_at')
+            ->orderByRaw('CASE WHEN revoked_at IS NULL THEN 0 ELSE 1 END')
             ->orderByDesc('created_at')
             ->get();
 
@@ -46,17 +47,7 @@ class ApiKeyController extends Controller
         $actor = $this->resolvedActorUser($request);
         $this->authorize('create', [ApiKey::class, $tenant]);
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'permissions' => ['required', 'array', 'min:1'],
-            'permissions.*' => ['required', 'string', 'max:255'],
-            'environment_id' => [
-                'nullable',
-                'string',
-                Rule::exists('environments', 'public_id')->where('tenant_id', $tenant->id),
-            ],
-            'expires_at' => ['nullable', 'date'],
-        ]);
+        $validated = $request->validate($this->payloadRules($tenant->id, requiredName: true));
 
         $environment = null;
 
@@ -73,7 +64,9 @@ class ApiKeyController extends Controller
             name: $validated['name'],
             permissions: $validated['permissions'],
             environment: $environment,
-            expiresAt: isset($validated['expires_at']) ? new \DateTimeImmutable($validated['expires_at']) : null,
+            expiresAt: array_key_exists('expires_at', $validated) && $validated['expires_at'] !== null
+                ? new \DateTimeImmutable($validated['expires_at'])
+                : null,
         );
 
         $apiKey = $result['api_key']->load('environment');
@@ -93,6 +86,57 @@ class ApiKeyController extends Controller
                 ['plaintext' => $result['plaintext']],
             ),
         ], 201);
+    }
+
+    public function update(Request $request, string $tenantId, string $apiKeyId): JsonResponse
+    {
+        $tenant = $this->resolvedTenant($request);
+
+        $apiKey = ApiKey::query()
+            ->where('public_id', $apiKeyId)
+            ->where('tenant_id', $tenant->id)
+            ->firstOrFail();
+
+        $this->authorize('update', [$apiKey, $tenant]);
+
+        if ($apiKey->isRevoked()) {
+            throw ValidationException::withMessages([
+                'api_key' => ['Revoked API keys cannot be updated.'],
+            ]);
+        }
+
+        $validated = $request->validate($this->payloadRules($tenant->id, requiredName: false));
+
+        $attributes = [];
+
+        if (array_key_exists('name', $validated)) {
+            $attributes['name'] = $validated['name'];
+        }
+
+        if (array_key_exists('permissions', $validated)) {
+            $attributes['permissions'] = $validated['permissions'];
+        }
+
+        if (array_key_exists('expires_at', $validated)) {
+            $attributes['expires_at'] = $validated['expires_at'] !== null
+                ? new \DateTimeImmutable($validated['expires_at'])
+                : null;
+        }
+
+        $apiKey = $this->apiKeyService->update($apiKey, $attributes)->load('environment');
+
+        $this->auditLogger->logFromRequest(
+            $request,
+            action: 'api_key.updated',
+            resourceType: 'api_key',
+            resourceId: $apiKey->public_id,
+            tenantId: $tenant->id,
+            summary: $validated,
+        );
+
+        return response()->json([
+            'data' => new ApiKeyResource($apiKey),
+        ]);
     }
 
     public function destroy(Request $request, string $tenantId, string $apiKeyId): Response
@@ -118,5 +162,33 @@ class ApiKeyController extends Controller
         );
 
         return response()->noContent();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function payloadRules(int $tenantId, bool $requiredName): array
+    {
+        $nameRule = $requiredName ? ['required', 'string', 'max:255'] : ['sometimes', 'string', 'max:255'];
+        $permissionsRule = $requiredName
+            ? ['required', 'array', 'min:1']
+            : ['sometimes', 'array', 'min:1'];
+
+        $rules = [
+            'name' => $nameRule,
+            'permissions' => $permissionsRule,
+            'permissions.*' => ['required', 'string', Rule::in(ApiKeyService::ALLOWED_PERMISSIONS)],
+            'expires_at' => ['nullable', 'date'],
+        ];
+
+        if ($requiredName) {
+            $rules['environment_id'] = [
+                'nullable',
+                'string',
+                Rule::exists('environments', 'public_id')->where('tenant_id', $tenantId),
+            ];
+        }
+
+        return $rules;
     }
 }

@@ -2,6 +2,25 @@
   "title": "Ambientes",
   "subtitle": "Limites lógicos dentro do seu tenant",
   "create": "Novo ambiente",
+  "edit": "Editar ambiente",
+  "createTitle": "Criar ambiente",
+  "editTitle": "Editar ambiente",
+  "save": "Salvar ambiente",
+  "archive": "Arquivar",
+  "archiveConfirm": "Arquivar este ambiente? Ele permanecerá na lista com o selo Arquivado, mas não aparecerá mais no seletor do cabeçalho.",
   "empty": "Nenhum ambiente configurado.",
-  "loadError": "Não foi possível carregar os ambientes"
+  "emptyHint": "Crie um ambiente para organizar tarefas e segredos.",
+  "loadError": "Não foi possível carregar os ambientes",
+  "saveError": "Não foi possível salvar o ambiente",
+  "archiveError": "Não foi possível arquivar o ambiente",
+  "needsTenant": "Selecione um tenant antes de gerenciar ambientes.",
+  "status": {
+    "active": "Ativo",
+    "archived": "Arquivado"
+  },
+  "fields": {
+    "name": "Nome",
+    "slug": "Slug",
+    "slugHint": "Deixe em branco para gerar a partir do nome."
+  }
 }

@@ -10,8 +10,48 @@
     "title": "API Keys",
     "subtitle": "Machine access credentials",
     "create": "Create API key",
+    "createTitle": "Create API key",
+    "editTitle": "Edit API key",
+    "save": "Save API key",
+    "revoke": "Revoke",
+    "revokeConfirm": "Revoke this API key? It will stop working immediately and cannot be restored.",
     "empty": "No API keys yet.",
-    "loadError": "Unable to load API keys"
+    "emptyHint": "Create a key for automation or integrations.",
+    "loadError": "Unable to load API keys",
+    "saveError": "Unable to save API key",
+    "revokeError": "Unable to revoke API key",
+    "needsTenant": "Select a tenant before managing API keys.",
+    "plaintextTitle": "Copy your API key now",
+    "plaintextWarning": "This secret is shown only once. Store it securely before leaving this page.",
+    "plaintextCopy": "Copy",
+    "plaintextCopied": "Copied",
+    "plaintextDismiss": "I have saved the key",
+    "status": {
+      "active": "Active",
+      "expired": "Expired",
+      "revoked": "Revoked"
+    },
+    "fields": {
+      "name": "Name",
+      "prefix": "Prefix",
+      "permissions": "Permissions",
+      "environment": "Environment",
+      "environmentAny": "All environments",
+      "environmentHint": "Optional. Cannot be changed after create.",
+      "environmentReadonly": "Environment (immutable)",
+      "expiresAt": "Expires at",
+      "expiresAtHint": "Optional. Leave empty for no expiry.",
+      "lastUsedAt": "Last used",
+      "never": "Never"
+    },
+    "permissions": {
+      "full": "Full access (*)",
+      "endpoint_profiles_read": "Endpoint profiles: read",
+      "endpoint_profiles_write": "Endpoint profiles: write",
+      "secrets_manage": "Secrets: manage",
+      "api_keys_manage": "API keys: manage",
+      "tenant_admin": "Tenant admin"
+    }
   },
   "members": {
     "title": "Members",
