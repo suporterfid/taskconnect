@@ -8,6 +8,30 @@ TaskConnect is an open-source, multi-tenant HTTP task scheduler designed to run 
 
 Product spec: `docs/http-task-scheduler-spec.md`. Deployment docs: `docs/deployment/`.
 
+## Hard constraints (non-negotiable)
+
+These are project invariants. Do not violate them, and reject or flag any change (or dependency) that would.
+
+### 1. Must stay deployable on commodity shared hosting
+
+The application must run, in production, on a plain shared web-hosting plan (e.g. Hostinger, cPanel/LiteSpeed) whose only capabilities are: **PHP 8.2+, MySQL 8.0+, and a per-minute cron**. Document root is `public/`.
+
+- **No dependency on an always-on process, daemon, or external broker/worker.** That rules out Redis, Memcached, RabbitMQ, Beanstalkd, Kafka, Laravel Horizon, Reverb/websocket servers, Supervisor-managed `queue:work` workers, Octane, and similar. None of these may become *required* to run the app.
+- **No dependency on a paid managed cloud service or a VPS** to perform core functionality. A user on a cheap shared plan must be able to run the full product.
+- Async, scheduled, and retry work must use the existing **MySQL-backed claiming + per-minute cron** pattern (`scheduler:*` commands, `DueTaskClaimer`/`RetryClaimer` leases). Extend that mechanism rather than reaching for a queue broker.
+- Config defaults must keep `QUEUE_CONNECTION`, `CACHE_STORE`, and `SESSION_DRIVER` on database/file-backed stores. A Redis (or other broker) driver may only ever be an **optional, opt-in** enhancement — never the default and never required.
+- Any PHP extension or tool assumed by the code must be one commonly available on shared hosting; if a change needs something unusual, call it out explicitly.
+
+When a feature seems to need a background worker or broker, design it around cron-driven DB claiming instead — or surface the trade-off rather than silently adding infrastructure.
+
+### 2. Track all work on GitHub issues
+
+Every unit of work — feature requests, user stories, implementation plans, tasks, and bug reports — must be represented and kept current as a **GitHub issue** in `suporterfid/taskconnect`, not only in local docs or commit messages.
+
+- Before starting non-trivial work, open (or find) the corresponding issue describing the request/story/bug and the plan.
+- Keep it updated as work progresses: reflect status changes, link the PR(s) that address it, and close it with a clear reason when done.
+- Keep any planning docs under `docs/` in sync with the issue; the issue is the canonical, up-to-date record.
+
 ## Development is Docker-only
 
 **Do not install or run PHP, Composer, Node, or npm on the host.** Everything runs through containers via the `tc` wrapper (`scripts/tc.sh` on Linux/macOS, `scripts/tc.ps1` on Windows; `Makefile` proxies to `tc.sh`).
@@ -101,4 +125,4 @@ Vue 3 + TypeScript + Vite + Pinia + vue-router + vue-i18n + Tailwind v4. `src/pa
 - Domain and Application code should stay framework-light: constructor-inject dependencies, prefer the bound interfaces (`Clock`, `DnsResolverInterface`, `OutboundPolicy`) over facades and `new`. Time comes from `Clock` so it can be frozen in tests.
 - New Eloquent models go in `app/Infrastructure/Persistence/Eloquent/`, not `app/Models/`.
 - Feature work is organized in "phases" (see `tests/Feature/Phase0`, `Phase1` and `docs/superpowers/`); follow the existing plan/spec docs when extending a feature area.
-- Production target is shared hosting with document root `public/` and cron — avoid features that assume a long-running queue worker or daemon.
+- Production target is shared hosting with document root `public/` and cron — avoid features that assume a long-running queue worker or daemon (see **Hard constraints** above).
