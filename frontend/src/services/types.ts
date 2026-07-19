@@ -143,11 +143,20 @@ export interface ApiKeyPayload {
   expires_at?: string | null
 }
 
+export type TenantRole = 'tenant_admin' | 'tenant_member' | 'read_only_viewer'
+
 export interface Member {
   id: string
   name: string
   email: string
-  role: string
+  role: TenantRole | string
+  created_at?: string
+}
+
+export interface MemberPayload {
+  email?: string
+  name?: string
+  role: TenantRole
 }
 
 export interface DashboardStats {

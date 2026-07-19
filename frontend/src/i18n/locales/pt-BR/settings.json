@@ -57,8 +57,28 @@
     "title": "Membros",
     "subtitle": "Pessoas com acesso a este tenant",
     "invite": "Convidar membro",
+    "inviteTitle": "Convidar membro",
+    "editTitle": "Editar função do membro",
+    "save": "Salvar membro",
+    "remove": "Remover",
+    "removeConfirm": "Remover este membro do tenant? O acesso será perdido imediatamente.",
     "empty": "Nenhum membro encontrado.",
-    "loadError": "Não foi possível carregar os membros"
+    "emptyHint": "Convide alguém da equipe para colaborar neste tenant.",
+    "loadError": "Não foi possível carregar os membros",
+    "saveError": "Não foi possível salvar o membro",
+    "removeError": "Não foi possível remover o membro",
+    "needsTenant": "Selecione um tenant antes de gerenciar membros.",
+    "fields": {
+      "name": "Nome",
+      "email": "E-mail",
+      "role": "Função",
+      "nameHint": "Usado ao criar uma nova conta para este e-mail."
+    },
+    "roles": {
+      "tenant_admin": "Admin do tenant",
+      "tenant_member": "Membro do tenant",
+      "read_only_viewer": "Visualizador"
+    }
   },
   "platformHealth": {
     "title": "Saúde da plataforma",

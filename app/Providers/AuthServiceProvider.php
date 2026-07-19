@@ -9,9 +9,11 @@ use App\Infrastructure\Persistence\Eloquent\Secret;
 use App\Infrastructure\Persistence\Eloquent\Task;
 use App\Infrastructure\Persistence\Eloquent\TaskRun;
 use App\Infrastructure\Persistence\Eloquent\Tenant;
+use App\Infrastructure\Persistence\Eloquent\TenantMembership;
 use App\Policies\ApiKeyPolicy;
 use App\Policies\EndpointProfilePolicy;
 use App\Policies\EnvironmentPolicy;
+use App\Policies\MemberPolicy;
 use App\Policies\SecretPolicy;
 use App\Policies\TaskPolicy;
 use App\Policies\TaskRunPolicy;
@@ -29,6 +31,7 @@ class AuthServiceProvider extends ServiceProvider
         EndpointProfile::class => EndpointProfilePolicy::class,
         Task::class => TaskPolicy::class,
         TaskRun::class => TaskRunPolicy::class,
+        TenantMembership::class => MemberPolicy::class,
     ];
 
     public function boot(): void

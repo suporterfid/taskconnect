@@ -57,8 +57,28 @@
     "title": "Members",
     "subtitle": "People with access to this tenant",
     "invite": "Invite member",
+    "inviteTitle": "Invite member",
+    "editTitle": "Edit member role",
+    "save": "Save member",
+    "remove": "Remove",
+    "removeConfirm": "Remove this member from the tenant? They will lose access immediately.",
     "empty": "No members found.",
-    "loadError": "Unable to load members"
+    "emptyHint": "Invite a teammate to collaborate in this tenant.",
+    "loadError": "Unable to load members",
+    "saveError": "Unable to save member",
+    "removeError": "Unable to remove member",
+    "needsTenant": "Select a tenant before managing members.",
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "nameHint": "Used when creating a new account for this email."
+    },
+    "roles": {
+      "tenant_admin": "Tenant admin",
+      "tenant_member": "Tenant member",
+      "read_only_viewer": "Read-only viewer"
+    }
   },
   "platformHealth": {
     "title": "Platform Health",
