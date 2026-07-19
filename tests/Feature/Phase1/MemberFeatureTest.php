@@ -80,7 +80,7 @@ class MemberFeatureTest extends TestCase
                 'role' => TenantRole::TenantMember->value,
             ],
         )->assertUnprocessable()
-            ->assertJsonValidationErrors(['email']);
+            ->assertJsonValidationErrors(['email'], 'error.details');
     }
 
     public function test_update_changes_role_and_rejects_demoting_last_admin(): void
@@ -109,7 +109,7 @@ class MemberFeatureTest extends TestCase
             $this->tenantRoute($tenant, '/members/'.$adminMembership->public_id),
             ['role' => TenantRole::TenantMember->value],
         )->assertUnprocessable()
-            ->assertJsonValidationErrors(['role']);
+            ->assertJsonValidationErrors(['role'], 'error.details');
     }
 
     public function test_remove_works_and_rejects_self_and_last_admin(): void
@@ -139,14 +139,14 @@ class MemberFeatureTest extends TestCase
         $this->actingAs($admin)->deleteJson(
             $this->tenantRoute($tenant, '/members/'.$adminMembership->public_id),
         )->assertUnprocessable()
-            ->assertJsonValidationErrors(['member']);
+            ->assertJsonValidationErrors(['member'], 'error.details');
 
         $platformAdmin = User::factory()->platformAdmin()->create();
 
         $this->actingAs($platformAdmin)->deleteJson(
             $this->tenantRoute($tenant, '/members/'.$adminMembership->public_id),
         )->assertUnprocessable()
-            ->assertJsonValidationErrors(['member']);
+            ->assertJsonValidationErrors(['member'], 'error.details');
     }
 
     public function test_non_admin_can_list_but_cannot_write(): void

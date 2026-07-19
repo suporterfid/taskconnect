@@ -14,9 +14,9 @@ class BootstrapFirstAdmin
             return null;
         }
 
-        $email ??= env('BOOTSTRAP_ADMIN_EMAIL');
-        $password ??= env('BOOTSTRAP_ADMIN_PASSWORD');
-        $name ??= env('BOOTSTRAP_ADMIN_NAME', 'Platform Admin');
+        $email ??= self::readEnv('BOOTSTRAP_ADMIN_EMAIL');
+        $password ??= self::readEnv('BOOTSTRAP_ADMIN_PASSWORD');
+        $name ??= self::readEnv('BOOTSTRAP_ADMIN_NAME') ?? 'Platform Admin';
 
         if (! is_string($email) || $email === '' || ! is_string($password) || $password === '') {
             return null;
@@ -41,5 +41,24 @@ class BootstrapFirstAdmin
         ]);
 
         return $user;
+    }
+
+    /**
+     * Read a bootstrap configuration value from the environment.
+     *
+     * Laravel's cached env repository does not observe values set via
+     * putenv() after boot, so we fall back to getenv() to honour variables
+     * exported into the process environment at deploy time.
+     */
+    private static function readEnv(string $key): ?string
+    {
+        $value = env($key);
+
+        if (! is_string($value) || $value === '') {
+            $fromProcess = getenv($key);
+            $value = $fromProcess === false ? null : $fromProcess;
+        }
+
+        return is_string($value) && $value !== '' ? $value : null;
     }
 }
