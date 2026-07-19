@@ -38,9 +38,9 @@ Run a single backend test through the container, e.g.:
 ./scripts/tc.sh artisan test tests/Feature/Scheduling/SchedulerClaimingTest.php
 ```
 
-Frontend tests/build (Vitest + `vue-tsc`) run from `frontend/`:
+Frontend tests/build (Vitest + `vue-tsc`), run through the node container:
 ```bash
-./scripts/tc.sh npm --prefix frontend run test    # or: cd frontend && npm test
+./scripts/tc.sh npm --prefix frontend run test
 ./scripts/tc.sh npm --prefix frontend run build
 ```
 
