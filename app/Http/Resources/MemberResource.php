@@ -18,6 +18,7 @@ class MemberResource extends JsonResource
             'name' => $this->user?->name,
             'email' => $this->user?->email,
             'role' => $this->role?->value ?? $this->role,
+            'created_at' => $this->created_at?->toIso8601String(),
         ];
     }
 }

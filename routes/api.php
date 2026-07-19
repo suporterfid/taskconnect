@@ -46,6 +46,9 @@ Route::prefix('v1')->group(function (): void {
             Route::delete('tenants/{tenantId}/api-keys/{apiKeyId}', [ApiKeyController::class, 'destroy']);
 
             Route::get('tenants/{tenantId}/members', [MemberController::class, 'index']);
+            Route::post('tenants/{tenantId}/members', [MemberController::class, 'store']);
+            Route::patch('tenants/{tenantId}/members/{memberId}', [MemberController::class, 'update']);
+            Route::delete('tenants/{tenantId}/members/{memberId}', [MemberController::class, 'destroy']);
 
             Route::get('tenants/{tenantId}/environments/{environmentId}/dashboard', DashboardController::class);
 
