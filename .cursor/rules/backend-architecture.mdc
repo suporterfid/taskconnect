@@ -1,0 +1,30 @@
+---
+description: Layered Laravel backend conventions (Domain / Application / Infrastructure / Http)
+globs: app/**/*.php
+alwaysApply: false
+---
+
+# Backend architecture
+
+Split by responsibility, not default Laravel layout:
+
+| Layer | Path | Rules |
+|-------|------|--------|
+| Domain | `app/Domain/` | Pure logic; **no** Eloquent, facades, or HTTP. Enums, state machines, schedule math, retry, SSRF policy, secret redaction. |
+| Application | `app/Application/` | Orchestration + transaction boundaries. Feature folders: `ApiKeys`, `Audit`, `Auth`, `EndpointProfiles`, `Execution`, `Members`, `Notifications`, `Retention`, `Scheduling`, `Secrets`, `Tasks`, `Tenancy`. |
+| Infrastructure | `app/Infrastructure/` | Adapters: `Persistence/Eloquent/`, `HttpClient/`, `Dns/`. |
+| Http | `app/Http/` | Thin `Controllers/Api/V1/`, Resources, Middleware, `Support/ApiErrorRenderer`. |
+
+## Do
+
+- Put new Eloquent models in `app/Infrastructure/Persistence/Eloquent/` (only stub `app/Models/User.php` extends infra User).
+- Constructor-inject; prefer bound interfaces (`Clock`, `DnsResolverInterface`, `OutboundPolicy`) over facades/`new`.
+- Bind collaborators in `AppServiceProvider`; policies in `AuthServiceProvider`.
+- Nest tenant APIs under `/v1` with `auth.api_or_sanctum` + `tenant.context`. Hierarchy: **Tenant → Environment → resources**.
+- Keep tenant isolation; add isolation tests for new tenant-scoped features.
+
+## Do not
+
+- Put business rules in controllers or Eloquent models.
+- Bypass outbound SSRF policy / DNS-pinned transport for user-supplied URLs.
+- Log or snapshot secrets without `SecretRedactor` / `RequestSnapshotRedactor`.

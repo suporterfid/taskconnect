@@ -1,0 +1,26 @@
+---
+description: Vue 3 SPA conventions in frontend/
+globs: frontend/**/*.{vue,ts,tsx,css,json}
+alwaysApply: false
+---
+
+# Frontend (`frontend/`)
+
+Stack: Vue 3 + TypeScript + Vite + Pinia + vue-router + vue-i18n + Tailwind v4. Axios client talks to `/v1`.
+
+| Area | Path |
+|------|------|
+| Pages | `src/pages/` |
+| Layout | `src/layouts/AppLayout.vue` |
+| Stores | `src/stores/` — `auth`, `tenant`, `locale` |
+| API | `src/services/api.ts`, `src/services/types.ts` |
+| i18n | `src/i18n/en/`, `src/i18n/pt-BR/` |
+| Composables | `src/composables/` |
+
+## Conventions
+
+- Alias `@/` → `src/`. Build output: `public/build` (`base: '/build/'`); Laravel serves SPA via `resources/views/app.blade.php`.
+- Keep `types.ts` aligned with API resources when changing payloads.
+- Add user-facing strings to both `en` and `pt-BR` locales.
+- Run tooling via containers: `.\scripts\tc.ps1 npm --prefix frontend run test|build` (prefer `--prefix frontend`; root `package.json` is a thin proxy).
+- Vitest specs live beside code (`*.spec.ts`). Playwright is a dependency but **not wired** (no e2e config/script yet) — do not assume `tc e2e` works.

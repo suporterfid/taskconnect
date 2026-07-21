@@ -1,0 +1,27 @@
+---
+description: Non-negotiable product constraints — shared hosting, Docker-only, GitHub issues
+alwaysApply: true
+---
+
+# Hard constraints
+
+TaskConnect is a multi-tenant HTTP task scheduler for **PHP/MySQL shared hosting** (PHP 8.2+, MySQL 8.0+, per-minute cron). Document root is `public/`.
+
+## Infrastructure
+
+- **No required** Redis, Memcached, RabbitMQ, Kafka, Horizon, Reverb, Octane, Supervisor `queue:work`, or other always-on workers/brokers.
+- Async work uses **MySQL-backed claiming + cron** (`scheduler:*`, `DueTaskClaimer` / `RetryClaimer`). Extend that — do not add a queue broker for core paths.
+- Keep `QUEUE_CONNECTION`, `CACHE_STORE`, and `SESSION_DRIVER` on database/file/sync-friendly stores. Redis may be opt-in only, never required.
+- Do not assume paid cloud services or a VPS for core functionality.
+
+## Dev environment
+
+- **Docker only** — do not install or run PHP, Composer, Node, or npm on the host.
+- Windows: `.\scripts\tc.ps1 …` · Linux/macOS: `./scripts/tc.sh …` (Makefile proxies to `tc.sh` via bash only).
+- Never commit Packagist mirror config; `COMPOSER_PACKAGIST_URL` is session-only.
+
+## Work tracking
+
+- Track non-trivial work as GitHub issues in `suporterfid/taskconnect`; keep `docs/` in sync. The issue is the canonical status record.
+
+Canonical overview: `CLAUDE.md`. Product spec: `docs/http-task-scheduler-spec.md` (Phase 2–4 in the spec are aspirational unless mirrored by code/tests).

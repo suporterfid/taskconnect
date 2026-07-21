@@ -1,0 +1,28 @@
+---
+description: Cron claiming scheduler and outbound HTTP/SSRF safety
+globs: app/Application/Scheduling/**/*.php,app/Application/Execution/**/*.php,app/Domain/Execution/**/*.php,app/Domain/Scheduling/**/*.php,app/Infrastructure/HttpClient/**/*.php,config/scheduler.php,config/outbound.php,app/Console/Commands/**/*.php
+alwaysApply: false
+---
+
+# Scheduler and outbound HTTP
+
+## Claiming (not queues)
+
+Cron every minute (see `docs/deployment/cron.md`):
+
+- `scheduler:execute-due` → due scheduled tasks
+- `scheduler:retry-due` → due retries
+- `scheduler:maintenance` → stale claims + retention (hourly)
+
+Flow: commands → `SchedulerCycleRunner` → `DueTaskClaimer` / `RetryClaimer` (`DB::transaction` + `lockForUpdate` + `claim_token` / `claim_expires_at`). `StaleClaimRecovery` reclaims expired leases. Delivery is **at-least-once**; use idempotency/occurrence keys. Tunables: `config/scheduler.php`.
+
+Related Application services: `AttemptExecutor`, `HeartbeatWriter`, task/run lifecycle under `Application/Tasks/`.
+
+## SSRF / outbound
+
+All user-target HTTP goes through:
+
+1. `Domain/Execution/Outbound/OutboundPolicy` — URL/IP classification, metadata/link-local blocks
+2. `Infrastructure/HttpClient/` — DNS-pinned Guzzle (resolve once, connect to that IP)
+
+Config: `config/outbound.php`. Local/testing may use `testing_allow_hosts` (defaults to `receiver`). **Never** widen blocklists or skip pinned transport for user URLs.

@@ -1,0 +1,29 @@
+---
+description: How to run tests and use the tc Docker wrapper
+globs: tests/**/*.php,frontend/**/*.spec.ts,phpunit.xml,compose*.yaml,scripts/tc.*
+alwaysApply: false
+---
+
+# Testing and Docker (`tc`)
+
+## Commands (Windows PowerShell)
+
+```powershell
+.\scripts\tc.ps1 test
+.\scripts\tc.ps1 artisan test --filter=ScheduleCalculatorTest
+.\scripts\tc.ps1 artisan test tests/Feature/Scheduling/SchedulerClaimingTest.php
+.\scripts\tc.ps1 npm --prefix frontend run test
+.\scripts\tc.ps1 npm --prefix frontend run build
+```
+
+Linux/macOS: `./scripts/tc.sh` with the same verbs.
+
+## Backend tests
+
+- PHPUnit; DB is SQLite `:memory:` (`phpunit.xml`). App runtime uses MySQL — keep migrations/queries portable.
+- Layout: `tests/Unit/{Execution,Scheduling,Secrets}/`, `tests/Feature/Phase0/`, `Phase1/`, `Scheduling/`, plus dashboard/maintenance. Helpers in `tests/Support/` (`FixedClock`, `ArrayDnsResolver`, …).
+- Freeze time via `Clock`; inject test DNS/outbound doubles — do not hit real network in unit tests.
+
+## CI mirror
+
+`.github/workflows/ci.yml` via `compose.ci.yaml`: composer install → migrate → `artisan test` → `frontend` `npm ci` / test / build. Run the same locally before pushing.
