@@ -4,45 +4,30 @@ namespace App\Policies;
 
 use App\Infrastructure\Persistence\Eloquent\TaskRun;
 use App\Infrastructure\Persistence\Eloquent\Tenant;
-use App\Infrastructure\Persistence\Eloquent\User;
+use App\Policies\Concerns\InteractsWithTenantAccess;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 class TaskRunPolicy
 {
-    public function viewAny(User $user, Tenant $tenant): bool
+    use InteractsWithTenantAccess;
+
+    public function viewAny(Authenticatable $user, Tenant $tenant): bool
     {
-        return $this->hasTenantAccess($user, $tenant);
+        return $this->actorCanReadTasks($tenant);
     }
 
-    public function view(User $user, TaskRun $run, Tenant $tenant): bool
+    public function view(Authenticatable $user, TaskRun $run, Tenant $tenant): bool
     {
-        return $run->tenant_id === $tenant->id && $this->hasTenantAccess($user, $tenant);
+        return $run->tenant_id === $tenant->id && $this->actorCanReadTasks($tenant);
     }
 
-    public function cancel(User $user, TaskRun $run, Tenant $tenant): bool
+    public function cancel(Authenticatable $user, TaskRun $run, Tenant $tenant): bool
     {
-        return $this->view($user, $run, $tenant) && $this->canManageTasks($user, $tenant);
+        return $run->tenant_id === $tenant->id && $this->actorCanOperateTasks($tenant);
     }
 
-    public function retry(User $user, TaskRun $run, Tenant $tenant): bool
+    public function retry(Authenticatable $user, TaskRun $run, Tenant $tenant): bool
     {
         return $this->cancel($user, $run, $tenant);
-    }
-
-    private function hasTenantAccess(User $user, Tenant $tenant): bool
-    {
-        if ($user->isPlatformAdmin()) {
-            return true;
-        }
-
-        return $user->memberships()->where('tenant_id', $tenant->id)->exists();
-    }
-
-    private function canManageTasks(User $user, Tenant $tenant): bool
-    {
-        if ($user->isPlatformAdmin()) {
-            return true;
-        }
-
-        return $user->memberships()->where('tenant_id', $tenant->id)->exists();
     }
 }

@@ -20,6 +20,9 @@ final class ApiKeyService
         'secrets:manage',
         'api_keys:manage',
         'tenant:admin',
+        'tasks:read',
+        'tasks:write',
+        'tasks:operate',
     ];
 
     /**
