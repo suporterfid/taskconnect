@@ -179,12 +179,3 @@ final class DueTaskClaimer
         $task->save();
     }
 }
-
-final readonly class ClaimedAttempt
-{
-    public function __construct(
-        public TaskRun $run,
-        public TaskRunAttempt $attempt,
-    ) {
-    }
-}

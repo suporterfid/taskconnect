@@ -2,6 +2,9 @@
 
 namespace App\Application\Scheduling;
 
+use App\Application\Execution\DeliveryResult;
+use App\Application\Execution\HttpDeliveryService;
+use App\Application\Notifications\FailureNotifier;
 use App\Domain\Execution\AttemptStateMachine;
 use App\Domain\Execution\Enums\AttemptState;
 use App\Domain\Execution\Enums\RunState;
@@ -9,8 +12,6 @@ use App\Domain\Execution\Enums\TriggerType;
 use App\Domain\Execution\RetryDecider;
 use App\Domain\Execution\RetryPolicy;
 use App\Domain\Execution\RunStateMachine;
-use App\Application\Execution\DeliveryResult;
-use App\Application\Execution\HttpDeliveryService;
 use App\Domain\Shared\Clock;
 use App\Infrastructure\Persistence\Eloquent\Task;
 use App\Infrastructure\Persistence\Eloquent\TaskRun;
@@ -25,6 +26,7 @@ final class AttemptExecutor
         private readonly RetryDecider $retryDecider,
         private readonly RunStateMachine $runStateMachine,
         private readonly AttemptStateMachine $attemptStateMachine,
+        private readonly FailureNotifier $failureNotifier,
     ) {
     }
 
@@ -196,6 +198,7 @@ final class AttemptExecutor
         $run->save();
 
         $this->updateTaskLastRun($task, $now, RunState::Dead);
+        $this->failureNotifier->notifyDeadRun($run);
     }
 
     private function finalizeBlocked(
