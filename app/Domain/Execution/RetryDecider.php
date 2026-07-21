@@ -8,7 +8,7 @@ final class RetryDecider
 {
     public function isRetryableHttpStatus(int $statusCode, RetryPolicy $policy): bool
     {
-        if ($statusCode >= 200 && $statusCode <= 299) {
+        if ($this->isSuccess($statusCode, $policy)) {
             return false;
         }
 
@@ -25,6 +25,11 @@ final class RetryDecider
         }
 
         if ($statusCode >= 400 && $statusCode <= 499) {
+            return false;
+        }
+
+        // Non-success 2xx (when custom success ranges exclude them) are terminal, not retryable.
+        if ($statusCode >= 200 && $statusCode <= 299) {
             return false;
         }
 
@@ -108,8 +113,20 @@ final class RetryDecider
         return max(0, $date->getTimestamp() - time());
     }
 
-    public function isSuccess(int $statusCode): bool
+    public function isSuccess(int $statusCode, ?RetryPolicy $policy = null): bool
     {
+        $ranges = $policy?->successStatusRanges;
+
+        if ($ranges !== null && $ranges !== []) {
+            foreach ($ranges as $range) {
+                if ($statusCode >= $range[0] && $statusCode <= $range[1]) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         return $statusCode >= 200 && $statusCode <= 299;
     }
 }

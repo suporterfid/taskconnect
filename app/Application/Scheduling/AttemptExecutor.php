@@ -59,7 +59,7 @@ final class AttemptExecutor
 
         $this->persistResponse($attempt, $response, $durationMs, $now);
 
-        if ($this->retryDecider->isSuccess($statusCode)) {
+        if ($this->retryDecider->isSuccess($statusCode, $policy)) {
             $this->finalizeSuccess($run, $attempt, $task, $now, $statusCode);
 
             return;

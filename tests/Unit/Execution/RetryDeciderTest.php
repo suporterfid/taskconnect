@@ -87,4 +87,46 @@ class RetryDeciderTest extends TestCase
 
         $this->assertTrue($this->decider->shouldRetry(503, null, 2, $policy, null, new DateTimeImmutable('now')));
     }
+
+    public function test_default_success_is_2xx(): void
+    {
+        $this->assertTrue($this->decider->isSuccess(200));
+        $this->assertTrue($this->decider->isSuccess(204, RetryPolicy::default()));
+        $this->assertFalse($this->decider->isSuccess(404));
+    }
+
+    public function test_custom_success_status_ranges(): void
+    {
+        $policy = new RetryPolicy(
+            maxAttempts: 3,
+            delaySeconds: [60],
+            successStatusRanges: [[204, 204]],
+        );
+
+        $this->assertTrue($this->decider->isSuccess(204, $policy));
+        $this->assertFalse($this->decider->isSuccess(200, $policy));
+        $this->assertFalse($this->decider->shouldRetry(200, null, 1, $policy));
+        $this->assertTrue($this->decider->shouldRetry(503, null, 1, $policy));
+    }
+
+    public function test_success_status_ranges_round_trip(): void
+    {
+        $policy = RetryPolicy::fromArray([
+            'max_attempts' => 2,
+            'success_status_ranges' => [[200, 201], [204, 204]],
+        ]);
+
+        $this->assertSame([[200, 201], [204, 204]], $policy->successStatusRanges);
+        $this->assertSame([[200, 201], [204, 204]], $policy->toArray()['success_status_ranges']);
+        $this->assertTrue($this->decider->isSuccess(201, $policy));
+        $this->assertFalse($this->decider->isSuccess(202, $policy));
+    }
+
+    public function test_invalid_success_status_ranges_rejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        RetryPolicy::fromArray([
+            'success_status_ranges' => [[300, 200]],
+        ]);
+    }
 }
