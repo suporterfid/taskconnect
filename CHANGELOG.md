@@ -9,13 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Feature coverage for task lifecycle (create, activate, pause/resume, run-now, duplicate, archive) and cross-tenant isolation
-- Password reset happy-path feature test
-- Root `LICENSE` (MIT) and this changelog
+- Enforce `max_retry_window_seconds` in retry decisions
+- Auth endpoint rate limiting (`login`, `forgot-password`, `reset-password`)
+- Task-run list pagination (`limit` / `before`) and `task_id` filter
+- Feature coverage for task lifecycle and password reset
+- Root `LICENSE` (MIT)
 
 ### Changed
 
-- P2 hardening in progress: retry window enforcement, overlapping claim coverage, auth throttling, task-run pagination/`task_id` filter (see `docs/superpowers/plans/2026-07-21-mvp-p2-hardening.md`)
+- Stronger scheduled-occurrence uniqueness coverage for overlapping claimers
 
 ## [1.1.0] — 2026-07-21
 
