@@ -41,9 +41,20 @@ final class RetryDecider
         ?string $transportError,
         int $attemptNumber,
         RetryPolicy $policy,
+        ?DateTimeImmutable $runStartedAt = null,
+        ?DateTimeImmutable $now = null,
     ): bool {
         if ($attemptNumber >= $policy->maxAttempts) {
             return false;
+        }
+
+        if ($policy->maxRetryWindowSeconds !== null && $runStartedAt !== null) {
+            $effectiveNow = $now ?? new DateTimeImmutable('now');
+            $elapsed = $effectiveNow->getTimestamp() - $runStartedAt->getTimestamp();
+
+            if ($elapsed >= $policy->maxRetryWindowSeconds) {
+                return false;
+            }
         }
 
         if ($this->isTransportRetryable($transportError)) {

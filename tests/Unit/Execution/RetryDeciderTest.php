@@ -4,6 +4,7 @@ namespace Tests\Unit\Execution;
 
 use App\Domain\Execution\RetryDecider;
 use App\Domain\Execution\RetryPolicy;
+use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 
 class RetryDeciderTest extends TestCase
@@ -48,5 +49,42 @@ class RetryDeciderTest extends TestCase
         $policy = RetryPolicy::default();
 
         $this->assertFalse($this->decider->shouldRetry(503, null, 6, $policy));
+    }
+
+    public function test_stops_when_max_retry_window_elapsed(): void
+    {
+        $policy = new RetryPolicy(
+            maxAttempts: 6,
+            delaySeconds: RetryPolicy::DEFAULT_DELAY_SECONDS,
+            maxRetryWindowSeconds: 3600,
+        );
+        $runStartedAt = new DateTimeImmutable('2026-07-18T12:00:00Z');
+        $now = new DateTimeImmutable('2026-07-18T13:00:00Z');
+
+        $this->assertFalse($this->decider->shouldRetry(503, null, 2, $policy, $runStartedAt, $now));
+    }
+
+    public function test_retries_within_max_retry_window(): void
+    {
+        $policy = new RetryPolicy(
+            maxAttempts: 6,
+            delaySeconds: RetryPolicy::DEFAULT_DELAY_SECONDS,
+            maxRetryWindowSeconds: 3600,
+        );
+        $runStartedAt = new DateTimeImmutable('2026-07-18T12:00:00Z');
+        $now = new DateTimeImmutable('2026-07-18T12:30:00Z');
+
+        $this->assertTrue($this->decider->shouldRetry(503, null, 2, $policy, $runStartedAt, $now));
+    }
+
+    public function test_max_retry_window_ignored_without_run_started_at(): void
+    {
+        $policy = new RetryPolicy(
+            maxAttempts: 6,
+            delaySeconds: RetryPolicy::DEFAULT_DELAY_SECONDS,
+            maxRetryWindowSeconds: 60,
+        );
+
+        $this->assertTrue($this->decider->shouldRetry(503, null, 2, $policy, null, new DateTimeImmutable('now')));
     }
 }

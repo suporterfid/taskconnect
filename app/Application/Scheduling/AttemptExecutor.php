@@ -37,6 +37,7 @@ final class AttemptExecutor
         $now = $this->clock->nowUtc();
 
         $this->markRunning($run, $attempt, $now);
+        $run->refresh();
 
         $policy = $overridePolicy ?? ($run->trigger_type === TriggerType::Test
             ? new RetryPolicy(maxAttempts: 1, delaySeconds: [])
@@ -68,7 +69,18 @@ final class AttemptExecutor
             ? $this->retryDecider->parseRetryAfter($response->headers)
             : null;
 
-        if ($this->retryDecider->shouldRetry($statusCode, $transportError, $attempt->attempt_number, $policy)) {
+        $runStartedAt = $run->started_at !== null
+            ? DateTimeImmutable::createFromInterface($run->started_at)
+            : null;
+
+        if ($this->retryDecider->shouldRetry(
+            $statusCode,
+            $transportError,
+            $attempt->attempt_number,
+            $policy,
+            $runStartedAt,
+            $now,
+        )) {
             $this->finalizeRetryable($run, $attempt, $task, $now, $statusCode, $transportError, $policy, $retryAfter);
 
             return;

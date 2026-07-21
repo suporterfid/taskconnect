@@ -92,7 +92,21 @@ final class StaleClaimRecovery
             $task = $run->task;
             $policy = $task->retryPolicy();
 
-            if ($this->retryDecider->shouldRetry(0, 'interrupted', $attempt->attempt_number, $policy)
+            $runStartedAt = null;
+            if ($run->started_at !== null) {
+                $runStartedAt = DateTimeImmutable::createFromInterface($run->started_at);
+            } elseif ($attempt->started_at !== null) {
+                $runStartedAt = DateTimeImmutable::createFromInterface($attempt->started_at);
+            }
+
+            if ($this->retryDecider->shouldRetry(
+                0,
+                'interrupted',
+                $attempt->attempt_number,
+                $policy,
+                $runStartedAt,
+                $now,
+            )
                 && $this->runStateMachine->canTransition($run->run_state, RunState::RetryWait)) {
                 $delay = $this->retryDecider->nextDelaySeconds($attempt->attempt_number, $policy);
                 $nextAttemptAt = $now->modify(sprintf('+%d seconds', $delay));

@@ -10,10 +10,11 @@ use App\Application\Tasks\TaskLifecycleService;
 use App\Domain\Execution\Enums\AttemptState;
 use App\Domain\Execution\Enums\RunState;
 use App\Domain\Execution\Enums\TriggerType;
+use App\Domain\Execution\OccurrenceKeyGenerator;
 use App\Domain\Execution\Outbound\OutboundPolicy;
 use App\Domain\Execution\Outbound\OutboundPolicyConfig;
-use App\Domain\Scheduling\ScheduleCalculator;
 use App\Domain\Shared\Clock;
+use DateTimeImmutable;
 use App\Infrastructure\HttpClient\PinnedHttpTransport;
 use App\Infrastructure\HttpClient\PinnedHttpResponse;
 use App\Infrastructure\Persistence\Eloquent\TaskRun;
@@ -71,6 +72,31 @@ class SchedulerClaimingTest extends TestCase
 
         $this->assertCount(1, $first);
         $this->assertCount(0, $second);
+        $this->assertSame(1, TaskRun::query()->where('task_id', $task->id)->count());
+    }
+
+    public function test_existing_occurrence_key_prevents_duplicate_claim_run(): void
+    {
+        $dueAt = '2026-07-18T11:45:00Z';
+        $task = $this->createActiveTaskDueAt($dueAt);
+        $scheduledFor = new DateTimeImmutable($dueAt);
+        $occurrenceKey = $this->app->make(OccurrenceKeyGenerator::class)->forScheduled($scheduledFor);
+
+        TaskRun::query()->create([
+            'tenant_id' => $task->tenant_id,
+            'environment_id' => $task->environment_id,
+            'task_id' => $task->id,
+            'trigger_type' => TriggerType::Scheduled,
+            'scheduled_for' => $scheduledFor,
+            'occurrence_key' => $occurrenceKey,
+            'idempotency_key' => 'preexisting-occurrence',
+            'run_state' => RunState::Pending,
+            'attempt_count' => 1,
+        ]);
+
+        $claimed = $this->app->make(DueTaskClaimer::class)->claim(10);
+
+        $this->assertCount(0, $claimed);
         $this->assertSame(1, TaskRun::query()->where('task_id', $task->id)->count());
     }
 

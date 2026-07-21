@@ -1,0 +1,36 @@
+# Changelog
+
+All notable changes to this project are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+
+- Enforce `max_retry_window_seconds` in retry decisions
+- Auth endpoint rate limiting (`login`, `forgot-password`, `reset-password`)
+- Task-run list pagination (`limit` / `before`) and `task_id` filter
+- Feature coverage for task lifecycle and password reset
+- Root `LICENSE` (MIT)
+
+### Changed
+
+- Stronger scheduled-occurrence uniqueness coverage for overlapping claimers
+
+## [1.1.0] — 2026-07-21
+
+### Added
+
+- **P0:** Pending/manual/test run execution via MySQL claim leases + cron (`PendingRunClaimer`), failure notification email, archived-environment guards
+- **P1:** Operator SPA workflow against `/api/v1` (tasks, runs, secrets, endpoint profiles, members, API keys), task/run authorization and API key scopes
+- Multi-tenant HTTP task scheduler MVP on shared hosting (PHP 8.2+, MySQL 8.0+, per-minute cron)
+
+### Fixed
+
+- Auth holes around task operate scopes and read-only viewer restrictions
+- Manual/test/retry runs no longer stuck pending without a queue worker
+
+[Unreleased]: https://github.com/suporterfid/taskconnect/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/suporterfid/taskconnect/releases/tag/v1.1.0

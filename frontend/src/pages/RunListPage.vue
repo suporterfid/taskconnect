@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 
@@ -24,20 +24,22 @@ const { data, loading, error, reload } = useAsyncData(async () => {
   if (!tenant.currentTenantId || !tenant.currentEnvironmentId) {
     return [] as TaskRun[]
   }
+  const params: Record<string, string> = {}
+  if (taskIdFilter.value) {
+    params.task_id = taskIdFilter.value
+  }
   const { data: response } = await api.get<{ data: TaskRun[] }>(
     tenant.tenantPath('/task-runs'),
+    { params },
   )
   return response.data ?? []
 })
 
-// Backend index has no task_id filter yet — filter client-side from query.
-const filtered = computed(() => {
-  const runs = data.value ?? []
-  if (!taskIdFilter.value) {
-    return runs
-  }
-  return runs.filter((run) => run.task_id === taskIdFilter.value)
+watch(taskIdFilter, () => {
+  void reload()
 })
+
+const filtered = computed(() => data.value ?? [])
 
 function formatDate(value?: string | null): string {
   if (!value) {
