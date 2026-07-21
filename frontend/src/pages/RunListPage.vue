@@ -1,49 +1,152 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { RouterLink, useRoute } from 'vue-router'
 
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import api from '@/services/api'
-import type { Run } from '@/services/types'
+import type { TaskRun } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
 
+const { locale } = useI18n()
+const route = useRoute()
 const tenant = useTenantStore()
 
+const taskIdFilter = computed(() => {
+  const raw = route.query.task_id
+  return typeof raw === 'string' && raw.length > 0 ? raw : null
+})
+
 const { data, loading, error, reload } = useAsyncData(async () => {
-  const { data: response } = await api.get<{ data: Run[] }>(
+  if (!tenant.currentTenantId || !tenant.currentEnvironmentId) {
+    return [] as TaskRun[]
+  }
+  const { data: response } = await api.get<{ data: TaskRun[] }>(
     tenant.tenantPath('/task-runs'),
   )
   return response.data ?? []
 })
+
+// Backend index has no task_id filter yet — filter client-side from query.
+const filtered = computed(() => {
+  const runs = data.value ?? []
+  if (!taskIdFilter.value) {
+    return runs
+  }
+  return runs.filter((run) => run.task_id === taskIdFilter.value)
+})
+
+function formatDate(value?: string | null): string {
+  if (!value) {
+    return '—'
+  }
+  try {
+    return new Intl.DateTimeFormat(locale.value, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(value))
+  } catch {
+    return value
+  }
+}
+
+function displayTime(run: TaskRun): string {
+  return formatDate(run.started_at || run.created_at)
+}
 </script>
 
 <template>
   <div>
     <PageHeader :title="$t('runs.title')" :subtitle="$t('runs.subtitle')" />
 
+    <p
+      v-if="taskIdFilter"
+      class="mb-4 text-sm text-gray-600"
+    >
+      {{ $t('runs.filteredByTask') }}
+      <RouterLink
+        :to="`/tasks/${taskIdFilter}`"
+        class="text-violet-600 hover:underline"
+      >
+        {{ taskIdFilter }}
+      </RouterLink>
+      ·
+      <RouterLink to="/runs" class="text-violet-600 hover:underline">
+        {{ $t('runs.clearFilter') }}
+      </RouterLink>
+    </p>
+
     <LoadingState v-if="loading" />
     <ErrorState v-else-if="error" :message="error ?? $t('runs.loadError')" @retry="reload" />
     <div
-      v-else-if="!data?.length"
+      v-else-if="!tenant.currentTenantId || !tenant.currentEnvironmentId"
+      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
+    >
+      {{ $t('runs.needsTenant') }}
+    </div>
+    <div
+      v-else-if="!filtered.length"
       class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
     >
       {{ $t('runs.empty') }}
     </div>
-    <ul v-else class="divide-y divide-gray-200 rounded-lg border border-gray-200 dark:divide-gray-800 dark:border-gray-800">
-      <li v-for="run in data" :key="run.id" class="flex items-center justify-between bg-white px-4 py-3 dark:bg-gray-900">
-        <div>
-          <p class="font-mono text-sm">{{ run.id }}</p>
-          <p class="text-sm text-gray-500">{{ run.triggered_at }}</p>
-        </div>
-        <div class="flex items-center gap-4">
-          <span class="text-sm">{{ $t(`runs.status.${run.status}`) }}</span>
-          <RouterLink :to="`/runs/${run.id}`" class="text-sm text-violet-600 hover:underline">
-            View
-          </RouterLink>
-        </div>
-      </li>
-    </ul>
+    <div
+      v-else
+      class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800"
+    >
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+        <thead class="bg-gray-50 dark:bg-gray-900">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+              {{ $t('runs.fields.id') }}
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+              {{ $t('runs.fields.task') }}
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+              {{ $t('common.status') }}
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+              {{ $t('runs.fields.when') }}
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+              {{ $t('common.actions') }}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+          <tr v-for="run in filtered" :key="run.id">
+            <td class="px-4 py-3 font-mono text-sm">{{ run.id }}</td>
+            <td class="px-4 py-3 text-sm">
+              <RouterLink
+                v-if="run.task_id"
+                :to="`/tasks/${run.task_id}`"
+                class="text-violet-600 hover:underline"
+              >
+                {{ run.task_id }}
+              </RouterLink>
+              <span v-else>—</span>
+            </td>
+            <td class="px-4 py-3 text-sm">
+              {{ $t(`runs.status.${run.run_state}`, run.run_state) }}
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-600">
+              {{ displayTime(run) }}
+            </td>
+            <td class="px-4 py-3 text-right text-sm">
+              <RouterLink
+                :to="`/runs/${run.id}`"
+                class="text-violet-600 hover:underline"
+              >
+                {{ $t('runs.view') }}
+              </RouterLink>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>

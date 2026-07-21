@@ -13,6 +13,18 @@ const router = createRouter({
       meta: { guest: true },
     },
     {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: () => import('@/pages/ForgotPasswordPage.vue'),
+      meta: { guest: true },
+    },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: () => import('@/pages/ResetPasswordPage.vue'),
+      meta: { guest: true },
+    },
+    {
       path: '/',
       component: () => import('@/layouts/AppLayout.vue'),
       meta: { requiresAuth: true },
@@ -69,6 +81,11 @@ const router = createRouter({
           name: 'endpoint-profiles-detail',
           component: () => import('@/pages/EndpointProfileDetailPage.vue'),
           props: true,
+        },
+        {
+          path: 'secrets',
+          name: 'secrets',
+          component: () => import('@/pages/SecretsPage.vue'),
         },
         {
           path: 'runs',

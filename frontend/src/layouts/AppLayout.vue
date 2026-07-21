@@ -14,29 +14,37 @@ const auth = useAuthStore()
 const tenant = useTenantStore()
 const localeStore = useLocaleStore()
 
-const navItems = computed(() => [
-  { name: 'dashboard', label: t('common.nav.dashboard'), to: '/dashboard' },
-  { name: 'tasks', label: t('common.nav.tasks'), to: '/tasks' },
-  {
-    name: 'endpoint-profiles',
-    label: t('common.nav.endpointProfiles'),
-    to: '/endpoint-profiles',
-  },
-  { name: 'runs', label: t('common.nav.runs'), to: '/runs' },
-  {
-    name: 'environments',
-    label: t('common.nav.environments'),
-    to: '/environments',
-  },
-  { name: 'api-keys', label: t('common.nav.apiKeys'), to: '/api-keys' },
-  { name: 'members', label: t('common.nav.members'), to: '/members' },
-  { name: 'settings', label: t('common.nav.settings'), to: '/settings' },
-  {
-    name: 'platform-health',
-    label: t('common.nav.platformHealth'),
-    to: '/platform-health',
-  },
-])
+const navItems = computed(() => {
+  const items = [
+    { name: 'dashboard', label: t('common.nav.dashboard'), to: '/dashboard' },
+    { name: 'tasks', label: t('common.nav.tasks'), to: '/tasks' },
+    {
+      name: 'endpoint-profiles',
+      label: t('common.nav.endpointProfiles'),
+      to: '/endpoint-profiles',
+    },
+    { name: 'secrets', label: t('common.nav.secrets'), to: '/secrets' },
+    { name: 'runs', label: t('common.nav.runs'), to: '/runs' },
+    {
+      name: 'environments',
+      label: t('common.nav.environments'),
+      to: '/environments',
+    },
+    { name: 'api-keys', label: t('common.nav.apiKeys'), to: '/api-keys' },
+    { name: 'members', label: t('common.nav.members'), to: '/members' },
+    { name: 'settings', label: t('common.nav.settings'), to: '/settings' },
+  ]
+
+  if (auth.user?.is_platform_admin) {
+    items.push({
+      name: 'platform-health',
+      label: t('common.nav.platformHealth'),
+      to: '/platform-health',
+    })
+  }
+
+  return items
+})
 
 function isActive(path: string): boolean {
   return route.path === path || route.path.startsWith(`${path}/`)

@@ -5,8 +5,20 @@
     "activeTasks": "Tarefas ativas",
     "pausedTasks": "Tarefas pausadas",
     "recentRuns": "Execuções recentes",
-    "failedRuns": "Falhas (24h)"
+    "failedRuns": "Falhas (24h)",
+    "retryWait": "Aguardando retry",
+    "deadRuns": "Execuções mortas"
   },
+  "scheduler": {
+    "staleTitle": "Heartbeat do agendador está atrasado",
+    "staleBody": "Última vez: {lastSeen}. O cron pode não estar rodando — verifique os jobs do agendador a cada minuto.",
+    "ok": "Agendador visto pela última vez em {lastSeen}"
+  },
+  "upcoming": {
+    "title": "Próximas tarefas",
+    "empty": "Nenhuma execução agendada próxima."
+  },
+  "oldestDue": "Tarefa vencida mais antiga: {at}",
   "empty": "Nenhuma atividade ainda. Crie sua primeira tarefa para começar.",
   "needsTenant": "Nenhum tenant ou ambiente selecionado. Crie um tenant para começar a agendar tarefas."
 }

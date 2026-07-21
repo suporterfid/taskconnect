@@ -3,8 +3,13 @@
   "subtitle": "Tenant and account preferences",
   "sections": {
     "general": "General",
+    "locale": "Language",
     "notifications": "Notifications",
     "security": "Security"
+  },
+  "locale": {
+    "hint": "Choose the language for the operator UI. Preference is saved in this browser.",
+    "savedLocally": "Language updated for this browser. Server preference sync is not available yet."
   },
   "apiKeys": {
     "title": "API Keys",
@@ -83,7 +88,19 @@
   "platformHealth": {
     "title": "Platform Health",
     "subtitle": "System status and diagnostics",
-    "loadError": "Unable to load platform health"
+    "loadError": "Unable to load platform health",
+    "status": {
+      "healthy": "Healthy",
+      "degraded": "Degraded"
+    },
+    "fields": {
+      "database": "Database",
+      "version": "Version",
+      "scheduler": "Scheduler last seen",
+      "retryExecutor": "Retry executor last seen",
+      "staleClaims": "Stale claims",
+      "pendingRuns": "Pending / in-flight runs"
+    }
   },
   "saved": "Settings saved"
 }

@@ -2,27 +2,86 @@
   "title": "Tasks",
   "subtitle": "Manage scheduled HTTP requests",
   "create": "New task",
+  "view": "View",
+  "needsTenant": "Select a tenant and environment before managing tasks.",
   "wizard": {
     "title": "Create task",
     "editTitle": "Edit task",
     "steps": {
       "basics": "Basics",
+      "destination": "Destination",
       "schedule": "Schedule",
       "review": "Review"
-    }
+    },
+    "saveDraft": "Save draft",
+    "activate": "Save and activate"
   },
   "detail": {
     "title": "Task details",
     "schedule": "Schedule",
     "endpoint": "Endpoint",
     "lastRun": "Last run",
+    "lastRunState": "Last run state",
     "nextRun": "Next run"
+  },
+  "fields": {
+    "name": "Name",
+    "description": "Description",
+    "method": "Method",
+    "url": "URL or path",
+    "body": "Body",
+    "contentType": "Content type",
+    "timezone": "Timezone",
+    "time": "Time",
+    "at": "Run at",
+    "intervalMinutes": "Interval (minutes)",
+    "minute": "Minute of hour",
+    "weekdays": "Weekdays",
+    "dayOfMonth": "Day of month",
+    "schedule": "Schedule",
+    "scheduleKind": "Schedule type",
+    "endpointProfile": "Endpoint profile",
+    "endpointProfileNone": "None (direct URL)",
+    "endpointProfileHint": "Optional. When set, URL/path is relative to the profile base URL.",
+    "maxAttempts": "Max attempts",
+    "retryStrategy": "Retry strategy"
+  },
+  "scheduleKinds": {
+    "once": "One-time",
+    "every_n_minutes": "Every N minutes",
+    "hourly_at": "Hourly at minute",
+    "daily_at": "Daily at time",
+    "weekly_on": "Weekly on days",
+    "monthly_on_day": "Monthly on day",
+    "business_days_at": "Business days at time"
+  },
+  "weekdays": {
+    "1": "Mon",
+    "2": "Tue",
+    "3": "Wed",
+    "4": "Thu",
+    "5": "Fri",
+    "6": "Sat",
+    "7": "Sun"
   },
   "status": {
     "active": "Active",
     "paused": "Paused",
     "draft": "Draft",
+    "completed": "Completed",
     "archived": "Archived"
+  },
+  "actions": {
+    "activate": "Activate",
+    "pause": "Pause",
+    "resume": "Resume",
+    "runNow": "Run now",
+    "test": "Test",
+    "duplicate": "Duplicate",
+    "archive": "Archive",
+    "archiveConfirm": "Archive this task? It will stop scheduling and can no longer be activated.",
+    "viewRuns": "View runs",
+    "error": "Unable to perform that action"
   },
   "empty": "No tasks yet. Create one to schedule your first HTTP request.",
   "loadError": "Unable to load tasks"

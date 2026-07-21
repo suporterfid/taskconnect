@@ -3,8 +3,13 @@
   "subtitle": "Preferências da conta e do tenant",
   "sections": {
     "general": "Geral",
+    "locale": "Idioma",
     "notifications": "Notificações",
     "security": "Segurança"
+  },
+  "locale": {
+    "hint": "Escolha o idioma da interface do operador. A preferência é salva neste navegador.",
+    "savedLocally": "Idioma atualizado neste navegador. A sincronização com o servidor ainda não está disponível."
   },
   "apiKeys": {
     "title": "Chaves de API",
@@ -83,7 +88,19 @@
   "platformHealth": {
     "title": "Saúde da plataforma",
     "subtitle": "Status e diagnósticos do sistema",
-    "loadError": "Não foi possível carregar a saúde da plataforma"
+    "loadError": "Não foi possível carregar a saúde da plataforma",
+    "status": {
+      "healthy": "Saudável",
+      "degraded": "Degradado"
+    },
+    "fields": {
+      "database": "Banco de dados",
+      "version": "Versão",
+      "scheduler": "Agendador visto pela última vez",
+      "retryExecutor": "Executor de retry visto pela última vez",
+      "staleClaims": "Claims expirados",
+      "pendingRuns": "Execuções pendentes / em andamento"
+    }
   },
   "saved": "Configurações salvas"
 }

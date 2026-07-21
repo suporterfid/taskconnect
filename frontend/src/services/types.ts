@@ -1,8 +1,13 @@
-export interface ApiErrorEnvelope {
+export interface ApiErrorBody {
+  code: string
   message: string
-  code?: string
-  errors?: Record<string, string[]>
+  details?: Record<string, string[]> | unknown
   request_id?: string
+}
+
+/** Nested envelope returned by ApiErrorRenderer: `{ error: { code, message, details, request_id } }` */
+export interface ApiErrorEnvelope {
+  error: ApiErrorBody
 }
 
 export interface PaginatedResponse<T> {
@@ -15,11 +20,17 @@ export interface PaginatedResponse<T> {
   }
 }
 
+export interface UserPreferences {
+  locale?: string
+  timezone?: string
+}
+
 export interface User {
   id: string
   name: string
   email: string
   is_platform_admin?: boolean
+  preferences?: UserPreferences
 }
 
 export interface Tenant {
@@ -43,16 +54,65 @@ export interface EnvironmentPayload {
   slug?: string
 }
 
+export type TaskDefinitionStatus =
+  | 'draft'
+  | 'active'
+  | 'paused'
+  | 'completed'
+  | 'archived'
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+
+export type ScheduleKind =
+  | 'once'
+  | 'every_n_minutes'
+  | 'hourly_at'
+  | 'daily_at'
+  | 'weekly_on'
+  | 'monthly_on_day'
+  | 'business_days_at'
+
+export interface ScheduleConfig {
+  kind: ScheduleKind
+  timezone: string
+  at?: string
+  interval_minutes?: number
+  minute?: number
+  time?: string
+  /** ISO-8601 weekdays: 1=Mon … 7=Sun */
+  weekdays?: number[]
+  day?: number
+  starts_at?: string
+  ends_at?: string
+}
+
+export interface RetryPolicy {
+  max_attempts?: number
+  strategy?: string
+}
+
 export interface Task {
   id: string
   name: string
-  description?: string
-  status: 'active' | 'paused' | 'draft' | 'archived'
+  description?: string | null
+  definition_status: TaskDefinitionStatus
+  method: HttpMethod | string
+  url_or_path?: string | null
+  endpoint_profile_id?: string | null
+  headers?: Record<string, string>
+  query?: Record<string, string>
+  body?: string | null
+  content_type?: string | null
+  timezone?: string | null
+  retry_policy?: RetryPolicy | null
+  next_run_at?: string | null
+  last_run_at?: string | null
+  last_run_state?: string | null
+  schedule?: ScheduleConfig | null
+  schedule_human?: string | null
   created_at: string
   updated_at: string
 }
-
-export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 export type AuthMode =
   | 'none'
@@ -111,16 +171,79 @@ export interface EndpointTestResult {
   created_at: string
 }
 
+export interface Secret {
+  id: string
+  name: string
+  version: number
+  archived_at?: string | null
+  created_at?: string
+  updated_at?: string
+  /** Present only on create/rotate responses — never on show/index. */
+  plaintext?: string
+}
+
+/** Lightweight secret ref used by endpoint profile forms. */
 export interface SecretSummary {
   id: string
   name: string
 }
 
-export interface Run {
+export type RunState =
+  | 'pending'
+  | 'running'
+  | 'retry_wait'
+  | 'succeeded'
+  | 'dead'
+  | 'cancelled'
+  | 'blocked'
+
+export type TriggerType = 'scheduled' | 'manual' | 'test' | 'retry' | string
+
+export interface TaskRun {
   id: string
   task_id: string
-  status: 'pending' | 'running' | 'succeeded' | 'failed' | 'cancelled'
-  triggered_at: string
+  trigger_type: TriggerType
+  scheduled_for?: string | null
+  idempotency_key?: string | null
+  run_state: RunState
+  attempt_count: number
+  next_attempt_at?: string | null
+  started_at?: string | null
+  finished_at?: string | null
+  final_http_status?: number | null
+  final_error_code?: string | null
+  created_at: string
+}
+
+/** @deprecated Prefer TaskRun — kept as alias for existing imports. */
+export type Run = TaskRun
+
+export type AttemptState =
+  | 'pending'
+  | 'running'
+  | 'succeeded'
+  | 'failed_retryable'
+  | 'failed_terminal'
+  | 'timed_out'
+  | 'interrupted'
+  | 'blocked'
+
+export interface TaskRunAttempt {
+  id: string
+  attempt_number: number
+  attempt_state: AttemptState
+  started_at?: string | null
+  finished_at?: string | null
+  duration_ms?: number | null
+  request_url_redacted?: string | null
+  request_headers_redacted?: Record<string, string> | null
+  request_body_redacted?: string | null
+  response_status?: number | null
+  response_headers?: Record<string, string> | null
+  response_body_truncated?: string | null
+  transport_error_code?: string | null
+  transport_error_message?: string | null
+  next_retry_at?: string | null
 }
 
 export interface ApiKey {
@@ -159,14 +282,31 @@ export interface MemberPayload {
   role: TenantRole
 }
 
+export interface UpcomingTask {
+  id: string
+  name: string
+  next_run_at?: string | null
+}
+
 export interface DashboardStats {
   active_tasks: number
   paused_tasks: number
   recent_runs: number
   failed_runs_24h: number
+  retry_wait_runs: number
+  dead_runs: number
+  upcoming_tasks: UpcomingTask[]
+  oldest_due_at?: string | null
+  scheduler_last_seen_at?: string | null
 }
 
+/** Flat payload from PlatformHealthController (not wrapped in `data`). */
 export interface PlatformHealth {
-  status: 'ok' | 'degraded' | 'down'
-  checks: Record<string, { status: string; message?: string }>
+  status: 'healthy' | 'degraded'
+  database: 'ok' | 'error' | string
+  scheduler_last_seen_at?: string | null
+  retry_executor_last_seen_at?: string | null
+  stale_claims: number
+  pending_runs: number
+  version: string
 }
