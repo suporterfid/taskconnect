@@ -24,6 +24,14 @@ Linux/macOS: `./scripts/tc.sh` with the same verbs.
 - Layout: `tests/Unit/{Execution,Scheduling,Secrets}/`, `tests/Feature/Phase0/`, `Phase1/`, `Scheduling/`, plus dashboard/maintenance. Helpers in `tests/Support/` (`FixedClock`, `ArrayDnsResolver`, …).
 - Freeze time via `Clock`; inject test DNS/outbound doubles — do not hit real network in unit tests.
 
-## CI mirror
+## Local verification
 
-`.github/workflows/ci.yml` via `compose.ci.yaml`: composer install → migrate → `artisan test` → `frontend` `npm ci` / test / build. Run the same locally before pushing.
+There is no GitHub Actions CI. Before pushing, run through Docker (`tc`):
+
+```bash
+./scripts/tc.sh test
+./scripts/tc.sh npm --prefix frontend run test
+./scripts/tc.sh npm --prefix frontend run build
+```
+
+Optional: set `TC_CI=1` to use `compose.ci.yaml` for a CI-like compose overlay.

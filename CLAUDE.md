@@ -73,7 +73,7 @@ Run a single backend test through the container, e.g.:
 ./scripts/tc.sh artisan test tests/Feature/Scheduling/SchedulerClaimingTest.php
 ```
 
-Frontend tests/build (Vitest + `vue-tsc`), prefer the `frontend/` package (CI does the same):
+Frontend tests/build (Vitest + `vue-tsc`), prefer the `frontend/` package:
 ```bash
 ./scripts/tc.sh npm --prefix frontend run test
 ./scripts/tc.sh npm --prefix frontend run build
@@ -83,9 +83,17 @@ Tests use SQLite `:memory:` (see `phpunit.xml`); the running app uses MySQL. Kee
 
 Playwright is listed as a frontend dependency but **is not wired yet** (no e2e config/script; `tc e2e` will fail until one exists). Do not run `playwright install` on the host.
 
-### CI
+### Local verification
 
-`.github/workflows/ci.yml` runs the whole thing through `compose.ci.yaml` (sets `TC_CI=1`): builds images, waits for MySQL, `composer install`, `migrate`, `artisan test`, then `cd frontend && npm ci && npm test && npm run build`. Mirror these steps locally before pushing.
+There is no GitHub Actions CI. Before pushing, verify locally through Docker (`tc`):
+
+```bash
+./scripts/tc.sh test
+./scripts/tc.sh npm --prefix frontend run test
+./scripts/tc.sh npm --prefix frontend run build
+```
+
+For a closer production-like compose overlay, set `TC_CI=1` (uses `compose.ci.yaml`).
 
 If Packagist is unreachable, set `COMPOSER_PACKAGIST_URL` for the session only — **never commit mirror configuration** (`tc` warns when it's set).
 
