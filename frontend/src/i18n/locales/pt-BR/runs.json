@@ -1,18 +1,58 @@
 {
   "title": "Execuções",
   "subtitle": "Histórico de execução de tarefas",
+  "view": "Ver",
+  "needsTenant": "Selecione um tenant e um ambiente antes de ver as execuções.",
+  "filteredByTask": "Filtrado pela tarefa",
+  "clearFilter": "Limpar filtro",
+  "fields": {
+    "id": "ID da execução",
+    "task": "Tarefa",
+    "when": "Quando",
+    "trigger": "Disparo",
+    "attempts": "Tentativas"
+  },
   "detail": {
     "title": "Detalhes da execução",
     "attempts": "Tentativas",
+    "noAttempts": "Nenhuma tentativa registrada ainda.",
+    "attemptNumber": "Tentativa {n}",
     "triggeredAt": "Disparada em",
-    "duration": "Duração"
+    "startedAt": "Iniciada em",
+    "finishedAt": "Finalizada em",
+    "duration": "Duração",
+    "httpStatus": "Status HTTP final",
+    "requestUrl": "URL da requisição (redigida)",
+    "requestHeaders": "Cabeçalhos da requisição (redigidos)",
+    "requestBody": "Corpo da requisição (redigido)",
+    "responseStatus": "Status da resposta",
+    "responseBody": "Corpo da resposta (truncado)",
+    "transportError": "Erro de transporte"
+  },
+  "actions": {
+    "cancel": "Cancelar execução",
+    "retry": "Tentar novamente",
+    "error": "Não foi possível executar essa ação"
   },
   "status": {
     "pending": "Pendente",
     "running": "Em execução",
+    "retry_wait": "Aguardando retry",
     "succeeded": "Sucesso",
+    "dead": "Morta",
     "failed": "Falhou",
-    "cancelled": "Cancelada"
+    "cancelled": "Cancelada",
+    "blocked": "Bloqueada"
+  },
+  "attemptStatus": {
+    "pending": "Pendente",
+    "running": "Em execução",
+    "succeeded": "Sucesso",
+    "failed_retryable": "Falhou (retentável)",
+    "failed_terminal": "Falhou (terminal)",
+    "timed_out": "Tempo esgotado",
+    "interrupted": "Interrompida",
+    "blocked": "Bloqueada"
   },
   "empty": "Nenhuma execução registrada ainda.",
   "loadError": "Não foi possível carregar as execuções"

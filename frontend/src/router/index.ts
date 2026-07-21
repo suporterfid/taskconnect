@@ -13,6 +13,18 @@ const router = createRouter({
       meta: { guest: true },
     },
     {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: () => import('@/pages/ForgotPasswordPage.vue'),
+      meta: { guest: true },
+    },
+    {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: () => import('@/pages/ResetPasswordPage.vue'),
+      meta: { guest: true },
+    },
+    {
       path: '/',
       component: () => import('@/layouts/AppLayout.vue'),
       meta: { requiresAuth: true },
@@ -71,6 +83,11 @@ const router = createRouter({
           props: true,
         },
         {
+          path: 'secrets',
+          name: 'secrets',
+          component: () => import('@/pages/SecretsPage.vue'),
+        },
+        {
           path: 'runs',
           name: 'runs',
           component: () => import('@/pages/RunListPage.vue'),
@@ -100,6 +117,11 @@ const router = createRouter({
           path: 'settings',
           name: 'settings',
           component: () => import('@/pages/SettingsPage.vue'),
+        },
+        {
+          path: 'audit-logs',
+          name: 'audit-logs',
+          component: () => import('@/pages/AuditLogsPage.vue'),
         },
         {
           path: 'platform-health',

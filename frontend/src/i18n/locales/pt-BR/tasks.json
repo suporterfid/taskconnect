@@ -2,27 +2,86 @@
   "title": "Tarefas",
   "subtitle": "Gerencie requisições HTTP agendadas",
   "create": "Nova tarefa",
+  "view": "Ver",
+  "needsTenant": "Selecione um tenant e um ambiente antes de gerenciar tarefas.",
   "wizard": {
     "title": "Criar tarefa",
     "editTitle": "Editar tarefa",
     "steps": {
       "basics": "Básico",
+      "destination": "Destino",
       "schedule": "Agendamento",
       "review": "Revisão"
-    }
+    },
+    "saveDraft": "Salvar rascunho",
+    "activate": "Salvar e ativar"
   },
   "detail": {
     "title": "Detalhes da tarefa",
     "schedule": "Agendamento",
     "endpoint": "Endpoint",
     "lastRun": "Última execução",
+    "lastRunState": "Estado da última execução",
     "nextRun": "Próxima execução"
+  },
+  "fields": {
+    "name": "Nome",
+    "description": "Descrição",
+    "method": "Método",
+    "url": "URL ou caminho",
+    "body": "Corpo",
+    "contentType": "Tipo de conteúdo",
+    "timezone": "Fuso horário",
+    "time": "Horário",
+    "at": "Executar em",
+    "intervalMinutes": "Intervalo (minutos)",
+    "minute": "Minuto da hora",
+    "weekdays": "Dias da semana",
+    "dayOfMonth": "Dia do mês",
+    "schedule": "Agendamento",
+    "scheduleKind": "Tipo de agendamento",
+    "endpointProfile": "Perfil de endpoint",
+    "endpointProfileNone": "Nenhum (URL direta)",
+    "endpointProfileHint": "Opcional. Quando definido, a URL/caminho é relativo à URL base do perfil.",
+    "maxAttempts": "Máximo de tentativas",
+    "retryStrategy": "Estratégia de retry"
+  },
+  "scheduleKinds": {
+    "once": "Uma vez",
+    "every_n_minutes": "A cada N minutos",
+    "hourly_at": "A cada hora no minuto",
+    "daily_at": "Diariamente no horário",
+    "weekly_on": "Semanalmente nos dias",
+    "monthly_on_day": "Mensalmente no dia",
+    "business_days_at": "Dias úteis no horário"
+  },
+  "weekdays": {
+    "1": "Seg",
+    "2": "Ter",
+    "3": "Qua",
+    "4": "Qui",
+    "5": "Sex",
+    "6": "Sáb",
+    "7": "Dom"
   },
   "status": {
     "active": "Ativa",
     "paused": "Pausada",
     "draft": "Rascunho",
+    "completed": "Concluída",
     "archived": "Arquivada"
+  },
+  "actions": {
+    "activate": "Ativar",
+    "pause": "Pausar",
+    "resume": "Retomar",
+    "runNow": "Executar agora",
+    "test": "Testar",
+    "duplicate": "Duplicar",
+    "archive": "Arquivar",
+    "archiveConfirm": "Arquivar esta tarefa? Ela deixa de ser agendada e não poderá ser reativada.",
+    "viewRuns": "Ver execuções",
+    "error": "Não foi possível executar essa ação"
   },
   "empty": "Nenhuma tarefa ainda. Crie uma para agendar sua primeira requisição HTTP.",
   "loadError": "Não foi possível carregar as tarefas"

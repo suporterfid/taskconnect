@@ -1,18 +1,58 @@
 {
   "title": "Runs",
   "subtitle": "Task execution history",
+  "view": "View",
+  "needsTenant": "Select a tenant and environment before viewing runs.",
+  "filteredByTask": "Filtered by task",
+  "clearFilter": "Clear filter",
+  "fields": {
+    "id": "Run ID",
+    "task": "Task",
+    "when": "When",
+    "trigger": "Trigger",
+    "attempts": "Attempts"
+  },
   "detail": {
     "title": "Run details",
     "attempts": "Attempts",
+    "noAttempts": "No attempts recorded yet.",
+    "attemptNumber": "Attempt {n}",
     "triggeredAt": "Triggered at",
-    "duration": "Duration"
+    "startedAt": "Started at",
+    "finishedAt": "Finished at",
+    "duration": "Duration",
+    "httpStatus": "Final HTTP status",
+    "requestUrl": "Request URL (redacted)",
+    "requestHeaders": "Request headers (redacted)",
+    "requestBody": "Request body (redacted)",
+    "responseStatus": "Response status",
+    "responseBody": "Response body (truncated)",
+    "transportError": "Transport error"
+  },
+  "actions": {
+    "cancel": "Cancel run",
+    "retry": "Retry now",
+    "error": "Unable to perform that action"
   },
   "status": {
     "pending": "Pending",
     "running": "Running",
+    "retry_wait": "Waiting to retry",
     "succeeded": "Succeeded",
+    "dead": "Dead",
     "failed": "Failed",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "blocked": "Blocked"
+  },
+  "attemptStatus": {
+    "pending": "Pending",
+    "running": "Running",
+    "succeeded": "Succeeded",
+    "failed_retryable": "Failed (retryable)",
+    "failed_terminal": "Failed (terminal)",
+    "timed_out": "Timed out",
+    "interrupted": "Interrupted",
+    "blocked": "Blocked"
   },
   "empty": "No runs recorded yet.",
   "loadError": "Unable to load runs"

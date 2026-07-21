@@ -26,6 +26,18 @@ const PERMISSION_OPTIONS = [
     labelKey: 'settings.apiKeys.permissions.secrets_manage',
   },
   {
+    value: 'tasks:read',
+    labelKey: 'settings.apiKeys.permissions.tasks_read',
+  },
+  {
+    value: 'tasks:write',
+    labelKey: 'settings.apiKeys.permissions.tasks_write',
+  },
+  {
+    value: 'tasks:operate',
+    labelKey: 'settings.apiKeys.permissions.tasks_operate',
+  },
+  {
     value: 'api_keys:manage',
     labelKey: 'settings.apiKeys.permissions.api_keys_manage',
   },

@@ -4,7 +4,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios'
 
-import type { ApiErrorEnvelope } from './types'
+import type { ApiErrorBody, ApiErrorEnvelope } from './types'
 
 export class ApiError extends Error {
   readonly status: number
@@ -30,25 +30,63 @@ export class ApiError extends Error {
   }
 }
 
-function parseErrorEnvelope(error: AxiosError): ApiError {
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function asStringRecord(value: unknown): Record<string, string[]> | undefined {
+  if (!isRecord(value)) {
+    return undefined
+  }
+  const entries = Object.entries(value)
+  if (entries.length === 0) {
+    return undefined
+  }
+  const result: Record<string, string[]> = {}
+  for (const [key, raw] of entries) {
+    if (Array.isArray(raw) && raw.every((item) => typeof item === 'string')) {
+      result[key] = raw
+    }
+  }
+  return Object.keys(result).length > 0 ? result : undefined
+}
+
+/** Parse `{ error: { code, message, details, request_id } }` from ApiErrorRenderer. */
+export function parseErrorEnvelope(error: AxiosError): ApiError {
   const status = error.response?.status ?? 0
   const data = error.response?.data
-  const requestId =
-    error.response?.headers['x-request-id'] ??
-    (typeof data === 'object' && data !== null && 'request_id' in data
-      ? String((data as ApiErrorEnvelope).request_id)
-      : undefined)
+  const headerRequestId = error.response?.headers['x-request-id']
 
-  if (typeof data === 'object' && data !== null && 'message' in data) {
-    const envelope = data as ApiErrorEnvelope
-    return new ApiError(envelope.message, status, {
-      code: envelope.code,
-      errors: envelope.errors,
-      requestId: envelope.request_id ?? requestId,
+  if (isRecord(data) && isRecord(data.error)) {
+    const body = data.error as unknown as ApiErrorBody
+    return new ApiError(
+      typeof body.message === 'string' && body.message ? body.message : 'Request failed',
+      status,
+      {
+        code: typeof body.code === 'string' ? body.code : undefined,
+        errors: asStringRecord(body.details),
+        requestId:
+          typeof body.request_id === 'string'
+            ? body.request_id
+            : headerRequestId,
+      },
+    )
+  }
+
+  // Legacy / unexpected flat shapes
+  if (isRecord(data) && typeof data.message === 'string') {
+    return new ApiError(data.message, status, {
+      code: typeof data.code === 'string' ? data.code : undefined,
+      errors: asStringRecord(data.errors ?? data.details),
+      requestId:
+        (typeof data.request_id === 'string' ? data.request_id : undefined) ??
+        headerRequestId,
     })
   }
 
-  return new ApiError(error.message || 'Request failed', status, { requestId })
+  return new ApiError(error.message || 'Request failed', status, {
+    requestId: headerRequestId,
+  })
 }
 
 let csrfInitialized = false
@@ -80,6 +118,7 @@ export const api: AxiosInstance = axios.create({
   withCredentials: true,
   headers: {
     Accept: 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
     'Content-Type': 'application/json',
   },
 })
@@ -102,3 +141,6 @@ api.interceptors.response.use(
 )
 
 export default api
+
+// Re-export for type-only consumers that imported ApiErrorEnvelope from api path historically.
+export type { ApiErrorEnvelope }

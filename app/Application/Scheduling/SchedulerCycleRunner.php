@@ -9,6 +9,7 @@ final class SchedulerCycleRunner
     public function __construct(
         private readonly Clock $clock,
         private readonly DueTaskClaimer $dueTaskClaimer,
+        private readonly PendingRunClaimer $pendingRunClaimer,
         private readonly RetryClaimer $retryClaimer,
         private readonly AttemptExecutor $attemptExecutor,
         private readonly HeartbeatWriter $heartbeatWriter,
@@ -35,12 +36,28 @@ final class SchedulerCycleRunner
             }
         }
 
+        $pendingClaimed = $this->pendingRunClaimer->claim($batchSize);
+        $pendingSuccessful = 0;
+        $pendingFailed = 0;
+
+        foreach ($pendingClaimed as $claimedAttempt) {
+            try {
+                $this->attemptExecutor->execute($claimedAttempt->attempt);
+                $pendingSuccessful++;
+            } catch (\Throwable) {
+                $pendingFailed++;
+            }
+        }
+
         $durationMs = (int) round((microtime(true) - $started) * 1000);
 
         $this->heartbeatWriter->record('scheduler.execute_due', [
             'claimed' => count($claimed),
             'successful' => $successful,
             'failed' => $failed,
+            'pending_claimed' => count($pendingClaimed),
+            'pending_successful' => $pendingSuccessful,
+            'pending_failed' => $pendingFailed,
             'duration_ms' => $durationMs,
         ]);
 
@@ -48,6 +65,9 @@ final class SchedulerCycleRunner
             'claimed' => count($claimed),
             'successful' => $successful,
             'failed' => $failed,
+            'pending_claimed' => count($pendingClaimed),
+            'pending_successful' => $pendingSuccessful,
+            'pending_failed' => $pendingFailed,
             'duration_ms' => $durationMs,
         ];
     }

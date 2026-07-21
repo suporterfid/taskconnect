@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Application\ApiKeys\ApiKeyService;
 use App\Application\Audit\AuditLogger;
+use App\Application\Tenancy\EnvironmentGuard;
 use App\Http\Controllers\Concerns\ResolvesTenantContext;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ApiKeyResource;
@@ -22,6 +23,7 @@ class ApiKeyController extends Controller
     public function __construct(
         private readonly ApiKeyService $apiKeyService,
         private readonly AuditLogger $auditLogger,
+        private readonly EnvironmentGuard $environmentGuard,
     ) {}
 
     public function index(Request $request, string $tenantId): JsonResponse
@@ -56,6 +58,8 @@ class ApiKeyController extends Controller
                 ->where('public_id', $validated['environment_id'])
                 ->where('tenant_id', $tenant->id)
                 ->firstOrFail();
+
+            $this->environmentGuard->assertActive($environment);
         }
 
         $result = $this->apiKeyService->create(

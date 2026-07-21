@@ -24,6 +24,9 @@ class MaintenanceCommandTest extends TestCase
         $counts = app(RetentionCleaner::class)->run();
 
         $this->assertArrayHasKey('payload_snapshots_cleared', $counts);
+        $this->assertArrayHasKey('attempt_metadata_cleared', $counts);
+        $this->assertArrayHasKey('run_summaries_deleted', $counts);
+        $this->assertArrayHasKey('audit_logs_deleted', $counts);
         $this->assertArrayHasKey('idempotency_keys_deleted', $counts);
         $this->assertArrayHasKey('stale_claims_released', $counts);
     }

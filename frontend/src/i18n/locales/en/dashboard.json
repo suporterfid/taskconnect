@@ -5,8 +5,20 @@
     "activeTasks": "Active tasks",
     "pausedTasks": "Paused tasks",
     "recentRuns": "Recent runs",
-    "failedRuns": "Failed runs (24h)"
+    "failedRuns": "Failed runs (24h)",
+    "retryWait": "Waiting to retry",
+    "deadRuns": "Dead runs"
   },
+  "scheduler": {
+    "staleTitle": "Scheduler heartbeat is stale",
+    "staleBody": "Last seen: {lastSeen}. Cron may not be running — check the per-minute scheduler jobs.",
+    "ok": "Scheduler last seen {lastSeen}"
+  },
+  "upcoming": {
+    "title": "Upcoming tasks",
+    "empty": "No upcoming scheduled runs."
+  },
+  "oldestDue": "Oldest due task: {at}",
   "empty": "No activity yet. Create your first task to get started.",
   "needsTenant": "No tenant or environment selected yet. Create a tenant to start scheduling tasks."
 }

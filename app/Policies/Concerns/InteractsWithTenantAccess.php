@@ -143,4 +143,47 @@ trait InteractsWithTenantAccess
             || $this->apiKeyHasPermission('endpoint_profiles:read')
             || $this->apiKeyHasPermission('endpoint_profiles:write');
     }
+
+    protected function canWriteTasks(User $user, Tenant $tenant): bool
+    {
+        return $this->canWriteProfiles($user, $tenant);
+    }
+
+    protected function actorCanReadTasks(Tenant $tenant): bool
+    {
+        $user = request()->user();
+
+        if ($user instanceof User && $this->hasTenantAccess($user, $tenant)) {
+            return true;
+        }
+
+        return $this->apiKeyHasPermission('*')
+            || $this->apiKeyHasPermission('tasks:read')
+            || $this->apiKeyHasPermission('tasks:write')
+            || $this->apiKeyHasPermission('tasks:operate');
+    }
+
+    protected function actorCanWriteTasks(Tenant $tenant): bool
+    {
+        $user = request()->user();
+
+        if ($user instanceof User && $this->canWriteTasks($user, $tenant)) {
+            return true;
+        }
+
+        return $this->apiKeyHasPermission('*')
+            || $this->apiKeyHasPermission('tasks:write');
+    }
+
+    protected function actorCanOperateTasks(Tenant $tenant): bool
+    {
+        $user = request()->user();
+
+        if ($user instanceof User && $this->canWriteTasks($user, $tenant)) {
+            return true;
+        }
+
+        return $this->apiKeyHasPermission('*')
+            || $this->apiKeyHasPermission('tasks:operate');
+    }
 }

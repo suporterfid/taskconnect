@@ -16,7 +16,11 @@ class TaskResource extends JsonResource
         $scheduleHuman = null;
 
         if ($schedule !== null) {
-            $scheduleHuman = ScheduleDescription::describe($schedule->toScheduleConfig());
+            $scheduleHuman = ScheduleDescription::fromConfig($schedule->toScheduleConfig());
+            $scheduleHuman = [
+                'kind' => $scheduleHuman->kind->value,
+                'parts' => $scheduleHuman->parts,
+            ];
         }
 
         return [

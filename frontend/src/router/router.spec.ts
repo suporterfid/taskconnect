@@ -38,6 +38,23 @@ describe('router', () => {
     expect(login?.path).toBe('/login')
   })
 
+  it('defines guest password reset routes', async () => {
+    const router = (await import('@/router')).default
+    expect(router.getRoutes().find((r) => r.name === 'forgot-password')?.path).toBe(
+      '/forgot-password',
+    )
+    expect(router.getRoutes().find((r) => r.name === 'reset-password')?.path).toBe(
+      '/reset-password',
+    )
+  })
+
+  it('defines secrets route under authenticated layout', async () => {
+    const router = (await import('@/router')).default
+    const secrets = router.getRoutes().find((r) => r.name === 'secrets')
+    expect(secrets).toBeDefined()
+    expect(secrets?.path).toBe('/secrets')
+  })
+
   it('defines dashboard route under authenticated layout', async () => {
     const router = (await import('@/router')).default
     const dashboard = router.getRoutes().find((r) => r.name === 'dashboard')
