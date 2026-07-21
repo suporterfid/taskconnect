@@ -73,16 +73,19 @@ Route::prefix('v1')->group(function (): void {
             Route::post('tenants/{tenantId}/environments/{environmentId}/endpoint-profiles/{profileId}/test', [EndpointProfileController::class, 'test']);
 
             Route::get('tenants/{tenantId}/environments/{environmentId}/tasks', [TaskController::class, 'index']);
-            Route::post('tenants/{tenantId}/environments/{environmentId}/tasks', [TaskController::class, 'store']);
+            Route::post('tenants/{tenantId}/environments/{environmentId}/tasks', [TaskController::class, 'store'])
+                ->middleware('idempotency');
             Route::get('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}', [TaskController::class, 'show']);
             Route::patch('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}', [TaskController::class, 'update']);
             Route::delete('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}', [TaskController::class, 'destroy']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}/activate', [TaskController::class, 'activate']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}/pause', [TaskController::class, 'pause']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}/resume', [TaskController::class, 'resume']);
-            Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}/run-now', [TaskController::class, 'runNow']);
+            Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}/run-now', [TaskController::class, 'runNow'])
+                ->middleware('idempotency');
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}/test', [TaskController::class, 'test']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}/duplicate', [TaskController::class, 'duplicate']);
+
 
             Route::get('tenants/{tenantId}/environments/{environmentId}/task-runs', [TaskRunController::class, 'index']);
             Route::get('tenants/{tenantId}/environments/{environmentId}/task-runs/{runId}', [TaskRunController::class, 'show']);
