@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\ApiKeyController;
+use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Auth\LoginController;
 use App\Http\Controllers\Api\V1\Auth\LogoutController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Api\V1\SecretController;
 use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\TaskRunController;
 use App\Http\Controllers\Api\V1\TenantController;
+use App\Http\Controllers\Api\V1\UserPreferencesController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -25,6 +27,7 @@ Route::prefix('v1')->group(function (): void {
     Route::middleware('auth.api_or_sanctum')->group(function (): void {
         Route::post('auth/logout', LogoutController::class);
         Route::get('me', MeController::class);
+        Route::patch('me/preferences', [UserPreferencesController::class, 'update']);
         Route::get('platform/health', PlatformHealthController::class);
 
         Route::get('tenants', [TenantController::class, 'index']);
@@ -49,6 +52,8 @@ Route::prefix('v1')->group(function (): void {
             Route::post('tenants/{tenantId}/members', [MemberController::class, 'store']);
             Route::patch('tenants/{tenantId}/members/{memberId}', [MemberController::class, 'update']);
             Route::delete('tenants/{tenantId}/members/{memberId}', [MemberController::class, 'destroy']);
+
+            Route::get('tenants/{tenantId}/audit-logs', [AuditLogController::class, 'index']);
 
             Route::get('tenants/{tenantId}/environments/{environmentId}/dashboard', DashboardController::class);
 

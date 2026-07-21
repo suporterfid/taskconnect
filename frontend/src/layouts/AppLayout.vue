@@ -32,6 +32,7 @@ const navItems = computed(() => {
     },
     { name: 'api-keys', label: t('common.nav.apiKeys'), to: '/api-keys' },
     { name: 'members', label: t('common.nav.members'), to: '/members' },
+    { name: 'audit-logs', label: t('common.nav.auditLogs'), to: '/audit-logs' },
     { name: 'settings', label: t('common.nav.settings'), to: '/settings' },
   ]
 

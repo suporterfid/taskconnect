@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 
 import api, { ApiError, ensureCsrfCookie, resetCsrfCookie } from '@/services/api'
 import type { User } from '@/services/types'
+import { setLocale, type SupportedLocale, SUPPORTED_LOCALES } from '@/i18n'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -12,6 +13,13 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => user.value !== null)
 
+  function applyUserPreferences(next: User | null): void {
+    const locale = next?.preferences?.locale
+    if (locale && SUPPORTED_LOCALES.includes(locale as SupportedLocale)) {
+      setLocale(locale as SupportedLocale)
+    }
+  }
+
   async function fetchUser(): Promise<void> {
     loading.value = true
     error.value = null
@@ -19,6 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const { data } = await api.get<{ data: User }>('/me')
       user.value = data.data ?? (data as unknown as User)
+      applyUserPreferences(user.value)
     } catch (err) {
       user.value = null
       if (err instanceof ApiError && err.status !== 401) {

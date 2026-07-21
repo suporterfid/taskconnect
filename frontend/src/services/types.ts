@@ -25,6 +25,23 @@ export interface UserPreferences {
   timezone?: string
 }
 
+export interface AuditLogActor {
+  id: string
+  name: string
+  email: string
+}
+
+export interface AuditLog {
+  id: string
+  action: string
+  resource_type: string
+  resource_id?: string | null
+  request_id?: string | null
+  summary?: Record<string, unknown> | null
+  actor?: AuditLogActor | null
+  created_at: string
+}
+
 export interface User {
   id: string
   name: string

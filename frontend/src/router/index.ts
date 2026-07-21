@@ -119,6 +119,11 @@ const router = createRouter({
           component: () => import('@/pages/SettingsPage.vue'),
         },
         {
+          path: 'audit-logs',
+          name: 'audit-logs',
+          component: () => import('@/pages/AuditLogsPage.vue'),
+        },
+        {
           path: 'platform-health',
           name: 'platform-health',
           component: () => import('@/pages/PlatformHealthPage.vue'),

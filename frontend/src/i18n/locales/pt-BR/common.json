@@ -27,6 +27,7 @@
     "environments": "Ambientes",
     "apiKeys": "Chaves de API",
     "members": "Membros",
+    "auditLogs": "Logs de auditoria",
     "settings": "Configurações",
     "platformHealth": "Saúde da plataforma",
     "logout": "Sair"

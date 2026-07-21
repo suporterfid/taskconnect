@@ -8,8 +8,28 @@
     "security": "Security"
   },
   "locale": {
-    "hint": "Choose the language for the operator UI. Preference is saved in this browser.",
-    "savedLocally": "Language updated for this browser. Server preference sync is not available yet."
+    "hint": "Choose the language for the operator UI. Preference is synced to your account.",
+    "savedLocally": "Language updated for this browser. Server sync failed; local preference kept."
+  },
+  "timezone": {
+    "label": "Timezone",
+    "save": "Save timezone"
+  },
+  "saveError": "Unable to save preferences",
+  "audit": {
+    "title": "Audit logs",
+    "subtitle": "Recent tenant activity",
+    "viewAll": "View all",
+    "needsTenant": "Select a tenant to view audit logs.",
+    "loadError": "Unable to load audit logs",
+    "empty": "No audit events recorded yet.",
+    "fields": {
+      "when": "When",
+      "action": "Action",
+      "resource": "Resource",
+      "actor": "Actor",
+      "requestId": "Request ID"
+    }
   },
   "apiKeys": {
     "title": "API Keys",
@@ -54,6 +74,9 @@
       "endpoint_profiles_read": "Endpoint profiles: read",
       "endpoint_profiles_write": "Endpoint profiles: write",
       "secrets_manage": "Secrets: manage",
+      "tasks_read": "Tasks: read",
+      "tasks_write": "Tasks: write",
+      "tasks_operate": "Tasks: operate",
       "api_keys_manage": "API keys: manage",
       "tenant_admin": "Tenant admin"
     }

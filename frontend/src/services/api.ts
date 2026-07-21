@@ -58,12 +58,19 @@ export function parseErrorEnvelope(error: AxiosError): ApiError {
   const headerRequestId = error.response?.headers['x-request-id']
 
   if (isRecord(data) && isRecord(data.error)) {
-    const body = data.error as ApiErrorBody
-    return new ApiError(body.message || 'Request failed', status, {
-      code: body.code,
-      errors: asStringRecord(body.details),
-      requestId: body.request_id ?? headerRequestId,
-    })
+    const body = data.error as unknown as ApiErrorBody
+    return new ApiError(
+      typeof body.message === 'string' && body.message ? body.message : 'Request failed',
+      status,
+      {
+        code: typeof body.code === 'string' ? body.code : undefined,
+        errors: asStringRecord(body.details),
+        requestId:
+          typeof body.request_id === 'string'
+            ? body.request_id
+            : headerRequestId,
+      },
+    )
   }
 
   // Legacy / unexpected flat shapes

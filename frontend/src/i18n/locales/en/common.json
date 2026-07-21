@@ -27,6 +27,7 @@
     "environments": "Environments",
     "apiKeys": "API Keys",
     "members": "Members",
+    "auditLogs": "Audit logs",
     "settings": "Settings",
     "platformHealth": "Platform Health",
     "logout": "Log out"

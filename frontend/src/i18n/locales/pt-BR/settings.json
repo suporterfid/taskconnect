@@ -8,8 +8,28 @@
     "security": "Segurança"
   },
   "locale": {
-    "hint": "Escolha o idioma da interface do operador. A preferência é salva neste navegador.",
-    "savedLocally": "Idioma atualizado neste navegador. A sincronização com o servidor ainda não está disponível."
+    "hint": "Escolha o idioma da interface do operador. A preferência é sincronizada com sua conta.",
+    "savedLocally": "Idioma atualizado neste navegador. A sincronização com o servidor falhou; a preferência local foi mantida."
+  },
+  "timezone": {
+    "label": "Fuso horário",
+    "save": "Salvar fuso horário"
+  },
+  "saveError": "Não foi possível salvar as preferências",
+  "audit": {
+    "title": "Logs de auditoria",
+    "subtitle": "Atividade recente do tenant",
+    "viewAll": "Ver todos",
+    "needsTenant": "Selecione um tenant para ver os logs de auditoria.",
+    "loadError": "Não foi possível carregar os logs de auditoria",
+    "empty": "Nenhum evento de auditoria registrado ainda.",
+    "fields": {
+      "when": "Quando",
+      "action": "Ação",
+      "resource": "Recurso",
+      "actor": "Ator",
+      "requestId": "ID da solicitação"
+    }
   },
   "apiKeys": {
     "title": "Chaves de API",
@@ -54,6 +74,9 @@
       "endpoint_profiles_read": "Perfis de endpoint: leitura",
       "endpoint_profiles_write": "Perfis de endpoint: escrita",
       "secrets_manage": "Segredos: gerenciar",
+      "tasks_read": "Tarefas: ler",
+      "tasks_write": "Tarefas: escrever",
+      "tasks_operate": "Tarefas: operar",
       "api_keys_manage": "Chaves de API: gerenciar",
       "tenant_admin": "Admin do tenant"
     }
