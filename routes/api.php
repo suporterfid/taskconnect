@@ -20,9 +20,11 @@ use App\Http\Controllers\Api\V1\UserPreferencesController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
-    Route::post('auth/login', LoginController::class);
-    Route::post('auth/forgot-password', ForgotPasswordController::class);
-    Route::post('auth/reset-password', ResetPasswordController::class);
+    Route::middleware('throttle:10,1')->group(function (): void {
+        Route::post('auth/login', LoginController::class);
+        Route::post('auth/forgot-password', ForgotPasswordController::class);
+        Route::post('auth/reset-password', ResetPasswordController::class);
+    });
 
     Route::middleware('auth.api_or_sanctum')->group(function (): void {
         Route::post('auth/logout', LogoutController::class);
