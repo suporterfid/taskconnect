@@ -34,7 +34,8 @@ final class EndpointProfileTester
         $secretQueryParams = $this->secretQueryParamNames($profile);
 
         try {
-            $validated = $this->outboundPolicy->validateUrl($request['url']);
+            $additionalAllowHosts = $this->tenantAllowHosts($profile);
+            $validated = $this->outboundPolicy->validateUrl($request['url'], $additionalAllowHosts);
             $this->outboundPolicy->validateHeaders($request['headers']);
 
             $response = $this->sendWithProfileOptions(
@@ -49,6 +50,7 @@ final class EndpointProfileTester
                     connectTimeout: $profile->connect_timeout,
                     totalTimeout: $profile->total_timeout,
                     responseBodyLimit: (int) config('outbound.endpoint_test_response_body_limit', 8192),
+                    additionalAllowHosts: $additionalAllowHosts,
                 ),
             );
 
@@ -74,6 +76,25 @@ final class EndpointProfileTester
                 transportErrorCode: $exception->reasonCode,
             );
         }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function tenantAllowHosts(EndpointProfile $profile): array
+    {
+        $tenant = $profile->relationLoaded('tenant')
+            ? $profile->tenant
+            : $profile->tenant()->first();
+
+        if ($tenant === null) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            (array) ($tenant->outbound_allow_hosts ?? []),
+            static fn ($host): bool => is_string($host) && $host !== '',
+        ));
     }
 
     /**

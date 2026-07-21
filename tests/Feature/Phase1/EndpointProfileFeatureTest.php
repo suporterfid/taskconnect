@@ -62,6 +62,39 @@ class EndpointProfileFeatureTest extends TestCase
         $this->assertNotSame('blocked_ip', $response->json('data.transport_error_code'));
     }
 
+    public function test_endpoint_profile_test_allows_tenant_outbound_allow_hosts(): void
+    {
+        [$admin, $tenant, $environment] = $this->createTenantAdmin();
+
+        $tenant->outbound_allow_hosts = ['private.partner.example'];
+        $tenant->save();
+
+        $this->app->instance(
+            \App\Domain\Execution\Outbound\DnsResolverInterface::class,
+            new ArrayDnsResolver([
+                'receiver' => ['127.0.0.1'],
+                'example.com' => ['93.184.216.34'],
+                'private.partner.example' => ['10.0.0.8'],
+            ]),
+        );
+        $this->app->forgetInstance(\App\Domain\Execution\Outbound\OutboundPolicy::class);
+        $this->app->forgetInstance(\App\Infrastructure\HttpClient\PinnedHttpTransport::class);
+
+        config([
+            'outbound.allow_http' => true,
+            'outbound.testing_allow_hosts' => [],
+        ]);
+
+        $profile = $this->createProfile($admin, $tenant, $environment, 'https://private.partner.example/hook');
+
+        $response = $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/endpoint-profiles/'.$profile->public_id.'/test'),
+        );
+
+        $response->assertOk();
+        $this->assertNotSame('blocked_ip', $response->json('data.transport_error_code'));
+    }
+
     public function test_cross_tenant_secret_reference_is_rejected(): void
     {
         [$adminA, $tenantA, $environmentA] = $this->createTenantAdmin('Tenant A');

@@ -86,7 +86,16 @@ class TenantController extends Controller
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'slug' => ['sometimes', 'string', 'max:255', 'alpha_dash', 'unique:tenants,slug,'.$tenant->id],
+            'outbound_allow_hosts' => ['sometimes', 'nullable', 'array', 'max:50'],
+            'outbound_allow_hosts.*' => ['required', 'string', 'max:253', 'regex:/^(?=.{1,253}$)(?!-)[a-zA-Z0-9-]{1,63}(?<!-)(\.(?!-)[a-zA-Z0-9-]{1,63}(?<!-))*$/'],
         ]);
+
+        if (array_key_exists('outbound_allow_hosts', $validated) && is_array($validated['outbound_allow_hosts'])) {
+            $validated['outbound_allow_hosts'] = array_values(array_map(
+                static fn (string $host): string => strtolower(trim($host)),
+                $validated['outbound_allow_hosts'],
+            ));
+        }
 
         $tenant->fill($validated);
         $tenant->save();

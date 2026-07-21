@@ -17,6 +17,7 @@ class TenantResource extends JsonResource
             'id' => $this->public_id,
             'name' => $this->name,
             'slug' => $this->slug,
+            'outbound_allow_hosts' => $this->outbound_allow_hosts ?? [],
             'archived_at' => $this->archived_at?->utc()->toIso8601String(),
             'created_at' => $this->created_at?->utc()->toIso8601String(),
             'updated_at' => $this->updated_at?->utc()->toIso8601String(),
