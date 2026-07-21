@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Application\Audit\AuditLogger;
 use App\Application\Tasks\TaskLifecycleService;
+use App\Application\Tenancy\EnvironmentGuard;
 use App\Domain\Execution\Enums\TaskDefinitionStatus;
 use App\Domain\Scheduling\ScheduleConfig;
 use App\Http\Controllers\Controller;
@@ -23,6 +24,7 @@ class TaskController extends Controller
     public function __construct(
         private readonly TaskLifecycleService $lifecycle,
         private readonly AuditLogger $auditLogger,
+        private readonly EnvironmentGuard $environmentGuard,
     ) {}
 
     public function index(Request $request, string $tenantId, string $environmentId): JsonResponse
@@ -47,6 +49,7 @@ class TaskController extends Controller
         $tenant = $this->tenant($request);
         $environment = $this->environment($request);
         $this->authorize('create', [Task::class, $tenant]);
+        $this->environmentGuard->assertActive($environment);
 
         $validated = $this->validateTaskPayload($request, $tenant, $environment);
         $schedule = ScheduleConfig::fromArray($validated['schedule']);
@@ -130,8 +133,10 @@ class TaskController extends Controller
     public function activate(Request $request, string $tenantId, string $environmentId, string $taskId): JsonResponse
     {
         $tenant = $this->tenant($request);
+        $environment = $this->environment($request);
         $task = $this->resolveTask($request);
         $this->authorize('operate', [$task, $tenant]);
+        $this->environmentGuard->assertActive($environment);
 
         $task = $this->lifecycle->activate($task);
         $this->audit($request, $tenant, 'task.activated', $task->public_id);
@@ -154,8 +159,10 @@ class TaskController extends Controller
     public function resume(Request $request, string $tenantId, string $environmentId, string $taskId): JsonResponse
     {
         $tenant = $this->tenant($request);
+        $environment = $this->environment($request);
         $task = $this->resolveTask($request);
         $this->authorize('operate', [$task, $tenant]);
+        $this->environmentGuard->assertActive($environment);
 
         $task = $this->lifecycle->resume($task);
         $this->audit($request, $tenant, 'task.resumed', $task->public_id);
@@ -166,8 +173,10 @@ class TaskController extends Controller
     public function runNow(Request $request, string $tenantId, string $environmentId, string $taskId): JsonResponse
     {
         $tenant = $this->tenant($request);
+        $environment = $this->environment($request);
         $task = $this->resolveTask($request);
         $this->authorize('operate', [$task, $tenant]);
+        $this->environmentGuard->assertActive($environment);
 
         $clientKey = $request->header('Idempotency-Key');
         $run = $this->lifecycle->queueManualRun($task, is_string($clientKey) ? $clientKey : null);
@@ -179,8 +188,10 @@ class TaskController extends Controller
     public function test(Request $request, string $tenantId, string $environmentId, string $taskId): JsonResponse
     {
         $tenant = $this->tenant($request);
+        $environment = $this->environment($request);
         $task = $this->resolveTask($request);
         $this->authorize('operate', [$task, $tenant]);
+        $this->environmentGuard->assertActive($environment);
 
         $run = $this->lifecycle->queueTestRun($task);
         $this->audit($request, $tenant, 'task.test', $task->public_id, ['run_id' => $run->public_id]);

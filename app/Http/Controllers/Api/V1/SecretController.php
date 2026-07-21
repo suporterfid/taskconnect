@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Application\Audit\AuditLogger;
 use App\Application\Secrets\SecretService;
+use App\Application\Tenancy\EnvironmentGuard;
 use App\Http\Controllers\Concerns\ResolvesTenantContext;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\SecretResource;
@@ -20,6 +21,7 @@ class SecretController extends Controller
     public function __construct(
         private readonly SecretService $secretService,
         private readonly AuditLogger $auditLogger,
+        private readonly EnvironmentGuard $environmentGuard,
     ) {}
 
     public function index(Request $request, string $tenantId, string $environmentId): JsonResponse
@@ -46,6 +48,7 @@ class SecretController extends Controller
         $environment = $this->resolvedEnvironment($request);
         $actor = $this->resolvedActorUser($request);
         $this->authorize('create', [Secret::class, $tenant]);
+        $this->environmentGuard->assertActive($environment);
 
         $validated = $request->validate([
             'name' => [

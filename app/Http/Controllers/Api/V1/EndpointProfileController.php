@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Application\Audit\AuditLogger;
 use App\Application\EndpointProfiles\EndpointProfileTester;
+use App\Application\Tenancy\EnvironmentGuard;
 use App\Domain\EndpointProfiles\AuthMode;
 use App\Http\Controllers\Concerns\ResolvesTenantContext;
 use App\Http\Controllers\Controller;
@@ -23,6 +24,7 @@ class EndpointProfileController extends Controller
     public function __construct(
         private readonly AuditLogger $auditLogger,
         private readonly EndpointProfileTester $profileTester,
+        private readonly EnvironmentGuard $environmentGuard,
     ) {}
 
     public function index(Request $request, string $tenantId, string $environmentId): JsonResponse
@@ -50,6 +52,7 @@ class EndpointProfileController extends Controller
         $environment = $this->resolvedEnvironment($request);
         $actor = $this->resolvedActorUser($request);
         $this->authorize('create', [EndpointProfile::class, $tenant]);
+        $this->environmentGuard->assertActive($environment);
 
         $validated = $this->validateProfile($request, $tenant->id, $environment->id);
 
