@@ -47,8 +47,8 @@ final class DueTaskClaimer
                 return;
             }
 
-            // Over-fetch so lower-priority rows behind a saturated type can still be skipped.
-            $candidateLimit = max($batchSize * 5, 50);
+            // Over-fetch so saturated high-priority types do not hide other due work.
+            $candidateLimit = max($batchSize * 20, 100);
             $tasks = $this->selectDueTasks($candidateLimit, $now);
 
             foreach ($tasks as $task) {

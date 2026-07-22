@@ -11,12 +11,14 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Tracks in-flight capacity by task type + global ceiling (R4).
- * Weight units consume capacity; claiming stops when remaining capacity is 0.
+ *
+ * Per-type caps are concurrency counts (number of open jobs of that type).
+ * Global ceiling is consumed in weight units so a heavy job costs more shared capacity.
  */
 final class InFlightCapacityTracker
 {
     /** @var array<string, int> */
-    private array $typeWeight = [];
+    private array $typeCount = [];
 
     private int $globalWeight = 0;
 
@@ -27,34 +29,46 @@ final class InFlightCapacityTracker
 
     public function refreshFromDatabase(): void
     {
-        $this->typeWeight = [];
+        $this->typeCount = [];
         $this->globalWeight = 0;
 
-        // Pending = claimed this tick but not yet delivering; Running = actively delivering.
-        $openRunTaskIds = TaskRun::query()
+        // Each open run consumes capacity (do not collapse by task_id).
+        $openRuns = TaskRun::query()
             ->whereIn('run_state', [RunState::Pending, RunState::Running])
-            ->pluck('task_id')
-            ->all();
+            ->get(['id', 'task_id']);
 
-        $claimedAttemptTaskIds = DB::table('task_run_attempts')
-            ->join('task_runs', 'task_runs.id', '=', 'task_run_attempts.task_run_id')
-            ->whereIn('task_run_attempts.attempt_state', [
+        $claimedAttemptRunIds = DB::table('task_run_attempts')
+            ->whereIn('attempt_state', [
                 AttemptState::Pending->value,
                 AttemptState::Running->value,
             ])
-            ->whereNotNull('task_run_attempts.claim_token')
-            ->where('task_run_attempts.claim_expires_at', '>', now())
-            ->pluck('task_runs.task_id')
+            ->whereNotNull('claim_token')
+            ->where('claim_expires_at', '>', now())
+            ->pluck('task_run_id')
             ->all();
 
-        $taskIds = array_values(array_unique(array_merge($openRunTaskIds, $claimedAttemptTaskIds)));
+        $extraRuns = $claimedAttemptRunIds === []
+            ? collect()
+            : TaskRun::query()
+                ->whereIn('id', $claimedAttemptRunIds)
+                ->whereNotIn('run_state', [RunState::Pending, RunState::Running])
+                ->get(['id', 'task_id']);
 
-        if ($taskIds === []) {
+        $runs = $openRuns->concat($extraRuns);
+        if ($runs->isEmpty()) {
             return;
         }
 
-        foreach (Task::query()->whereIn('id', $taskIds)->get(['id', 'task_type', 'weight']) as $task) {
-            $this->reserve($task);
+        $tasks = Task::query()
+            ->whereIn('id', $runs->pluck('task_id')->unique()->all())
+            ->get(['id', 'task_type', 'weight'])
+            ->keyBy('id');
+
+        foreach ($runs as $run) {
+            $task = $tasks->get($run->task_id);
+            if ($task !== null) {
+                $this->reserve($task);
+            }
         }
     }
 
@@ -63,9 +77,9 @@ final class InFlightCapacityTracker
         $weight = $this->weightFor($task);
         $type = $this->typeKey($task);
         $def = $this->catalog->definition($task->task_type);
-        $typeUsed = $this->typeWeight[$type] ?? 0;
+        $typeUsed = $this->typeCount[$type] ?? 0;
 
-        if ($typeUsed + $weight > $def['concurrency_cap']) {
+        if ($typeUsed + 1 > $def['concurrency_cap']) {
             return false;
         }
 
@@ -80,7 +94,7 @@ final class InFlightCapacityTracker
     {
         $weight = $this->weightFor($task);
         $type = $this->typeKey($task);
-        $this->typeWeight[$type] = ($this->typeWeight[$type] ?? 0) + $weight;
+        $this->typeCount[$type] = ($this->typeCount[$type] ?? 0) + 1;
         $this->globalWeight += $weight;
     }
 

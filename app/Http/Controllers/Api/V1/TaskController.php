@@ -6,6 +6,7 @@ use App\Application\Audit\AuditLogger;
 use App\Application\Tasks\TaskLifecycleService;
 use App\Application\Tenancy\EnvironmentGuard;
 use App\Domain\Execution\Enums\TaskDefinitionStatus;
+use App\Domain\Execution\RetryPolicy;
 use App\Domain\Scheduling\ScheduleConfig;
 use App\Domain\Scheduling\TaskTypeCatalog;
 use App\Http\Controllers\Controller;
@@ -187,6 +188,14 @@ class TaskController extends Controller
             $attributes['weight'] = $governance['weight'];
             $attributes['timeout_ms'] = $governance['timeout_ms'];
             $attributes['egress_profile'] = $governance['egress_profile'];
+
+            if (! array_key_exists('retry_policy', $validated) && array_key_exists('task_type', $validated)) {
+                $existingPolicy = is_array($task->retry_policy_json)
+                    ? $task->retry_policy_json
+                    : RetryPolicy::default()->toArray();
+                $existingPolicy['max_attempts'] = $governance['max_attempts'];
+                $attributes['retry_policy_json'] = $existingPolicy;
+            }
         }
 
         $task = $this->lifecycle->update($task, $attributes, $schedule, $request->user()?->id);
@@ -382,19 +391,17 @@ class TaskController extends Controller
 
     /**
      * @param  array<string, mixed>|null  $retryPolicy
-     * @return array<string, mixed>|null
+     * @return array<string, mixed>
      */
-    private function mergeRetryPolicyDefaults(?array $retryPolicy, int $typeMaxAttempts): ?array
+    private function mergeRetryPolicyDefaults(?array $retryPolicy, int $typeMaxAttempts): array
     {
-        if ($retryPolicy === null) {
-            return null;
+        $policy = $retryPolicy ?? RetryPolicy::default()->toArray();
+
+        if ($retryPolicy === null || ! array_key_exists('max_attempts', $retryPolicy)) {
+            $policy['max_attempts'] = $typeMaxAttempts;
         }
 
-        if (! array_key_exists('max_attempts', $retryPolicy)) {
-            $retryPolicy['max_attempts'] = $typeMaxAttempts;
-        }
-
-        return $retryPolicy;
+        return $policy;
     }
 
     private function resolveEndpointProfileId(?string $publicId, Tenant $tenant, Environment $environment): ?int

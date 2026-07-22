@@ -39,7 +39,31 @@ class InFlightCapacityTrackerTest extends TestCase
         $this->assertTrue($tracker->canAccept($task));
         $tracker->reserve($task);
         $tracker->reserve($task);
+        // Per-type cap is a concurrency count (2 jobs), not weight units.
         $this->assertFalse($tracker->canAccept($task));
+    }
+
+    public function test_heavy_weight_fits_when_type_cap_allows_one_job(): void
+    {
+        config([
+            'task_types.global_inflight_ceiling' => 4,
+            'task_types.types.site.crawl.concurrency_cap' => 1,
+            'task_types.types.site.crawl.weight' => 2,
+        ]);
+
+        $catalog = new TaskTypeCatalog;
+        $tracker = new InFlightCapacityTracker($catalog);
+        $task = Task::factory()->create([
+            'task_type' => 'site.crawl',
+            'priority' => 4,
+            'weight' => 2,
+            'definition_status' => TaskDefinitionStatus::Active,
+        ]);
+
+        $this->assertTrue($tracker->canAccept($task));
+        $tracker->reserve($task);
+        $this->assertFalse($tracker->canAccept($task));
+        $this->assertSame(2, $tracker->remainingGlobal());
     }
 
     public function test_refresh_from_database_counts_pending_and_running_runs(): void

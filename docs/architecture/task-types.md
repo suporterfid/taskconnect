@@ -10,4 +10,5 @@ Tasks store `task_type`, `priority`, `weight`, `timeout_ms`, and `egress_profile
 
 ## Claiming
 
-`DueTaskClaimer` orders due work by `priority` DESC then `next_run_at`, over-fetches candidates, and skips rows that would exceed remaining per-type or global capacity. Capacity units are **weight**. In-flight accounting counts `task_runs` in `pending` or `running`, plus attempts with an active claim lease (retry path).
+`DueTaskClaimer` (and `RetryClaimer`) order/select due work and skip rows that would exceed remaining capacity. **Per-type caps** limit how many open jobs of that type may run concurrently. The **global ceiling** is consumed in **weight** units so a heavy job (e.g. crawl weight 2) costs more of the shared hosting budget. In-flight accounting counts each `task_runs` row in `pending` or `running`, plus retry attempts that hold an active claim lease.
+
