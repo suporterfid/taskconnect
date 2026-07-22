@@ -18,11 +18,12 @@ class ExecuteDueCommand extends Command
         $stats = $runner->executeDue();
 
         $this->info(sprintf(
-            'Claimed %d due task(s); %d succeeded, %d failed (%d ms).',
+            'Claimed %d due task(s); %d succeeded, %d failed (%d ms)%s.',
             $stats['claimed'],
             $stats['successful'],
             $stats['failed'],
             $stats['duration_ms'],
+            ! empty($stats['budget_stopped']) ? '; stopped on wall-clock budget' : '',
         ));
 
         return self::SUCCESS;
