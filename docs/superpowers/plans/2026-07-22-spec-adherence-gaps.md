@@ -35,3 +35,7 @@
 ## Verification
 
 For each child: unit/feature tests green via `./scripts/tc.sh test` (and Playwright when #65); update `docs/architecture/*` when behavior changes; keep hard constraints (no Redis/daemon).
+
+## Closeout
+
+Children **#62–#66** are implemented on `main`. Epic **#67** can close once #65 lands.
