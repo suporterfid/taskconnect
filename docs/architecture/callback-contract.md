@@ -32,3 +32,5 @@ X-Task-Attempt: 2
 Attempt `2` carries the **same** `Idempotency-Key` as attempt `1` for that run.
 
 > GrandpaSSOn bearer + `X-TC-Signature` HMAC arrive in R8; this document covers idempotency headers only.
+>
+> **S8:** HMAC / freshness / nonce verification is the **receiver’s** duty (notes app). TaskConnect does not expose an inbound verify endpoint — see `docs/architecture/audit-s8-s10.md`.

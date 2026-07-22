@@ -16,6 +16,7 @@ final class PendingRunClaimer
 {
     public function __construct(
         private readonly Clock $clock,
+        private readonly SchedulerAuditRecorder $auditRecorder,
         private readonly WorkspaceFairnessInterleaver $fairness = new WorkspaceFairnessInterleaver,
     ) {
     }
@@ -43,6 +44,10 @@ final class PendingRunClaimer
                 }
             }
         });
+
+        foreach ($claimed as $claimedAttempt) {
+            $this->auditRecorder->recordClaim($claimedAttempt, 'pending');
+        }
 
         return $claimed;
     }

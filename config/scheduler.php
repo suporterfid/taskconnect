@@ -63,4 +63,12 @@ return [
 
     'submit_rate_limit_window_seconds' => (int) env('SCHEDULER_SUBMIT_RATE_LIMIT_WINDOW_SECONDS', 60),
 
+    /**
+     * S10: write workspace-scoped audit_logs rows for claim leases and delivery
+     * terminal outcomes (succeeded / retry_wait / dead / blocked). Metadata only.
+     */
+    'audit_claims' => filter_var(env('SCHEDULER_AUDIT_CLAIMS', true), FILTER_VALIDATE_BOOL),
+
+    'audit_deliveries' => filter_var(env('SCHEDULER_AUDIT_DELIVERIES', true), FILTER_VALIDATE_BOOL),
+
 ];
