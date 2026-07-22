@@ -61,6 +61,7 @@ Implement **in order R1→R9**. Do not start R(n+1) until R(n) acceptance tests 
 | R8 | **Done** (#24) | GrandpaSSOn outbound bearer+HMAC + inbound introspection (flags off by default); `docs/architecture/grandpasson-auth.md` |
 | R9 | **Done** (#25) | Release zip secret scan + `.env.example` v1 placeholders; `docs/architecture/secret-hygiene.md` |
 | R10 | **Done** (#28) | Pipeline templates + instance API + settlement; `docs/architecture/pipelines.md` |
+| R11 | **Done** (#29) | `coalesce_key` + window; `docs/architecture/coalesce.md` |
 
 ## Open questions (defaults applied)
 

@@ -35,6 +35,7 @@ class TaskResource extends JsonResource
             'weight' => $this->weight,
             'timeout_ms' => $this->timeout_ms,
             'egress_profile' => $this->egress_profile,
+            'coalesce_key' => $this->coalesce_key,
             'method' => $this->method,
             'url_or_path' => $this->url_or_path,
             'endpoint_profile_id' => $this->endpointProfile?->public_id,

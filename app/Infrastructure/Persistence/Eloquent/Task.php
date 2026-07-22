@@ -31,6 +31,7 @@ class Task extends Model
         'weight',
         'timeout_ms',
         'egress_profile',
+        'coalesce_key',
         'method',
         'url_or_path',
         'headers_json',
