@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Infrastructure\Persistence\Eloquent\ApiKey;
 use App\Infrastructure\Persistence\Eloquent\EndpointProfile;
 use App\Infrastructure\Persistence\Eloquent\Environment;
+use App\Infrastructure\Persistence\Eloquent\PipelineInstance;
 use App\Infrastructure\Persistence\Eloquent\Secret;
 use App\Infrastructure\Persistence\Eloquent\Task;
 use App\Infrastructure\Persistence\Eloquent\TaskRun;
@@ -14,6 +15,7 @@ use App\Policies\ApiKeyPolicy;
 use App\Policies\EndpointProfilePolicy;
 use App\Policies\EnvironmentPolicy;
 use App\Policies\MemberPolicy;
+use App\Policies\PipelineInstancePolicy;
 use App\Policies\SecretPolicy;
 use App\Policies\TaskPolicy;
 use App\Policies\TaskRunPolicy;
@@ -31,6 +33,7 @@ class AuthServiceProvider extends ServiceProvider
         EndpointProfile::class => EndpointProfilePolicy::class,
         Task::class => TaskPolicy::class,
         TaskRun::class => TaskRunPolicy::class,
+        PipelineInstance::class => PipelineInstancePolicy::class,
         TenantMembership::class => MemberPolicy::class,
     ];
 

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- v1 Extension R10: named pipeline DAGs (`on_success` / `on_failure` / `depends_on`) with `convert-index-publish` template; workspace-scoped instance API; settlement materializes successors; see `docs/architecture/pipelines.md`
 - v1 Extension R8: GrandpaSSOn client-credentials + HMAC callback headers (outbound) and introspected `tasks:write` inbound with workspace `aud` check (dual-mode; flags default off); see `docs/architecture/grandpasson-auth.md`
 - v1 Extension R9: `validate-release.sh` fails on `.env` / private keys / credential-like literals; documents GrandpaSSOn placeholders; see `docs/architecture/secret-hygiene.md`
 - v1 Extension R7: named egress profiles (`internal` / `public-crawl` / `api`) enforced before DNS-pinned connect; see `docs/architecture/egress-profiles.md`

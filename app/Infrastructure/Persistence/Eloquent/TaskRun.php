@@ -18,6 +18,8 @@ class TaskRun extends Model
         'tenant_id',
         'environment_id',
         'task_id',
+        'pipeline_instance_id',
+        'pipeline_node_id',
         'trigger_type',
         'scheduled_for',
         'occurrence_key',
@@ -51,6 +53,16 @@ class TaskRun extends Model
     public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class);
+    }
+
+    public function pipelineInstance(): BelongsTo
+    {
+        return $this->belongsTo(PipelineInstance::class, 'pipeline_instance_id');
+    }
+
+    public function pipelineNode(): BelongsTo
+    {
+        return $this->belongsTo(PipelineInstanceNode::class, 'pipeline_node_id');
     }
 
     public function environment(): BelongsTo

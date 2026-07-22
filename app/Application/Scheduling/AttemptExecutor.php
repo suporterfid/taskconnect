@@ -5,6 +5,7 @@ namespace App\Application\Scheduling;
 use App\Application\Execution\DeliveryResult;
 use App\Application\Execution\HttpDeliveryService;
 use App\Application\Notifications\FailureNotifier;
+use App\Application\Pipelines\PipelineSettlementService;
 use App\Domain\Execution\AttemptStateMachine;
 use App\Domain\Execution\Enums\AttemptState;
 use App\Domain\Execution\Enums\RunState;
@@ -27,6 +28,7 @@ final class AttemptExecutor
         private readonly RunStateMachine $runStateMachine,
         private readonly AttemptStateMachine $attemptStateMachine,
         private readonly FailureNotifier $failureNotifier,
+        private readonly PipelineSettlementService $pipelineSettlement,
     ) {
     }
 
@@ -151,6 +153,7 @@ final class AttemptExecutor
         $run->save();
 
         $this->updateTaskLastRun($task, $now, RunState::Succeeded);
+        $this->pipelineSettlement->handleSettledRun($run->fresh());
     }
 
     private function finalizeRetryable(
@@ -211,6 +214,7 @@ final class AttemptExecutor
 
         $this->updateTaskLastRun($task, $now, RunState::Dead);
         $this->failureNotifier->notifyDeadRun($run);
+        $this->pipelineSettlement->handleSettledRun($run->fresh());
     }
 
     private function finalizeBlocked(
@@ -237,6 +241,7 @@ final class AttemptExecutor
 
         $task = $run->task()->firstOrFail();
         $this->updateTaskLastRun($task, $now, RunState::Blocked);
+        $this->pipelineSettlement->handleSettledRun($run->fresh());
     }
 
     private function updateTaskLastRun(Task $task, DateTimeImmutable $now, RunState $state): void

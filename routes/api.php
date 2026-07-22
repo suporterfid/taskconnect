@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\EndpointProfileController;
 use App\Http\Controllers\Api\V1\EnvironmentController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\MemberController;
+use App\Http\Controllers\Api\V1\PipelineInstanceController;
 use App\Http\Controllers\Api\V1\PlatformHealthController;
 use App\Http\Controllers\Api\V1\RetentionSettingsController;
 use App\Http\Controllers\Api\V1\SchedulePreviewController;
@@ -75,6 +76,11 @@ Route::prefix('v1')->group(function (): void {
             Route::patch('tenants/{tenantId}/environments/{environmentId}/endpoint-profiles/{profileId}', [EndpointProfileController::class, 'update']);
             Route::delete('tenants/{tenantId}/environments/{environmentId}/endpoint-profiles/{profileId}', [EndpointProfileController::class, 'destroy']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/endpoint-profiles/{profileId}/test', [EndpointProfileController::class, 'test']);
+
+            Route::get('tenants/{tenantId}/environments/{environmentId}/pipelines', [PipelineInstanceController::class, 'templates']);
+            Route::post('tenants/{tenantId}/environments/{environmentId}/pipelines/{templateName}/instances', [PipelineInstanceController::class, 'store'])
+                ->middleware('idempotency');
+            Route::get('tenants/{tenantId}/environments/{environmentId}/pipelines/{templateName}/instances/{instanceId}', [PipelineInstanceController::class, 'show']);
 
             Route::get('tenants/{tenantId}/environments/{environmentId}/tasks', [TaskController::class, 'index']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks', [TaskController::class, 'store'])
