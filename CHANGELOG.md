@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Tenant `outbound_allow_hosts` for SSRF host allowlisting (API + delivery path)
+- Per-task `success_status_ranges` on retry policy
+- API `Idempotency-Key` middleware for task create and run-now
+- Playwright smoke wiring (`frontend/e2e`, `npm run e2e`)
 - Enforce `max_retry_window_seconds` in retry decisions
 - Auth endpoint rate limiting (`login`, `forgot-password`, `reset-password`)
 - Task-run list pagination (`limit` / `before`) and `task_id` filter

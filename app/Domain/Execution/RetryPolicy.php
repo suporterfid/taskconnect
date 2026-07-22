@@ -2,6 +2,8 @@
 
 namespace App\Domain\Execution;
 
+use InvalidArgumentException;
+
 final readonly class RetryPolicy
 {
     /** @var list<int> */
@@ -10,6 +12,7 @@ final readonly class RetryPolicy
     /**
      * @param  list<int>  $delaySeconds
      * @param  list<int>|null  $retryableStatusCodes
+     * @param  list<array{0: int, 1: int}>|null  $successStatusRanges
      */
     public function __construct(
         public int $maxAttempts = 6,
@@ -17,6 +20,7 @@ final readonly class RetryPolicy
         public bool $honorRetryAfter = true,
         public ?int $maxRetryWindowSeconds = null,
         public ?array $retryableStatusCodes = null,
+        public ?array $successStatusRanges = null,
     ) {
     }
 
@@ -50,6 +54,9 @@ final readonly class RetryPolicy
             retryableStatusCodes: isset($data['retryable_status_codes'])
                 ? array_map('intval', (array) $data['retryable_status_codes'])
                 : null,
+            successStatusRanges: self::normalizeSuccessStatusRanges(
+                $data['success_status_ranges'] ?? null,
+            ),
         );
     }
 
@@ -64,6 +71,48 @@ final readonly class RetryPolicy
             'honor_retry_after' => $this->honorRetryAfter,
             'max_retry_window_seconds' => $this->maxRetryWindowSeconds,
             'retryable_status_codes' => $this->retryableStatusCodes,
+            'success_status_ranges' => $this->successStatusRanges,
         ];
+    }
+
+    /**
+     * @return list<array{0: int, 1: int}>|null
+     */
+    private static function normalizeSuccessStatusRanges(mixed $ranges): ?array
+    {
+        if ($ranges === null) {
+            return null;
+        }
+
+        if (! is_array($ranges)) {
+            throw new InvalidArgumentException('success_status_ranges must be an array of [min, max] pairs.');
+        }
+
+        if ($ranges === []) {
+            return [];
+        }
+
+        $normalized = [];
+
+        foreach ($ranges as $range) {
+            if (! is_array($range) || count($range) < 2) {
+                throw new InvalidArgumentException('Each success_status_ranges entry must be a [min, max] pair.');
+            }
+
+            $min = (int) $range[0];
+            $max = (int) $range[1];
+
+            if ($min > $max) {
+                throw new InvalidArgumentException('success_status_ranges min must be <= max.');
+            }
+
+            if ($min < 100 || $max > 599) {
+                throw new InvalidArgumentException('success_status_ranges values must be between 100 and 599.');
+            }
+
+            $normalized[] = [$min, $max];
+        }
+
+        return $normalized;
     }
 }

@@ -232,6 +232,35 @@ class TaskController extends Controller
             'content_type' => ['nullable', 'string'],
             'schedule' => [$required, 'array'],
             'retry_policy' => ['nullable', 'array'],
+            'retry_policy.max_attempts' => ['sometimes', 'integer', 'min:1', 'max:20'],
+            'retry_policy.delay_seconds' => ['sometimes', 'array'],
+            'retry_policy.delay_seconds.*' => ['integer', 'min:0'],
+            'retry_policy.honor_retry_after' => ['sometimes', 'boolean'],
+            'retry_policy.max_retry_window_seconds' => ['sometimes', 'nullable', 'integer', 'min:1'],
+            'retry_policy.retryable_status_codes' => ['sometimes', 'nullable', 'array'],
+            'retry_policy.retryable_status_codes.*' => ['integer', 'min:100', 'max:599'],
+            'retry_policy.success_status_ranges' => ['sometimes', 'nullable', 'array'],
+            'retry_policy.success_status_ranges.*' => [
+                'array',
+                'size:2',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! is_array($value) || count($value) < 2) {
+                        return;
+                    }
+
+                    $min = (int) $value[0];
+                    $max = (int) $value[1];
+
+                    if ($min < 100 || $max > 599) {
+                        $fail('The '.$attribute.' values must be between 100 and 599.');
+                    }
+
+                    if ($min > $max) {
+                        $fail('The '.$attribute.' min must be less than or equal to max.');
+                    }
+                },
+            ],
+            'retry_policy.success_status_ranges.*.*' => ['integer', 'min:100', 'max:599'],
             'definition_status' => ['nullable', Rule::in(array_column(TaskDefinitionStatus::cases(), 'value'))],
         ]);
     }

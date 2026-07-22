@@ -29,13 +29,14 @@ final class HttpDeliveryService
     public function deliver(TaskRunAttempt $attempt): DeliveryResult
     {
         $run = $attempt->run()->firstOrFail();
-        $task = $run->task()->with('endpointProfile.secret')->firstOrFail();
+        $task = $run->task()->with(['endpointProfile.secret', 'tenant'])->firstOrFail();
 
         try {
             $resolved = $this->resolveRequest($task);
             $this->outboundPolicy->validateHeaders($resolved['headers']);
 
-            $validated = $this->outboundPolicy->validateUrl($resolved['url']);
+            $additionalAllowHosts = $this->tenantAllowHosts($task);
+            $validated = $this->outboundPolicy->validateUrl($resolved['url'], $additionalAllowHosts);
             $endpoint = $this->selectPinnedEndpoint($validated);
             $profile = $task->endpointProfile;
 
@@ -55,6 +56,7 @@ final class HttpDeliveryService
                 followRedirects: $profile?->follow_redirects ?? false,
                 connectTimeout: $profile?->connect_timeout,
                 totalTimeout: $profile?->total_timeout,
+                additionalAllowHosts: $additionalAllowHosts,
             ));
 
             return new DeliveryResult(
@@ -155,6 +157,25 @@ final class HttpDeliveryService
             'X-Task-Run-Id' => $run->public_id,
             'X-Task-Attempt' => (string) $attempt->attempt_number,
         ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function tenantAllowHosts(Task $task): array
+    {
+        $tenant = $task->relationLoaded('tenant')
+            ? $task->tenant
+            : $task->tenant()->first();
+
+        if ($tenant === null) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            (array) ($tenant->outbound_allow_hosts ?? []),
+            static fn ($host): bool => is_string($host) && $host !== '',
+        ));
     }
 
     private function selectPinnedEndpoint(ValidatedEndpoint $validated): ValidatedEndpoint

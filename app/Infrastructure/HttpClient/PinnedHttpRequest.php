@@ -8,6 +8,7 @@ final readonly class PinnedHttpRequest
 {
     /**
      * @param  array<string, string>  $headers
+     * @param  list<string>  $additionalAllowHosts
      */
     public function __construct(
         public string $method,
@@ -19,6 +20,7 @@ final readonly class PinnedHttpRequest
         public ?int $connectTimeout = null,
         public ?int $totalTimeout = null,
         public ?int $responseBodyLimit = null,
+        public array $additionalAllowHosts = [],
     ) {
     }
 }

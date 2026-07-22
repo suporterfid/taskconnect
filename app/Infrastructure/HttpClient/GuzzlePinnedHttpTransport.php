@@ -83,7 +83,7 @@ final class GuzzlePinnedHttpTransport implements PinnedHttpTransport
                     );
                 }
 
-                $validated = $this->policy->validateUrl($location);
+                $validated = $this->policy->validateUrl($location, $request->additionalAllowHosts);
                 $currentEndpoint = $this->selectPinnedEndpoint($validated);
                 $currentUrl = $currentEndpoint->url;
                 $redirectCount++;

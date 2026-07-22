@@ -24,9 +24,12 @@ final class OutboundPolicy
         );
     }
 
-    public function validateUrl(string $url): ValidatedEndpoint
+    /**
+     * @param  list<string>  $additionalAllowHosts
+     */
+    public function validateUrl(string $url, array $additionalAllowHosts = []): ValidatedEndpoint
     {
-        return $this->urlValidator->validate($url);
+        return $this->urlValidator->validate($url, $additionalAllowHosts);
     }
 
     /**

@@ -133,6 +133,21 @@ class OutboundPolicyTest extends TestCase
         $policy->validateUrl('http://trusted.example:8080/hook');
     }
 
+    public function test_additional_allow_hosts_permit_private_resolution_but_not_bad_ports(): void
+    {
+        $policy = $this->policy(
+            configOverrides: ['testing_allow_hosts' => []],
+            dnsMap: ['private.internal' => ['10.0.0.5']],
+        );
+
+        $validated = $policy->validateUrl('https://private.internal/hook', ['Private.Internal']);
+        $this->assertTrue($validated->hostAllowlisted);
+        $this->assertSame('10.0.0.5', $validated->pinnedIp);
+
+        $this->expectExceptionObject(new OutboundPolicyViolation('port_not_allowed', 'Port 8080 is not allowed by platform policy.'));
+        $policy->validateUrl('https://private.internal:8080/hook', ['private.internal']);
+    }
+
     public function test_rejects_plain_http_when_disabled(): void
     {
         $policy = $this->policy(['allow_http' => false]);

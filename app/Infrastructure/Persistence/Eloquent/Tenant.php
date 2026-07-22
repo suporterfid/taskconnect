@@ -19,12 +19,14 @@ class Tenant extends Model
         'public_id',
         'name',
         'slug',
+        'outbound_allow_hosts',
         'archived_at',
     ];
 
     protected function casts(): array
     {
         return [
+            'outbound_allow_hosts' => 'array',
             'archived_at' => 'datetime',
         ];
     }

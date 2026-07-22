@@ -11,7 +11,10 @@ final class UrlValidator
     ) {
     }
 
-    public function validate(string $url): ValidatedEndpoint
+    /**
+     * @param  list<string>  $additionalAllowHosts
+     */
+    public function validate(string $url, array $additionalAllowHosts = []): ValidatedEndpoint
     {
         $parts = parse_url($url);
 
@@ -72,7 +75,7 @@ final class UrlValidator
             );
         }
 
-        $hostAllowlisted = $this->isHostAllowlisted($host);
+        $hostAllowlisted = $this->isHostAllowlisted($host, $additionalAllowHosts);
 
         $resolvedIps = $this->dnsResolver->resolve($host);
 
@@ -115,11 +118,21 @@ final class UrlValidator
         return false;
     }
 
-    private function isHostAllowlisted(string $host): bool
+    /**
+     * @param  list<string>  $additionalAllowHosts
+     */
+    private function isHostAllowlisted(string $host, array $additionalAllowHosts = []): bool
     {
         $allowlist = array_merge(
             $this->config->platformAllowHosts,
             $this->config->testingAllowHosts,
+            array_map(
+                static fn (string $allowedHost): string => strtolower(trim($allowedHost)),
+                array_values(array_filter(
+                    $additionalAllowHosts,
+                    static fn ($value): bool => is_string($value) && trim($value) !== '',
+                )),
+            ),
         );
 
         foreach ($allowlist as $allowedHost) {
