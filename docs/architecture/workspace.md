@@ -12,6 +12,8 @@ For the v1 Extension Spec, a **workspace** is the existing **Environment** recor
 
 API JSON resources expose `workspace_id` alongside existing fields. Optional request body `workspace_id` on task create/update must match the route environment’s public id.
 
+See also: [callback-contract.md](callback-contract.md) for outbound delivery idempotency headers (R3).
+
 ## Isolation
 
 All tenant resources remain filtered by `tenant_id` **and** `environment_id`. Cross-environment access within the same tenant returns 404 (same as cross-tenant).

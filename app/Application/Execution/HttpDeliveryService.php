@@ -152,8 +152,13 @@ final class HttpDeliveryService
      */
     private function executionHeaders(TaskRun $run, TaskRunAttempt $attempt): array
     {
+        $idempotencyKey = (string) $run->idempotency_key;
+
         return [
-            'X-Task-Idempotency-Key' => $run->idempotency_key,
+            // v1 Extension R3 — stable per run; constant across retries of this run.
+            'Idempotency-Key' => $idempotencyKey,
+            // Compatibility alias (deprecated; remove after consumers migrate).
+            'X-Task-Idempotency-Key' => $idempotencyKey,
             'X-Task-Run-Id' => $run->public_id,
             'X-Task-Attempt' => (string) $attempt->attempt_number,
         ];
