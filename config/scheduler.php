@@ -10,6 +10,12 @@ return [
 
     'target_duration_seconds' => (int) env('SCHEDULER_TARGET_DURATION_SECONDS', 45),
 
+    /** Seconds reserved before PHP max_execution_time / target so the tick exits cleanly (R5). */
+    'budget_safety_margin_seconds' => (int) env('SCHEDULER_BUDGET_SAFETY_MARGIN_SECONDS', 5),
+
+    /** Claim-execute chunk size so budget stop does not leave a large unused lease batch. */
+    'claim_chunk' => (int) env('SCHEDULER_CLAIM_CHUNK', 5),
+
     'failure_emails_enabled' => (bool) env('SCHEDULER_FAILURE_EMAILS_ENABLED', true),
 
 ];
