@@ -45,7 +45,8 @@
     "daily_at": "Daily at {time} ({timezone})",
     "weekly_on": "Weekly on {weekdays} at {time} ({timezone})",
     "monthly_on_day": "Monthly on day {day} at {time} ({timezone})",
-    "business_days_at": "Business days at {time} ({timezone})"
+    "business_days_at": "Business days at {time} ({timezone})",
+    "cron": "Cron {expression} ({timezone})"
   },
   "fields": {
     "name": "Name",
@@ -65,6 +66,8 @@
     "minute": "Minute of hour",
     "weekdays": "Weekdays",
     "dayOfMonth": "Day of month",
+    "cronExpression": "Cron expression",
+    "cronExpressionHint": "Five fields: minute hour day-of-month month day-of-week",
     "schedule": "Schedule",
     "scheduleKind": "Schedule type",
     "endpointProfile": "Endpoint profile",
@@ -89,7 +92,8 @@
     "daily_at": "Daily at time",
     "weekly_on": "Weekly on days",
     "monthly_on_day": "Monthly on day",
-    "business_days_at": "Business days at time"
+    "business_days_at": "Business days at time",
+    "cron": "Cron expression"
   },
   "weekdays": {
     "1": "Mon",

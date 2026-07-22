@@ -93,6 +93,7 @@ export type ScheduleKind =
   | 'weekly_on'
   | 'monthly_on_day'
   | 'business_days_at'
+  | 'cron'
 
 export interface ScheduleConfig {
   kind: ScheduleKind
@@ -104,6 +105,7 @@ export interface ScheduleConfig {
   /** ISO-8601 weekdays: 1=Mon … 7=Sun */
   weekdays?: number[]
   day?: number
+  cron_expression?: string
   starts_at?: string
   ends_at?: string
 }
@@ -143,6 +145,8 @@ export interface Task {
   content_type?: string | null
   timezone?: string | null
   retry_policy?: RetryPolicy | null
+  /** Delayed one-shot instant when schedule kind is once (R16). */
+  run_at?: string | null
   next_run_at?: string | null
   last_run_at?: string | null
   last_run_state?: string | null

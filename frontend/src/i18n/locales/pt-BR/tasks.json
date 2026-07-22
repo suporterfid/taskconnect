@@ -45,7 +45,8 @@
     "daily_at": "Diariamente às {time} ({timezone})",
     "weekly_on": "Semanalmente em {weekdays} às {time} ({timezone})",
     "monthly_on_day": "Mensalmente no dia {day} às {time} ({timezone})",
-    "business_days_at": "Dias úteis às {time} ({timezone})"
+    "business_days_at": "Dias úteis às {time} ({timezone})",
+    "cron": "Cron {expression} ({timezone})"
   },
   "fields": {
     "name": "Nome",
@@ -65,6 +66,8 @@
     "minute": "Minuto da hora",
     "weekdays": "Dias da semana",
     "dayOfMonth": "Dia do mês",
+    "cronExpression": "Expressão cron",
+    "cronExpressionHint": "Cinco campos: minuto hora dia-do-mês mês dia-da-semana",
     "schedule": "Agendamento",
     "scheduleKind": "Tipo de agendamento",
     "endpointProfile": "Perfil de endpoint",
@@ -89,7 +92,8 @@
     "daily_at": "Diariamente no horário",
     "weekly_on": "Semanalmente nos dias",
     "monthly_on_day": "Mensalmente no dia",
-    "business_days_at": "Dias úteis no horário"
+    "business_days_at": "Dias úteis no horário",
+    "cron": "Expressão cron"
   },
   "weekdays": {
     "1": "Seg",

@@ -25,4 +25,19 @@ class ScheduleDescriptionTest extends TestCase
         $this->assertSame('14:30', $description->parts['time']);
         $this->assertSame('America/New_York', $description->parts['timezone']);
     }
+
+    public function test_exposes_cron_expression_parts(): void
+    {
+        $config = ScheduleConfig::fromArray([
+            'kind' => 'cron',
+            'timezone' => 'UTC',
+            'cron_expression' => '0 9 * * 1-5',
+        ]);
+
+        $description = ScheduleDescription::fromConfig($config);
+
+        $this->assertSame(ScheduleKind::Cron, $description->kind);
+        $this->assertSame('0 9 * * 1-5', $description->parts['cron_expression']);
+        $this->assertSame('UTC', $description->parts['timezone']);
+    }
 }

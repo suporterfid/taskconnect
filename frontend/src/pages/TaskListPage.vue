@@ -26,6 +26,7 @@ const SCHEDULE_KINDS: ScheduleKind[] = [
   'weekly_on',
   'monthly_on_day',
   'business_days_at',
+  'cron',
 ]
 
 function queryString(key: string): string {

@@ -95,6 +95,10 @@ final class TaskScheduleService
             $data['day'] = $config->dayOfMonth;
         }
 
+        if ($config->cronExpression !== null) {
+            $data['cron_expression'] = $config->cronExpression;
+        }
+
         if ($config->startsAt !== null) {
             $data['starts_at'] = $config->startsAt->format('Y-m-d\TH:i:s\Z');
         }

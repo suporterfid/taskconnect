@@ -19,6 +19,7 @@ final readonly class ScheduleConfig
         public ?string $time = null,
         public ?array $weekdays = null,
         public ?int $dayOfMonth = null,
+        public ?string $cronExpression = null,
         public ?DateTimeImmutable $startsAt = null,
         public ?DateTimeImmutable $endsAt = null,
     ) {
@@ -56,7 +57,20 @@ final readonly class ScheduleConfig
             ScheduleKind::WeeklyOn => self::fromWeeklyOn($data, $startsAt, $endsAt),
             ScheduleKind::MonthlyOnDay => self::fromMonthlyOnDay($data, $startsAt, $endsAt),
             ScheduleKind::BusinessDaysAt => self::fromBusinessDaysAt($data, $startsAt, $endsAt),
+            ScheduleKind::Cron => self::fromCron($data, $startsAt, $endsAt),
         };
+    }
+
+    /**
+     * Build a one-shot delayed schedule from a top-level run_at (R16).
+     */
+    public static function delayedOnce(string $runAt, string $timezone = 'UTC'): self
+    {
+        return self::fromArray([
+            'kind' => ScheduleKind::Once->value,
+            'timezone' => $timezone,
+            'at' => $runAt,
+        ]);
     }
 
     /**
@@ -220,6 +234,41 @@ final readonly class ScheduleConfig
             kind: ScheduleKind::BusinessDaysAt,
             timezone: (string) $data['timezone'],
             time: (string) $data['time'],
+            startsAt: $startsAt,
+            endsAt: $endsAt,
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private static function fromCron(array $data, ?DateTimeImmutable $startsAt, ?DateTimeImmutable $endsAt): self
+    {
+        $expression = $data['cron_expression'] ?? $data['expression'] ?? null;
+        if (! is_string($expression) || trim($expression) === '') {
+            throw new InvalidScheduleConfigException('Cron schedules require a cron_expression.');
+        }
+
+        $expression = trim($expression);
+        $parts = preg_split('/\s+/', $expression) ?: [];
+        if (count($parts) !== 5) {
+            throw new InvalidScheduleConfigException('Cron expression must have exactly 5 fields (min hour dom month dow).');
+        }
+
+        try {
+            new \Cron\CronExpression($expression);
+        } catch (\Throwable $exception) {
+            throw new InvalidScheduleConfigException(
+                'Invalid cron expression: '.$exception->getMessage(),
+                0,
+                $exception,
+            );
+        }
+
+        return new self(
+            kind: ScheduleKind::Cron,
+            timezone: (string) $data['timezone'],
+            cronExpression: $expression,
             startsAt: $startsAt,
             endsAt: $endsAt,
         );

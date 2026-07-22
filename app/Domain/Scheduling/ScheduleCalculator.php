@@ -3,6 +3,7 @@
 namespace App\Domain\Scheduling;
 
 use App\Domain\Shared\Clock;
+use Cron\CronExpression;
 use DateTimeImmutable;
 use DateTimeZone;
 
@@ -25,6 +26,7 @@ final class ScheduleCalculator
             ScheduleKind::WeeklyOn => $this->nextWeeklyOn($config, $afterUtc),
             ScheduleKind::MonthlyOnDay => $this->nextMonthlyOnDay($config, $afterUtc),
             ScheduleKind::BusinessDaysAt => $this->nextBusinessDaysAt($config, $afterUtc),
+            ScheduleKind::Cron => $this->nextCron($config, $afterUtc),
         };
 
         if ($candidate === null) {
@@ -78,6 +80,7 @@ final class ScheduleCalculator
             ScheduleKind::WeeklyOn => $this->nextWeeklyOn($config, $afterUtc),
             ScheduleKind::MonthlyOnDay => $this->nextMonthlyOnDay($config, $afterUtc),
             ScheduleKind::BusinessDaysAt => $this->nextBusinessDaysAt($config, $afterUtc),
+            ScheduleKind::Cron => $this->nextCron($config, $afterUtc),
         };
     }
 
@@ -275,6 +278,34 @@ final class ScheduleCalculator
         }
 
         return null;
+    }
+
+    private function nextCron(ScheduleConfig $config, DateTimeImmutable $afterUtc): ?DateTimeImmutable
+    {
+        $expression = $config->cronExpression;
+        if ($expression === null || $expression === '') {
+            return null;
+        }
+
+        try {
+            $cron = new CronExpression($expression);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        $timezone = new DateTimeZone($config->timezone);
+        $afterLocal = $afterUtc->setTimezone($timezone);
+
+        try {
+            $next = $cron->getNextRunDate($afterLocal, 0, false, $config->timezone);
+        } catch (\Throwable) {
+            return null;
+        }
+
+        $candidateUtc = DateTimeImmutable::createFromInterface($next)
+            ->setTimezone(new DateTimeZone('UTC'));
+
+        return $candidateUtc > $afterUtc ? $candidateUtc : null;
     }
 
     /**

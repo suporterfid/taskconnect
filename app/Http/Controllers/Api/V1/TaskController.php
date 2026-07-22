@@ -92,7 +92,7 @@ class TaskController extends Controller
         $this->environmentGuard->assertActive($environment);
 
         $validated = $this->validateTaskPayload($request, $tenant, $environment);
-        $schedule = ScheduleConfig::fromArray($validated['schedule']);
+        $schedule = $this->resolveScheduleConfig($validated);
         $governance = $this->resolveGovernanceAttributes($validated);
 
         $coalesceKey = isset($validated['coalesce_key']) && is_string($validated['coalesce_key'])
@@ -127,7 +127,7 @@ class TaskController extends Controller
             'query_json' => $validated['query'] ?? [],
             'body_template' => isset($validated['body']) ? (is_string($validated['body']) ? $validated['body'] : json_encode($validated['body'])) : null,
             'content_type' => $validated['content_type'] ?? null,
-            'timezone' => $validated['schedule']['timezone'],
+            'timezone' => $schedule->timezone,
             'retry_policy_json' => $this->mergeRetryPolicyDefaults($validated['retry_policy'] ?? null, $governance['max_attempts']),
         ], $schedule, $this->actorUserId($request));
 
@@ -151,7 +151,9 @@ class TaskController extends Controller
         $this->authorize('update', [$task, $tenant]);
 
         $validated = $this->validateTaskPayload($request, $tenant, $environment, partial: true);
-        $schedule = isset($validated['schedule']) ? ScheduleConfig::fromArray($validated['schedule']) : null;
+        $schedule = array_key_exists('schedule', $validated) || array_key_exists('run_at', $validated)
+            ? $this->resolveScheduleConfig($validated, required: false)
+            : null;
 
         $governanceTouched = array_key_exists('task_type', $validated)
             || array_key_exists('priority', $validated)
@@ -191,7 +193,7 @@ class TaskController extends Controller
             'query_json' => $validated['query'] ?? null,
             'body_template' => isset($validated['body']) ? (is_string($validated['body']) ? $validated['body'] : json_encode($validated['body'])) : null,
             'content_type' => $validated['content_type'] ?? null,
-            'timezone' => $validated['schedule']['timezone'] ?? null,
+            'timezone' => $schedule?->timezone ?? ($validated['timezone'] ?? null),
             'retry_policy_json' => $validated['retry_policy'] ?? null,
             'definition_status' => isset($validated['definition_status'])
                 ? TaskDefinitionStatus::from($validated['definition_status'])
@@ -342,7 +344,9 @@ class TaskController extends Controller
             'query' => ['nullable', 'array'],
             'body' => ['nullable'],
             'content_type' => ['nullable', 'string'],
-            'schedule' => [$required, 'array'],
+            'schedule' => [$partial ? 'sometimes' : 'required_without:run_at', 'array'],
+            'run_at' => [$partial ? 'sometimes' : 'required_without:schedule', 'nullable', 'date'],
+            'timezone' => ['sometimes', 'nullable', 'string', 'timezone'],
             'retry_policy' => ['nullable', 'array'],
             'retry_policy.max_attempts' => ['sometimes', 'integer', 'min:1', 'max:20'],
             'retry_policy.delay_seconds' => ['sometimes', 'array'],
@@ -383,6 +387,37 @@ class TaskController extends Controller
             'egress_profile' => ['sometimes', 'nullable', 'string', 'max:64'],
             'coalesce_key' => ['sometimes', 'nullable', 'string', 'max:255'],
         ]);
+    }
+
+    /**
+     * Resolve structured schedule or top-level delayed run_at (R16).
+     *
+     * @param  array<string, mixed>  $validated
+     */
+    private function resolveScheduleConfig(array $validated, bool $required = true): ?ScheduleConfig
+    {
+        if (isset($validated['schedule']) && is_array($validated['schedule'])) {
+            return ScheduleConfig::fromArray($validated['schedule']);
+        }
+
+        $runAt = $validated['run_at'] ?? null;
+        if ($runAt instanceof \DateTimeInterface) {
+            $runAt = $runAt->format('Y-m-d\TH:i:s\Z');
+        }
+
+        if (is_string($runAt) && $runAt !== '') {
+            $timezone = $validated['timezone'] ?? 'UTC';
+
+            return ScheduleConfig::delayedOnce($runAt, is_string($timezone) && $timezone !== '' ? $timezone : 'UTC');
+        }
+
+        if ($required) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'schedule' => ['A schedule or run_at is required.'],
+            ]);
+        }
+
+        return null;
     }
 
     /**

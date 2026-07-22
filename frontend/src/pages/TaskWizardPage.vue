@@ -52,6 +52,7 @@ const SCHEDULE_KINDS: ScheduleKind[] = [
   'weekly_on',
   'monthly_on_day',
   'business_days_at',
+  'cron',
 ]
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const
@@ -74,6 +75,7 @@ const form = reactive({
   minute: 0,
   weekdays: [1, 2, 3, 4, 5] as number[],
   day: 1,
+  cron_expression: '0 9 * * 1-5',
   max_attempts: 6,
   retry_strategy: 'standard_exponential',
   success_status_ranges: '',
@@ -121,6 +123,8 @@ const localScheduleSummary = computed(() => {
       return `${t('tasks.scheduleKinds.monthly_on_day')}: day ${form.day} @ ${form.time} (${tz})`
     case 'business_days_at':
       return `${t('tasks.scheduleKinds.business_days_at')}: ${form.time} (${tz})`
+    case 'cron':
+      return `${t('tasks.scheduleKinds.cron')}: ${form.cron_expression} (${tz})`
     default:
       return kind
   }
@@ -179,6 +183,7 @@ watch(
     form.time,
     form.weekdays.join(','),
     form.day,
+    form.cron_expression,
   ],
   () => {
     void refreshSchedulePreview()
@@ -265,6 +270,8 @@ function buildSchedule(): ScheduleConfig {
       return { ...base, time: form.time, weekdays: [...form.weekdays] }
     case 'monthly_on_day':
       return { ...base, time: form.time, day: Number(form.day) }
+    case 'cron':
+      return { ...base, cron_expression: form.cron_expression }
     default:
       return base
   }
@@ -320,6 +327,7 @@ function applyTask(task: Task): void {
       ? [...schedule.weekdays]
       : [1, 2, 3, 4, 5]
     form.day = schedule.day ?? 1
+    form.cron_expression = schedule.cron_expression ?? form.cron_expression
   }
 }
 
@@ -752,6 +760,23 @@ async function onSubmit(activate: boolean): Promise<void> {
               required
               class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
             />
+          </label>
+
+          <label
+            v-if="form.schedule_kind === 'cron'"
+            class="block text-sm font-medium"
+          >
+            {{ $t('tasks.fields.cronExpression') }}
+            <input
+              v-model="form.cron_expression"
+              type="text"
+              required
+              placeholder="0 9 * * 1-5"
+              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-950"
+            />
+            <span class="mt-1 block text-xs text-gray-500">{{
+              $t('tasks.fields.cronExpressionHint')
+            }}</span>
           </label>
 
           <label

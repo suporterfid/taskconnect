@@ -47,6 +47,11 @@ export function formatScheduleHuman(
         time: String(parts.time ?? ''),
         timezone: String(parts.timezone ?? ''),
       })
+    case 'cron':
+      return t(key, {
+        expression: String(parts.cron_expression ?? ''),
+        timezone: String(parts.timezone ?? ''),
+      })
     default:
       return kind
   }
