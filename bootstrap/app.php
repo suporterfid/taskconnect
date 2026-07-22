@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -36,7 +37,16 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            return response()->json($payload['message'], $payload['status']);
+            $response = response()->json($payload['message'], $payload['status']);
+
+            // Preserve Retry-After (and other headers) from throttle / HTTP exceptions.
+            if ($e instanceof HttpExceptionInterface) {
+                foreach ($e->getHeaders() as $name => $value) {
+                    $response->headers->set($name, $value);
+                }
+            }
+
+            return $response;
         });
     })
     ->create();

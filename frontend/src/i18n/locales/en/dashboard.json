@@ -7,6 +7,7 @@
     "pausedTasks": "Paused tasks",
     "recentRuns": "Recent runs",
     "failedRuns": "Failed runs (24h)",
+    "failedTasks": "Failed tasks",
     "retryWait": "Waiting to retry",
     "deadRuns": "Dead runs"
   },

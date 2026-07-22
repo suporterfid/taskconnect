@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
@@ -11,8 +11,11 @@ import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { ScheduleKind, Task, TaskDefinitionStatus } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
+import { formatScheduleHuman } from '@/utils/scheduleHuman'
 
 const { locale, t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const tenant = useTenantStore()
 
 const SCHEDULE_KINDS: ScheduleKind[] = [
@@ -25,18 +28,24 @@ const SCHEDULE_KINDS: ScheduleKind[] = [
   'business_days_at',
 ]
 
+function queryString(key: string): string {
+  const raw = route.query[key]
+  return typeof raw === 'string' ? raw : ''
+}
+
 const filters = reactive({
-  q: '',
-  definition_status: '' as '' | TaskDefinitionStatus,
-  last_run_state: '',
-  schedule_kind: '' as '' | ScheduleKind,
-  sort: 'name' as 'name' | 'next_run_at' | 'last_run_at',
-  order: 'asc' as 'asc' | 'desc',
+  q: queryString('q'),
+  definition_status: queryString('definition_status') as '' | TaskDefinitionStatus,
+  last_run_state: queryString('last_run_state'),
+  schedule_kind: queryString('schedule_kind') as '' | ScheduleKind,
+  sort: (queryString('sort') || 'name') as 'name' | 'next_run_at' | 'last_run_at',
+  order: (queryString('order') || 'asc') as 'asc' | 'desc',
 })
 
 const selectedIds = ref<string[]>([])
 const actionError = ref<string | null>(null)
 const bulkBusy = ref(false)
+const duplicatingId = ref<string | null>(null)
 
 const { data, loading, error, reload } = useAsyncData(async () => {
   if (!tenant.currentTenantId || !tenant.currentEnvironmentId) {
@@ -65,6 +74,16 @@ const { data, loading, error, reload } = useAsyncData(async () => {
   return response.data ?? []
 })
 
+watch(
+  () => route.query.last_run_state,
+  (value) => {
+    const next = typeof value === 'string' ? value : ''
+    if (filters.last_run_state !== next) {
+      filters.last_run_state = next
+    }
+  },
+)
+
 watch(filters, () => {
   selectedIds.value = []
   actionError.value = null
@@ -82,6 +101,16 @@ const allSelected = computed(() => {
 })
 
 const someSelected = computed(() => selectedIds.value.length > 0)
+
+const hasActiveFilters = computed(
+  () =>
+    Boolean(
+      filters.q.trim() ||
+        filters.definition_status ||
+        filters.last_run_state ||
+        filters.schedule_kind,
+    ),
+)
 
 function toggleSelectAll(): void {
   const tasks = data.value ?? []
@@ -124,6 +153,29 @@ async function bulkAction(action: 'pause' | 'resume'): Promise<void> {
   }
 }
 
+async function onDuplicate(task: Task): Promise<void> {
+  if (duplicatingId.value) {
+    return
+  }
+  duplicatingId.value = task.id
+  actionError.value = null
+  try {
+    const { data: response } = await api.post<{ data: Task }>(
+      tenant.tenantPath(`/tasks/${task.id}/duplicate`),
+    )
+    if (response.data?.id) {
+      await router.push(`/tasks/${response.data.id}`)
+    } else {
+      await reload()
+    }
+  } catch (err) {
+    actionError.value =
+      err instanceof ApiError ? err.message : t('tasks.actions.error')
+  } finally {
+    duplicatingId.value = null
+  }
+}
+
 function toggleSort(column: 'name' | 'next_run_at' | 'last_run_at'): void {
   if (filters.sort === column) {
     filters.order = filters.order === 'asc' ? 'desc' : 'asc'
@@ -152,6 +204,10 @@ function formatDate(value?: string | null): string {
   } catch {
     return value
   }
+}
+
+function scheduleLabel(task: Task): string {
+  return formatScheduleHuman(task.schedule_human, t) || '—'
 }
 
 function statusClass(status: string): string {
@@ -253,7 +309,14 @@ function statusClass(status: string): string {
       v-else-if="!data?.length"
       class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
     >
-      {{ $t('tasks.empty') }}
+      <p>{{ hasActiveFilters ? $t('tasks.filters.resultCount', { count: 0 }) : $t('tasks.empty') }}</p>
+      <RouterLink
+        v-if="!hasActiveFilters"
+        to="/tasks/new"
+        class="mt-4 inline-block rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
+      >
+        {{ $t('tasks.emptyCta') }}
+      </RouterLink>
     </div>
     <div v-else>
       <div
@@ -307,6 +370,9 @@ function statusClass(status: string): string {
                 {{ $t('common.status') }}
               </th>
               <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                {{ $t('tasks.detail.schedule') }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
                 <button type="button" class="hover:underline" @click="toggleSort('next_run_at')">
                   {{ $t('tasks.detail.nextRun') }}{{ sortIndicator('next_run_at') }}
                 </button>
@@ -348,6 +414,9 @@ function statusClass(status: string): string {
                   {{ $t(`tasks.status.${task.definition_status}`) }}
                 </span>
               </td>
+              <td class="max-w-xs truncate px-4 py-3 text-sm text-gray-600">
+                {{ scheduleLabel(task) }}
+              </td>
               <td class="px-4 py-3 text-sm text-gray-600">
                 {{ formatDate(task.next_run_at) }}
               </td>
@@ -357,13 +426,21 @@ function statusClass(status: string): string {
                 </template>
                 <template v-else>—</template>
               </td>
-              <td class="px-4 py-3 text-right text-sm">
+              <td class="space-x-3 px-4 py-3 text-right text-sm">
                 <RouterLink
                   :to="`/tasks/${task.id}`"
                   class="text-violet-600 hover:underline"
                 >
                   {{ $t('tasks.view') }}
                 </RouterLink>
+                <button
+                  type="button"
+                  class="text-violet-600 hover:underline disabled:opacity-60"
+                  :disabled="duplicatingId === task.id"
+                  @click="onDuplicate(task)"
+                >
+                  {{ $t('tasks.actions.duplicate') }}
+                </button>
               </td>
             </tr>
           </tbody>

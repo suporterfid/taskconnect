@@ -47,7 +47,7 @@ class PlatformHealthController extends Controller
             'retry_executor_stale' => $retryStale,
             'stale_claims' => $staleClaims,
             'pending_runs' => TaskRun::query()->whereIn('run_state', ['pending', 'retry_wait', 'running'])->count(),
-            'version' => config('app.version', '1.1.0'),
+            'version' => config('app.version', '1.2.0'),
             'retention' => [
                 'payload_snapshots_days' => (int) config('retention.payload_snapshots_days'),
                 'attempt_metadata_days' => (int) config('retention.attempt_metadata_days'),

@@ -47,6 +47,7 @@ class DashboardController extends Controller
                     ->where('run_state', 'dead')
                     ->where('updated_at', '>=', now()->subDay())
                     ->count(),
+                'failed_tasks' => (clone $taskQuery)->where('last_run_state', 'dead')->count(),
                 'retry_wait_runs' => (clone $runQuery)->where('run_state', 'retry_wait')->count(),
                 'dead_runs' => (clone $runQuery)->where('run_state', 'dead')->count(),
                 'upcoming_tasks' => (clone $taskQuery)

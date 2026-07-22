@@ -116,6 +116,7 @@
     "error": "Unable to perform that action"
   },
   "empty": "No tasks yet. Create one to schedule your first HTTP request.",
+  "emptyCta": "Create your first task",
   "loadError": "Unable to load tasks",
   "filters": {
     "searchPlaceholder": "Search by name…",

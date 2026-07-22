@@ -3,7 +3,11 @@ import type { AxiosError } from 'axios'
 
 import { parseErrorEnvelope } from './api'
 
-function axiosError(data: unknown, status = 422): AxiosError {
+function axiosError(
+  data: unknown,
+  status = 422,
+  headers: Record<string, string> = { 'x-request-id': 'hdr-1' },
+): AxiosError {
   return {
     isAxiosError: true,
     name: 'AxiosError',
@@ -13,7 +17,7 @@ function axiosError(data: unknown, status = 422): AxiosError {
       data,
       status,
       statusText: 'Unprocessable',
-      headers: { 'x-request-id': 'hdr-1' },
+      headers,
       config: {} as never,
     },
   } as AxiosError
@@ -67,6 +71,26 @@ describe('parseErrorEnvelope', () => {
     expect(err.code).toBe('too_many_requests')
     expect(err.message).toBe(
       'Too many requests. Please wait a moment and try again.',
+    )
+  })
+
+  it('includes Retry-After seconds in the localized 429 message', () => {
+    const err = parseErrorEnvelope(
+      axiosError(
+        {
+          error: {
+            code: 'too_many_requests',
+            message: 'Slow down',
+          },
+        },
+        429,
+        { 'retry-after': '12', 'x-request-id': 'hdr-1' },
+      ),
+    )
+
+    expect(err.retryAfterSeconds).toBe(12)
+    expect(err.message).toBe(
+      'Too many requests. Please wait 12s and try again.',
     )
   })
 

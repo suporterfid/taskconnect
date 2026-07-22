@@ -15,9 +15,16 @@ Optional production-focused frontend pass:
 bash ./scripts/tc.sh npm --prefix frontend audit --omit=dev
 ```
 
-## Current status (2026-07-22)
+## Current status (2026-07-22 — P9)
 
-Automated `composer audit` / `npm audit` from this agent environment could not reach Packagist/npm registries (network timeout). Treat the commands above as the source of truth on a networked workstation before release.
+Automated `composer audit` / `npm audit` from this agent environment could not reach Packagist/npm registries (network timeout). Treat the commands above as the source of truth on a networked workstation before tagging **v1.2.0**.
+
+Re-run before release:
+
+```bash
+bash ./scripts/tc.sh composer audit
+bash ./scripts/tc.sh npm --prefix frontend audit
+```
 
 ## Mitigation policy
 

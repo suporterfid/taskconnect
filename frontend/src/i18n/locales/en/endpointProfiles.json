@@ -18,6 +18,7 @@
   "saveError": "Unable to save endpoint profile",
   "archiveError": "Unable to archive endpoint profile",
   "testError": "Connection test failed",
+  "testSuccess": "Connection test completed",
   "needsTenant": "Select a tenant and environment before managing endpoint profiles.",
   "tlsWarning": "TLS certificate verification is disabled. Connections may be vulnerable to man-in-the-middle attacks. Only use this for trusted internal endpoints.",
   "tlsConfirm": "I understand TLS verification is disabled",

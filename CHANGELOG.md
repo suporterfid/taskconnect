@@ -7,8 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-07-22
+
 ### Added
 
+- Dashboard `failed_tasks` count linking to `/tasks?last_run_state=dead`
+- Task list: human-readable schedule column, empty-state CTA, row Duplicate
+- Endpoint profile connection Test from the list page
+- Secret `usage_count` on API responses + in-use archive confirmation
+- Auth 429 responses preserve `Retry-After`; SPA surfaces wait seconds when present
 - Wizard query-params editor + task detail display
 - Run list cancel/retry actions
 - Platform health: maintenance heartbeat, stale execute/retry degrade, retention summary
@@ -44,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Application version default bumped to **1.2.0** (`APP_VERSION` / platform health)
 - Stronger scheduled-occurrence uniqueness coverage for overlapping claimers
 
 ## [1.1.0] — 2026-07-21
@@ -59,5 +67,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Auth holes around task operate scopes and read-only viewer restrictions
 - Manual/test/retry runs no longer stuck pending without a queue worker
 
-[Unreleased]: https://github.com/suporterfid/taskconnect/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/suporterfid/taskconnect/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/suporterfid/taskconnect/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/suporterfid/taskconnect/releases/tag/v1.1.0

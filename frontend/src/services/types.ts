@@ -203,6 +203,8 @@ export interface Secret {
   id: string
   name: string
   version: number
+  /** Number of non-archived endpoint profiles referencing this secret. */
+  usage_count?: number
   archived_at?: string | null
   created_at?: string
   updated_at?: string
@@ -330,6 +332,7 @@ export interface DashboardStats {
   paused_tasks: number
   recent_runs: number
   failed_runs_24h: number
+  failed_tasks: number
   retry_wait_runs: number
   dead_runs: number
   upcoming_tasks: UpcomingTask[]

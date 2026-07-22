@@ -37,6 +37,7 @@ class AuthThrottleTest extends TestCase
 
         $this->postJson('/api/v1/auth/login', $payload)
             ->assertStatus(429)
-            ->assertJsonPath('error.code', 'too_many_requests');
+            ->assertJsonPath('error.code', 'too_many_requests')
+            ->assertHeader('Retry-After');
     }
 }
