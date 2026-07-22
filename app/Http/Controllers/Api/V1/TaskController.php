@@ -6,7 +6,9 @@ use App\Application\Audit\AuditLogger;
 use App\Application\Tasks\TaskLifecycleService;
 use App\Application\Tenancy\EnvironmentGuard;
 use App\Domain\Execution\Enums\TaskDefinitionStatus;
+use App\Domain\Execution\RetryPolicy;
 use App\Domain\Scheduling\ScheduleConfig;
+use App\Domain\Scheduling\TaskTypeCatalog;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\TaskRunResource;
@@ -25,6 +27,7 @@ class TaskController extends Controller
         private readonly TaskLifecycleService $lifecycle,
         private readonly AuditLogger $auditLogger,
         private readonly EnvironmentGuard $environmentGuard,
+        private readonly TaskTypeCatalog $taskTypeCatalog,
     ) {}
 
     public function index(Request $request, string $tenantId, string $environmentId): JsonResponse
@@ -88,6 +91,7 @@ class TaskController extends Controller
 
         $validated = $this->validateTaskPayload($request, $tenant, $environment);
         $schedule = ScheduleConfig::fromArray($validated['schedule']);
+        $governance = $this->resolveGovernanceAttributes($validated);
 
         $task = $this->lifecycle->create([
             'tenant_id' => $tenant->id,
@@ -96,6 +100,11 @@ class TaskController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'definition_status' => TaskDefinitionStatus::from($validated['definition_status'] ?? TaskDefinitionStatus::Draft->value),
+            'task_type' => $governance['task_type'],
+            'priority' => $governance['priority'],
+            'weight' => $governance['weight'],
+            'timeout_ms' => $governance['timeout_ms'],
+            'egress_profile' => $governance['egress_profile'],
             'method' => strtoupper($validated['method']),
             'url_or_path' => $validated['url_or_path'] ?? $validated['path'] ?? $validated['url'],
             'headers_json' => $validated['headers'] ?? [],
@@ -103,7 +112,7 @@ class TaskController extends Controller
             'body_template' => isset($validated['body']) ? (is_string($validated['body']) ? $validated['body'] : json_encode($validated['body'])) : null,
             'content_type' => $validated['content_type'] ?? null,
             'timezone' => $validated['schedule']['timezone'],
-            'retry_policy_json' => $validated['retry_policy'] ?? null,
+            'retry_policy_json' => $this->mergeRetryPolicyDefaults($validated['retry_policy'] ?? null, $governance['max_attempts']),
         ], $schedule, $request->user()?->id);
 
         $this->audit($request, $tenant, 'task.created', $task->public_id);
@@ -128,6 +137,32 @@ class TaskController extends Controller
         $validated = $this->validateTaskPayload($request, $tenant, $environment, partial: true);
         $schedule = isset($validated['schedule']) ? ScheduleConfig::fromArray($validated['schedule']) : null;
 
+        $governanceTouched = array_key_exists('task_type', $validated)
+            || array_key_exists('priority', $validated)
+            || array_key_exists('weight', $validated)
+            || array_key_exists('timeout_ms', $validated)
+            || array_key_exists('egress_profile', $validated);
+
+        $governance = null;
+        if ($governanceTouched) {
+            $taskType = array_key_exists('task_type', $validated)
+                ? ($validated['task_type'] ?? null)
+                : $task->task_type;
+            $overrides = [];
+            foreach (['priority', 'weight', 'timeout_ms', 'egress_profile'] as $field) {
+                if (array_key_exists($field, $validated)) {
+                    $overrides[$field] = $validated[$field];
+                } elseif (! array_key_exists('task_type', $validated) && $task->{$field} !== null) {
+                    // Keep existing overrides when only tweaking one governance field.
+                    $overrides[$field] = $task->{$field};
+                }
+            }
+            $governance = $this->taskTypeCatalog->resolveTaskAttributes(
+                is_string($taskType) ? $taskType : null,
+                $overrides,
+            );
+        }
+
         $attributes = array_filter([
             'endpoint_profile_id' => array_key_exists('endpoint_profile_id', $validated)
                 ? $this->resolveEndpointProfileId($validated['endpoint_profile_id'], $tenant, $environment)
@@ -146,6 +181,22 @@ class TaskController extends Controller
                 ? TaskDefinitionStatus::from($validated['definition_status'])
                 : null,
         ], fn ($value) => $value !== null);
+
+        if ($governance !== null) {
+            $attributes['task_type'] = $governance['task_type'];
+            $attributes['priority'] = $governance['priority'];
+            $attributes['weight'] = $governance['weight'];
+            $attributes['timeout_ms'] = $governance['timeout_ms'];
+            $attributes['egress_profile'] = $governance['egress_profile'];
+
+            if (! array_key_exists('retry_policy', $validated) && array_key_exists('task_type', $validated)) {
+                $existingPolicy = is_array($task->retry_policy_json)
+                    ? $task->retry_policy_json
+                    : RetryPolicy::default()->toArray();
+                $existingPolicy['max_attempts'] = $governance['max_attempts'];
+                $attributes['retry_policy_json'] = $existingPolicy;
+            }
+        }
 
         $task = $this->lifecycle->update($task, $attributes, $schedule, $request->user()?->id);
         $this->audit($request, $tenant, 'task.updated', $task->public_id);
@@ -309,7 +360,48 @@ class TaskController extends Controller
             'definition_status' => ['nullable', Rule::in(array_column(TaskDefinitionStatus::cases(), 'value'))],
             // Optional body echo of workspace (environment public id); must match route context.
             'workspace_id' => ['sometimes', 'nullable', 'string', Rule::in([$environment->public_id])],
+            'task_type' => ['sometimes', 'nullable', 'string', 'max:64', Rule::in($this->taskTypeCatalog->knownTypes())],
+            'priority' => ['sometimes', 'integer', 'min:0', 'max:1000'],
+            'weight' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'timeout_ms' => ['sometimes', 'integer', 'min:1', 'max:300000'],
+            'egress_profile' => ['sometimes', 'nullable', 'string', 'max:64'],
         ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     * @return array{task_type: ?string, priority: int, weight: int, timeout_ms: int, egress_profile: string, max_attempts: int}
+     */
+    private function resolveGovernanceAttributes(array $validated): array
+    {
+        $overrides = [];
+        foreach (['priority', 'weight', 'timeout_ms', 'egress_profile'] as $field) {
+            if (array_key_exists($field, $validated)) {
+                $overrides[$field] = $validated[$field];
+            }
+        }
+
+        $taskType = $validated['task_type'] ?? null;
+
+        return $this->taskTypeCatalog->resolveTaskAttributes(
+            is_string($taskType) ? $taskType : null,
+            $overrides,
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $retryPolicy
+     * @return array<string, mixed>
+     */
+    private function mergeRetryPolicyDefaults(?array $retryPolicy, int $typeMaxAttempts): array
+    {
+        $policy = $retryPolicy ?? RetryPolicy::default()->toArray();
+
+        if ($retryPolicy === null || ! array_key_exists('max_attempts', $retryPolicy)) {
+            $policy['max_attempts'] = $typeMaxAttempts;
+        }
+
+        return $policy;
     }
 
     private function resolveEndpointProfileId(?string $publicId, Tenant $tenant, Environment $environment): ?int

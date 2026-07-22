@@ -26,6 +26,11 @@ class Task extends Model
         'name',
         'description',
         'definition_status',
+        'task_type',
+        'priority',
+        'weight',
+        'timeout_ms',
+        'egress_profile',
         'method',
         'url_or_path',
         'headers_json',
@@ -49,6 +54,9 @@ class Task extends Model
     {
         return [
             'definition_status' => TaskDefinitionStatus::class,
+            'priority' => 'integer',
+            'weight' => 'integer',
+            'timeout_ms' => 'integer',
             'headers_json' => 'array',
             'query_json' => 'array',
             'retry_policy_json' => 'array',

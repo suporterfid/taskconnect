@@ -6,6 +6,7 @@ use App\Domain\Execution\AttemptStateMachine;
 use App\Domain\Execution\Enums\AttemptState;
 use App\Domain\Execution\Enums\RunState;
 use App\Domain\Execution\RunStateMachine;
+use App\Domain\Scheduling\TaskTypeCatalog;
 use App\Domain\Shared\Clock;
 use App\Infrastructure\Persistence\Eloquent\TaskRun;
 use App\Infrastructure\Persistence\Eloquent\TaskRunAttempt;
@@ -19,6 +20,7 @@ final class RetryClaimer
         private readonly Clock $clock,
         private readonly RunStateMachine $runStateMachine,
         private readonly AttemptStateMachine $attemptStateMachine,
+        private readonly TaskTypeCatalog $taskTypeCatalog,
     ) {
     }
 
@@ -31,12 +33,30 @@ final class RetryClaimer
         $claimed = [];
 
         DB::transaction(function () use ($batchSize, $now, &$claimed): void {
-            $runs = $this->selectRetryableRuns($batchSize, $now);
+            $capacity = new InFlightCapacityTracker($this->taskTypeCatalog);
+            $capacity->refreshFromDatabase();
+
+            if ($capacity->remainingGlobal() <= 0) {
+                return;
+            }
+
+            $candidateLimit = max($batchSize * 5, 50);
+            $runs = $this->selectRetryableRuns($candidateLimit, $now);
 
             foreach ($runs as $run) {
+                if (count($claimed) >= $batchSize) {
+                    break;
+                }
+
+                $task = $run->task;
+                if ($task === null || ! $capacity->canAccept($task)) {
+                    continue;
+                }
+
                 $attempt = $this->tryClaimRetry($run, $now);
 
                 if ($attempt !== null) {
+                    $capacity->reserve($task);
                     $claimed[] = new ClaimedAttempt($run->fresh(['task']), $attempt);
                 }
             }

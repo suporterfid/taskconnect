@@ -128,6 +128,12 @@ export interface Task {
   name: string
   description?: string | null
   definition_status: TaskDefinitionStatus
+  /** Named governance type (R4), e.g. document.convert */
+  task_type?: string | null
+  priority?: number
+  weight?: number | null
+  timeout_ms?: number | null
+  egress_profile?: string | null
   method: HttpMethod | string
   url_or_path?: string | null
   endpoint_profile_id?: string | null

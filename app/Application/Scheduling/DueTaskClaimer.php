@@ -10,6 +10,7 @@ use App\Domain\Execution\IdempotencyKeyGenerator;
 use App\Domain\Execution\OccurrenceKeyGenerator;
 use App\Domain\Scheduling\ScheduleCalculator;
 use App\Domain\Scheduling\ScheduleKind;
+use App\Domain\Scheduling\TaskTypeCatalog;
 use App\Domain\Shared\Clock;
 use App\Infrastructure\Persistence\Eloquent\Task;
 use App\Infrastructure\Persistence\Eloquent\TaskRun;
@@ -26,6 +27,7 @@ final class DueTaskClaimer
         private readonly ScheduleCalculator $scheduleCalculator,
         private readonly IdempotencyKeyGenerator $idempotencyKeyGenerator,
         private readonly OccurrenceKeyGenerator $occurrenceKeyGenerator,
+        private readonly TaskTypeCatalog $taskTypeCatalog,
     ) {
     }
 
@@ -38,12 +40,30 @@ final class DueTaskClaimer
         $claimed = [];
 
         DB::transaction(function () use ($batchSize, $now, &$claimed): void {
-            $tasks = $this->selectDueTasks($batchSize, $now);
+            $capacity = new InFlightCapacityTracker($this->taskTypeCatalog);
+            $capacity->refreshFromDatabase();
+
+            if ($capacity->remainingGlobal() <= 0) {
+                return;
+            }
+
+            // Over-fetch so saturated high-priority types do not hide other due work.
+            $candidateLimit = max($batchSize * 20, 100);
+            $tasks = $this->selectDueTasks($candidateLimit, $now);
 
             foreach ($tasks as $task) {
+                if (count($claimed) >= $batchSize) {
+                    break;
+                }
+
+                if (! $capacity->canAccept($task)) {
+                    continue;
+                }
+
                 $attempt = $this->tryClaimTask($task, $now);
 
                 if ($attempt !== null) {
+                    $capacity->reserve($task);
                     $claimed[] = $attempt;
                 }
             }
@@ -68,6 +88,7 @@ final class DueTaskClaimer
                 $builder->whereNull('claim_token')
                     ->orWhere('claim_expires_at', '<', $nowString);
             })
+            ->orderByDesc('priority')
             ->orderBy('next_run_at')
             ->limit($batchSize);
 

@@ -42,6 +42,40 @@ trait CreatesScheduledTasks
     }
 
     /**
+     * @param  array<string, mixed>  $overrides
+     */
+    protected function createActiveTaskDueAtIn(
+        Tenant $tenant,
+        Environment $environment,
+        User $user,
+        string $utcTimestamp,
+        array $overrides = [],
+        int $intervalMinutes = 15,
+    ): Task {
+        $task = Task::factory()->create(array_merge([
+            'tenant_id' => $tenant->id,
+            'environment_id' => $environment->id,
+            'definition_status' => TaskDefinitionStatus::Active,
+            'next_run_at' => $utcTimestamp,
+            'url_or_path' => 'http://receiver:8080/hook',
+            'created_by' => $user->id,
+        ], $overrides));
+
+        TaskSchedule::query()->create([
+            'tenant_id' => $tenant->id,
+            'task_id' => $task->id,
+            'schedule_kind' => ScheduleKind::EveryNMinutes,
+            'schedule_config_json' => [
+                'kind' => ScheduleKind::EveryNMinutes->value,
+                'timezone' => 'UTC',
+                'interval_minutes' => $intervalMinutes,
+            ],
+        ]);
+
+        return $task->fresh(['schedule']);
+    }
+
+    /**
      * @return array{0: Tenant, 1: Environment, 2: User}
      */
     protected function createTenantContext(): array
