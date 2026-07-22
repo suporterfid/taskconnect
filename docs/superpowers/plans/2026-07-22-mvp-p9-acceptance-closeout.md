@@ -7,4 +7,4 @@
 3. [x] Endpoint profile list Test action
 4. [x] Secret usage_count API + UI
 5. [x] v1.2 version/changelog/README + Retry-After + audit doc
-6. [ ] Verify + PR
+6. [x] Verify + PR
