@@ -33,7 +33,7 @@ export function formatScheduleHuman(
       })
     case 'weekly_on': {
       const weekdays = Array.isArray(parts.weekdays)
-        ? parts.weekdays.map((d) => t(`tasks.weekdays.${d}`, String(d))).join(', ')
+        ? parts.weekdays.map((d) => t(`tasks.weekdays.${d}`)).join(', ')
         : ''
       return t(key, {
         weekdays,

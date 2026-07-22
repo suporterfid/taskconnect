@@ -28,9 +28,11 @@ class SchedulePreviewController extends Controller
         ]);
 
         $count = (int) ($validated['count'] ?? 3);
+        /** @var array<string, mixed> $schedule */
+        $schedule = $request->input('schedule');
 
         try {
-            $config = ScheduleConfig::fromArray($validated['schedule']);
+            $config = ScheduleConfig::fromArray($schedule);
         } catch (InvalidScheduleConfigException $e) {
             return response()->json([
                 'message' => $e->getMessage(),
