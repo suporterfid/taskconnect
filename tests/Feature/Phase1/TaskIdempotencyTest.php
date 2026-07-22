@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Phase1;
 
+use App\Application\Retention\RetentionCleaner;
+use App\Infrastructure\Persistence\Eloquent\IdempotencyKey;
 use App\Infrastructure\Persistence\Eloquent\Task;
 use App\Infrastructure\Persistence\Eloquent\TaskRun;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -34,10 +36,27 @@ class TaskIdempotencyTest extends TestCase
             $headers,
         );
 
-        $second->assertCreated()
+        $second->assertOk()
             ->assertJsonPath('data.id', $taskId);
 
         $this->assertSame(1, Task::query()->where('tenant_id', $tenant->id)->count());
+
+        $record = IdempotencyKey::query()->where('key', 'create-task-key-1')->first();
+        $this->assertNotNull($record);
+        $this->assertSame($environment->id, $record->environment_id);
+    }
+
+    public function test_create_task_without_idempotency_key_is_rejected(): void
+    {
+        [$admin, $tenant, $environment] = $this->createTenantAdmin();
+
+        // Use json() (not postJson) so TestCase does not auto-inject a key.
+        $this->actingAs($admin)->json(
+            'POST',
+            $this->environmentRoute($tenant, $environment, '/tasks'),
+            $this->draftTaskPayload('Missing Key'),
+        )->assertStatus(422)
+            ->assertJsonPath('error.code', 'validation_error');
     }
 
     public function test_same_idempotency_key_with_different_payload_returns_conflict(): void
@@ -57,6 +76,76 @@ class TaskIdempotencyTest extends TestCase
             $headers,
         )->assertStatus(409)
             ->assertJsonPath('error.code', 'conflict');
+    }
+
+    public function test_idempotency_key_is_scoped_per_workspace(): void
+    {
+        [$admin, $tenant, $development] = $this->createTenantAdmin();
+        $staging = $tenant->environments()->where('slug', 'staging')->firstOrFail();
+        $headers = ['Idempotency-Key' => 'shared-across-workspaces'];
+        $payload = $this->draftTaskPayload('Scoped Hook');
+
+        $dev = $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $development, '/tasks'),
+            $payload,
+            $headers,
+        )->assertCreated();
+
+        $stg = $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $staging, '/tasks'),
+            $payload,
+            $headers,
+        )->assertCreated();
+
+        $this->assertNotSame($dev->json('data.id'), $stg->json('data.id'));
+        $this->assertSame(2, Task::query()->where('tenant_id', $tenant->id)->count());
+    }
+
+    public function test_expired_idempotency_key_can_be_reused(): void
+    {
+        [$admin, $tenant, $environment] = $this->createTenantAdmin();
+        $headers = ['Idempotency-Key' => 'expired-key-reuse'];
+        $payload = $this->draftTaskPayload('Expired Hook');
+
+        $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks'),
+            $payload,
+            $headers,
+        )->assertCreated();
+
+        IdempotencyKey::query()
+            ->where('key', 'expired-key-reuse')
+            ->update(['expires_at' => now()->subHour()]);
+
+        $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks'),
+            $this->draftTaskPayload('Expired Hook Again'),
+            $headers,
+        )->assertCreated();
+
+        $this->assertSame(2, Task::query()->where('tenant_id', $tenant->id)->count());
+    }
+
+    public function test_retention_cleaner_prunes_expired_idempotency_keys(): void
+    {
+        [$admin, $tenant, $environment] = $this->createTenantAdmin();
+
+        IdempotencyKey::query()->create([
+            'tenant_id' => $tenant->id,
+            'environment_id' => $environment->id,
+            'key' => 'prune-me',
+            'route' => 'POST api/v1/tenants/{tenantId}/environments/{environmentId}/tasks',
+            'request_hash' => hash('sha256', 'x'),
+            'response_code' => 201,
+            'response_body' => ['data' => ['id' => 'task_x']],
+            'created_at' => now()->subDays(2),
+            'expires_at' => now()->subHour(),
+        ]);
+
+        $counts = app(RetentionCleaner::class)->run();
+
+        $this->assertGreaterThanOrEqual(1, $counts['idempotency_keys_deleted']);
+        $this->assertSame(0, IdempotencyKey::query()->where('key', 'prune-me')->count());
     }
 
     public function test_run_now_twice_with_same_idempotency_key_returns_same_run(): void

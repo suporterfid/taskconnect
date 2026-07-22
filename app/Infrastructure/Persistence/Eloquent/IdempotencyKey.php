@@ -11,6 +11,7 @@ class IdempotencyKey extends Model
 
     protected $fillable = [
         'tenant_id',
+        'environment_id',
         'user_id',
         'api_key_id',
         'key',
@@ -34,5 +35,10 @@ class IdempotencyKey extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    public function environment(): BelongsTo
+    {
+        return $this->belongsTo(Environment::class);
     }
 }

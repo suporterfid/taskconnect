@@ -10,7 +10,10 @@ return [
 
     'audit_logs_days' => (int) env('RETENTION_AUDIT_LOGS_DAYS', 365),
 
-    'api_idempotency_hours' => (int) env('RETENTION_API_IDEMPOTENCY_HOURS', 24),
+    'api_idempotency_hours' => (int) env(
+        'IDEMPOTENCY_ENQUEUE_TTL_HOURS',
+        env('RETENTION_API_IDEMPOTENCY_HOURS', 24),
+    ),
 
     'system_heartbeat_days' => (int) env('RETENTION_SYSTEM_HEARTBEAT_DAYS', 30),
 
