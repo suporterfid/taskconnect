@@ -61,20 +61,30 @@ final class DlqService
      */
     public function replay(TaskRun $dead): TaskRun
     {
-        if ($dead->run_state !== RunState::Dead) {
-            throw new InvalidStateTransitionException('task_run', $dead->run_state->value, RunState::Pending->value);
-        }
+        return DB::transaction(function () use ($dead): TaskRun {
+            /** @var TaskRun|null $locked */
+            $locked = TaskRun::query()
+                ->where('id', $dead->id)
+                ->lockForUpdate()
+                ->first();
 
-        $task = $dead->task;
-        if ($task === null) {
-            throw new InvalidStateTransitionException('task_run', $dead->run_state->value, RunState::Pending->value);
-        }
+            if ($locked === null || $locked->run_state !== RunState::Dead) {
+                throw new InvalidStateTransitionException(
+                    'task_run',
+                    $locked?->run_state->value ?? 'missing',
+                    RunState::Pending->value,
+                );
+            }
 
-        $idempotencyKey = $this->idempotencyKeyGenerator->forDlqReplay();
-        $occurrenceKey = $this->occurrenceKeyGenerator->forDlqReplay($idempotencyKey);
+            $task = $locked->task;
+            if ($task === null) {
+                throw new InvalidStateTransitionException('task_run', $locked->run_state->value, RunState::Pending->value);
+            }
 
-        $newRun = DB::transaction(function () use ($dead, $task, $idempotencyKey, $occurrenceKey): TaskRun {
-            $run = TaskRun::query()->create([
+            $idempotencyKey = $this->idempotencyKeyGenerator->forDlqReplay();
+            $occurrenceKey = $this->occurrenceKeyGenerator->forDlqReplay($idempotencyKey);
+
+            $newRun = TaskRun::query()->create([
                 'tenant_id' => $task->tenant_id,
                 'environment_id' => $task->environment_id,
                 'task_id' => $task->id,
@@ -89,31 +99,29 @@ final class DlqService
             TaskRunAttempt::query()->create([
                 'tenant_id' => $task->tenant_id,
                 'environment_id' => $task->environment_id,
-                'task_run_id' => $run->id,
+                'task_run_id' => $newRun->id,
                 'attempt_number' => 1,
                 'attempt_state' => AttemptState::Pending,
             ]);
 
-            return $run;
+            $this->auditLogger->log(
+                action: 'dlq.replayed',
+                resourceType: 'task_run',
+                resourceId: $locked->public_id,
+                tenantId: $locked->tenant_id,
+                environmentId: $locked->environment_id,
+                summary: [
+                    'source_run_id' => $locked->public_id,
+                    'new_run_id' => $newRun->public_id,
+                    'task_id' => $task->public_id,
+                    'task_type' => $task->task_type,
+                    'previous_idempotency_key' => $locked->idempotency_key,
+                    'new_idempotency_key' => $idempotencyKey,
+                ],
+            );
+
+            return $newRun->fresh(['attempts', 'task']);
         });
-
-        $this->auditLogger->log(
-            action: 'dlq.replayed',
-            resourceType: 'task_run',
-            resourceId: $dead->public_id,
-            tenantId: $dead->tenant_id,
-            environmentId: $dead->environment_id,
-            summary: [
-                'source_run_id' => $dead->public_id,
-                'new_run_id' => $newRun->public_id,
-                'task_id' => $task->public_id,
-                'task_type' => $task->task_type,
-                'previous_idempotency_key' => $dead->idempotency_key,
-                'new_idempotency_key' => $idempotencyKey,
-            ],
-        );
-
-        return $newRun->fresh(['attempts', 'task']);
     }
 
     /**
@@ -125,7 +133,12 @@ final class DlqService
         $replayed = [];
 
         foreach ($deadRuns as $dead) {
-            $replayed[] = $this->replay($dead);
+            try {
+                $replayed[] = $this->replay($dead);
+            } catch (InvalidStateTransitionException) {
+                // Skipped: left the DLQ between list and replay (e.g. API manualRetry).
+                continue;
+            }
         }
 
         return $replayed;
@@ -154,6 +167,16 @@ final class DlqService
 
         if ($taskType !== null && $taskType !== '') {
             $query->whereHas('task', static function (Builder $builder) use ($taskType): void {
+                if ($taskType === 'default') {
+                    $builder->where(function (Builder $inner): void {
+                        $inner->whereNull('task_type')
+                            ->orWhere('task_type', '')
+                            ->orWhere('task_type', 'default');
+                    });
+
+                    return;
+                }
+
                 $builder->where('task_type', $taskType);
             });
         }
