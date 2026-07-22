@@ -1,6 +1,7 @@
 {
   "title": "Dashboard",
   "subtitle": "Overview of your scheduled HTTP tasks",
+  "createTask": "Create task",
   "stats": {
     "activeTasks": "Active tasks",
     "pausedTasks": "Paused tasks",
@@ -13,6 +14,11 @@
     "staleTitle": "Scheduler heartbeat is stale",
     "staleBody": "Last seen: {lastSeen}. Cron may not be running — check the per-minute scheduler jobs.",
     "ok": "Scheduler last seen {lastSeen}"
+  },
+  "recent": {
+    "title": "Recent runs",
+    "empty": "No recent runs yet.",
+    "viewAll": "View all runs"
   },
   "upcoming": {
     "title": "Upcoming tasks",

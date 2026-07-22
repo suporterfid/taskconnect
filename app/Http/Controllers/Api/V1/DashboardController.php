@@ -62,6 +62,22 @@ class DashboardController extends Controller
                     ])
                     ->values()
                     ->all(),
+                'recent_run_items' => (clone $runQuery)
+                    ->with('task')
+                    ->orderByDesc('created_at')
+                    ->orderByDesc('id')
+                    ->limit(8)
+                    ->get()
+                    ->map(fn (TaskRun $run) => [
+                        'id' => $run->public_id,
+                        'task_id' => $run->task?->public_id,
+                        'task_name' => $run->task?->name,
+                        'run_state' => $run->run_state->value,
+                        'finished_at' => $run->finished_at?->utc()->format('Y-m-d\TH:i:s\Z'),
+                        'created_at' => $run->created_at?->utc()->format('Y-m-d\TH:i:s\Z'),
+                    ])
+                    ->values()
+                    ->all(),
                 'oldest_due_at' => $oldestDue === null
                     ? null
                     : Carbon::parse($oldestDue)->utc()->format('Y-m-d\TH:i:s\Z'),

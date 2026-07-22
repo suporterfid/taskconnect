@@ -26,6 +26,10 @@ class DashboardTest extends TestCase
                     'paused_tasks',
                     'recent_runs',
                     'failed_runs_24h',
+                    'retry_wait_runs',
+                    'dead_runs',
+                    'upcoming_tasks',
+                    'recent_run_items',
                     'scheduler_last_seen_at',
                 ],
             ]);

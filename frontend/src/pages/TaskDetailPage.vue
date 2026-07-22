@@ -11,6 +11,7 @@ import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { Task, TaskRun } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
+import { formatScheduleHuman } from '@/utils/scheduleHuman'
 
 const props = defineProps<{ id: string }>()
 const { t, locale } = useI18n()
@@ -31,6 +32,11 @@ const { data, loading, error, reload } = useAsyncData(async () => {
 })
 
 const status = computed(() => data.value?.definition_status)
+
+const scheduleLabel = computed(() => {
+  const formatted = formatScheduleHuman(data.value?.schedule_human, t)
+  return formatted || data.value?.schedule?.kind || '—'
+})
 
 function formatDate(value?: string | null): string {
   if (!value) {
@@ -168,7 +174,7 @@ async function onArchive(): Promise<void> {
         <div>
           <dt class="text-sm text-gray-500">{{ $t('tasks.detail.schedule') }}</dt>
           <dd class="mt-1 text-sm">
-            {{ data.schedule_human || data.schedule?.kind || '—' }}
+            {{ scheduleLabel }}
           </dd>
         </div>
         <div>

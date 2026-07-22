@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Application\Tasks\RunLifecycleService;
+use App\Domain\Execution\Enums\RunState;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TaskRunAttemptResource;
 use App\Http\Resources\TaskRunResource;
@@ -11,7 +12,7 @@ use App\Infrastructure\Persistence\Eloquent\TaskRun;
 use App\Infrastructure\Persistence\Eloquent\Tenant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Illuminate\Validation\Rule;
 
 class TaskRunController extends Controller
 {
@@ -26,6 +27,7 @@ class TaskRunController extends Controller
         $limit = min(100, max(1, (int) $request->query('limit', 50)));
         $before = $request->query('before');
         $taskPublicId = $request->query('task_id');
+        $runState = $request->query('run_state');
 
         $query = TaskRun::query()
             ->where('task_runs.tenant_id', $tenant->id)
@@ -38,6 +40,13 @@ class TaskRunController extends Controller
             $query->whereHas('task', function ($builder) use ($taskPublicId): void {
                 $builder->where('public_id', $taskPublicId);
             });
+        }
+
+        if (is_string($runState) && $runState !== '') {
+            $request->validate([
+                'run_state' => ['required', Rule::in(array_column(RunState::cases(), 'value'))],
+            ]);
+            $query->where('task_runs.run_state', $runState);
         }
 
         if (is_string($before) && $before !== '') {

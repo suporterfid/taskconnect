@@ -1,6 +1,7 @@
 {
   "title": "Painel",
   "subtitle": "Visão geral das suas tarefas HTTP agendadas",
+  "createTask": "Criar tarefa",
   "stats": {
     "activeTasks": "Tarefas ativas",
     "pausedTasks": "Tarefas pausadas",
@@ -13,6 +14,11 @@
     "staleTitle": "Heartbeat do agendador está atrasado",
     "staleBody": "Última vez: {lastSeen}. O cron pode não estar rodando — verifique os jobs do agendador a cada minuto.",
     "ok": "Agendador visto pela última vez em {lastSeen}"
+  },
+  "recent": {
+    "title": "Execuções recentes",
+    "empty": "Nenhuma execução recente ainda.",
+    "viewAll": "Ver todas as execuções"
   },
   "upcoming": {
     "title": "Próximas tarefas",

@@ -20,6 +20,11 @@ const taskIdFilter = computed(() => {
   return typeof raw === 'string' && raw.length > 0 ? raw : null
 })
 
+const runStateFilter = computed(() => {
+  const raw = route.query.run_state
+  return typeof raw === 'string' && raw.length > 0 ? raw : null
+})
+
 const { data, loading, error, reload } = useAsyncData(async () => {
   if (!tenant.currentTenantId || !tenant.currentEnvironmentId) {
     return [] as TaskRun[]
@@ -28,6 +33,9 @@ const { data, loading, error, reload } = useAsyncData(async () => {
   if (taskIdFilter.value) {
     params.task_id = taskIdFilter.value
   }
+  if (runStateFilter.value) {
+    params.run_state = runStateFilter.value
+  }
   const { data: response } = await api.get<{ data: TaskRun[] }>(
     tenant.tenantPath('/task-runs'),
     { params },
@@ -35,7 +43,7 @@ const { data, loading, error, reload } = useAsyncData(async () => {
   return response.data ?? []
 })
 
-watch(taskIdFilter, () => {
+watch([taskIdFilter, runStateFilter], () => {
   void reload()
 })
 
@@ -65,16 +73,25 @@ function displayTime(run: TaskRun): string {
     <PageHeader :title="$t('runs.title')" :subtitle="$t('runs.subtitle')" />
 
     <p
-      v-if="taskIdFilter"
+      v-if="taskIdFilter || runStateFilter"
       class="mb-4 text-sm text-gray-600"
     >
-      {{ $t('runs.filteredByTask') }}
-      <RouterLink
-        :to="`/tasks/${taskIdFilter}`"
-        class="text-violet-600 hover:underline"
-      >
-        {{ taskIdFilter }}
-      </RouterLink>
+      <template v-if="taskIdFilter">
+        {{ $t('runs.filteredByTask') }}
+        <RouterLink
+          :to="`/tasks/${taskIdFilter}`"
+          class="text-violet-600 hover:underline"
+        >
+          {{ taskIdFilter }}
+        </RouterLink>
+      </template>
+      <template v-if="runStateFilter">
+        <span v-if="taskIdFilter"> · </span>
+        {{ $t('runs.filteredByState') }}
+        <span class="font-medium">
+          {{ $t(`runs.status.${runStateFilter}`, runStateFilter) }}
+        </span>
+      </template>
       ·
       <RouterLink to="/runs" class="text-violet-600 hover:underline">
         {{ $t('runs.clearFilter') }}

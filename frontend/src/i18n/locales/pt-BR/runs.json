@@ -4,6 +4,7 @@
   "view": "Ver",
   "needsTenant": "Selecione um tenant e um ambiente antes de ver as execuções.",
   "filteredByTask": "Filtrado pela tarefa",
+  "filteredByState": "Filtrado pelo estado",
   "clearFilter": "Limpar filtro",
   "fields": {
     "id": "ID da execução",
@@ -18,6 +19,10 @@
     "noAttempts": "Nenhuma tentativa registrada ainda.",
     "attemptNumber": "Tentativa {n}",
     "triggeredAt": "Disparada em",
+    "scheduledFor": "Agendada para",
+    "idempotencyKey": "Chave de idempotência",
+    "nextAttemptAt": "Próxima tentativa em",
+    "nextRetryAt": "Próximo retry em",
     "startedAt": "Iniciada em",
     "finishedAt": "Finalizada em",
     "duration": "Duração",
@@ -27,7 +32,13 @@
     "requestBody": "Corpo da requisição (redigido)",
     "responseStatus": "Status da resposta",
     "responseBody": "Corpo da resposta (truncado)",
-    "transportError": "Erro de transporte"
+    "transportError": "Erro de transporte",
+    "terminal": {
+      "dead": "Esta execução terminou em falha terminal ({code}, HTTP {status}). Use Tentar novamente para criar uma nova tentativa pendente.",
+      "blocked": "Esta execução foi bloqueada ({code}). Corrija o destino ou a política e tente novamente se apropriado.",
+      "cancelled": "Esta execução foi cancelada e não continuará.",
+      "unknownCode": "erro desconhecido"
+    }
   },
   "actions": {
     "cancel": "Cancelar execução",

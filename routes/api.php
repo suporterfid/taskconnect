@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\EnvironmentController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\MemberController;
 use App\Http\Controllers\Api\V1\PlatformHealthController;
+use App\Http\Controllers\Api\V1\SchedulePreviewController;
 use App\Http\Controllers\Api\V1\SecretController;
 use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\TaskRunController;
@@ -58,6 +59,7 @@ Route::prefix('v1')->group(function (): void {
             Route::get('tenants/{tenantId}/audit-logs', [AuditLogController::class, 'index']);
 
             Route::get('tenants/{tenantId}/environments/{environmentId}/dashboard', DashboardController::class);
+            Route::post('tenants/{tenantId}/environments/{environmentId}/schedules/preview', SchedulePreviewController::class);
 
             Route::get('tenants/{tenantId}/environments/{environmentId}/secrets', [SecretController::class, 'index']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/secrets', [SecretController::class, 'store']);
