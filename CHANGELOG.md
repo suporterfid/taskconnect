@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- v1 Extension P0 epic closeout: R1–R9 complete; see `docs/architecture/p0-epic-closeout.md` (closes #16)
 - v1 Extension P1 epic closeout: R10–R15 complete; see `docs/architecture/p1-epic-closeout.md` (closes #27)
 - v1 Extension R17: WFQ deficit claiming (`SCHEDULER_FAIRNESS_MODE`) + optional claim-time priority preemption; see `docs/architecture/fairness.md`
 - v1 Extension R18: Prometheus-style `GET /api/v1/platform/metrics` (platform admin); queue depth, in-flight, DLQ, per-type latency, tick vs budget; see `docs/architecture/metrics.md`

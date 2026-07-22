@@ -89,7 +89,7 @@ Canonical tracking (created 2026-07-22):
 
 | Issue | Title |
 |-------|-------|
-| [#16](https://github.com/suporterfid/taskconnect/issues/16) | Epic: P0 stop line (R1–R9) |
+| [#16](https://github.com/suporterfid/taskconnect/issues/16) | Epic: P0 stop line (R1–R9) — **closed** (R1–R9 done) |
 | [#17](https://github.com/suporterfid/taskconnect/issues/17) | P0/R1 Workspace scoping |
 | [#18](https://github.com/suporterfid/taskconnect/issues/18) | P0/R2 Enqueue idempotency |
 | [#19](https://github.com/suporterfid/taskconnect/issues/19) | P0/R3 Delivery idempotency |
