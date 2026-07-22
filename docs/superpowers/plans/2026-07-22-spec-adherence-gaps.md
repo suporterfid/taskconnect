@@ -16,7 +16,7 @@
 | R12 / R17 | Done | RR + WFQ; claim-time preemption only |
 | R14 | Done (UI) | Missing authenticated Playwright depth (#65) |
 | §8 S8/S10 | Partial | Submit limits yes; claim/delivery audit + callback verify limit (#64) |
-| §6.1 literal schema | Partial | v0-compatible aliases — document (#66) |
+| §6.1 literal schema | Done | Mapping doc `docs/architecture/api-contract-v1.md` (#66) |
 
 ## Implementation order
 
@@ -24,7 +24,7 @@
 2. **#63** egress extras — **done**
 3. **#64** audit + S8 clarification/limiter
 4. **#65** Playwright authenticated operator journeys
-5. **#66** contract mapping doc (can parallel anytime; no API break without version plan)
+5. **#66** contract mapping doc — **done**
 
 ## Non-goals for this epic
 
