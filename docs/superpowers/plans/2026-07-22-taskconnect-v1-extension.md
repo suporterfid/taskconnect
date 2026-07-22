@@ -67,6 +67,7 @@ Implement **in order R1→R9**. Do not start R(n+1) until R(n) acceptance tests 
 | R15 | **Done** (#33) | DB-backed submit rate limits; `docs/architecture/submit-rate-limiting.md` |
 | R14 | **Done** (#32) | Operator UI: task governance fields, DLQ page, pipelines pages + REST |
 | R16 | **Done** (part of #34) | Top-level `run_at` + optional five-field `cron`; `docs/architecture/delayed-schedules.md` |
+| R17 | **Done** (#56) | WFQ deficit claiming + claim-time priority preemption; `docs/architecture/fairness.md` |
 | R18 | **Done** (part of #34) | Prometheus-style `/platform/metrics`; `docs/architecture/metrics.md` |
 
 ## Open questions (defaults applied)
@@ -102,6 +103,7 @@ Canonical tracking (created 2026-07-22):
 | [#27](https://github.com/suporterfid/taskconnect/issues/27) | Epic: P1 (after P0 review) |
 | [#28](https://github.com/suporterfid/taskconnect/issues/28)–[#33](https://github.com/suporterfid/taskconnect/issues/33) | P1 R10–R15 |
 | [#34](https://github.com/suporterfid/taskconnect/issues/34) | Epic: P2 R16–R18 |
+| [#56](https://github.com/suporterfid/taskconnect/issues/56) | P2/R17 Priority preemption / refined WFQ |
 | [#35](https://github.com/suporterfid/taskconnect/issues/35) | Open questions Q1–Q6 defaults |
 
 Spec copy: `docs/superpowers/specs/2026-07-22-taskconnect-v1-extension-spec.md`.
