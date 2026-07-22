@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- v1 Extension open-questions audit: Q1–Q6 defaults documented in `docs/architecture/open-questions.md` (closes #35)
 - v1 Extension R16: top-level delayed `run_at` synthesizes once schedules; optional five-field `cron` schedule kind; see `docs/architecture/delayed-schedules.md`
 - v1 Extension R14: operator SPA task governance columns, DLQ inspect/replay UI, pipeline instance visibility; REST `…/dlq` + `…/pipeline-instances`
 - v1 Extension R15: DB-backed submission rate limits per workspace (`rate_limit_buckets`, `Retry-After` on 429); see `docs/architecture/submit-rate-limiting.md`
