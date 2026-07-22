@@ -15,6 +15,8 @@ class SecretResource extends JsonResource
     {
         return [
             'id' => $this->public_id,
+            /** Environment public id — v1 Extension workspace alias (R1). */
+            'workspace_id' => $this->environment?->public_id,
             'name' => $this->name,
             'version' => $this->version,
             'usage_count' => (int) ($this->endpoint_profiles_count

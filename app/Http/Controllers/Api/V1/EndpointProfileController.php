@@ -34,7 +34,7 @@ class EndpointProfileController extends Controller
         $this->authorize('viewAny', [EndpointProfile::class, $tenant]);
 
         $profiles = EndpointProfile::query()
-            ->with('secret')
+            ->with(['secret', 'environment'])
             ->where('tenant_id', $tenant->id)
             ->where('environment_id', $environment->id)
             ->notArchived()
@@ -298,7 +298,7 @@ class EndpointProfileController extends Controller
     private function findProfile(int $tenantId, int $environmentId, string $profileId): EndpointProfile
     {
         return EndpointProfile::query()
-            ->with('secret')
+            ->with(['secret', 'environment'])
             ->where('public_id', $profileId)
             ->where('tenant_id', $tenantId)
             ->where('environment_id', $environmentId)

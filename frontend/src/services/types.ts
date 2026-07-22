@@ -61,6 +61,8 @@ export interface Tenant {
 
 export interface Environment {
   id: string
+  /** Alias of id — Environment is the v1 Extension workspace. */
+  workspace_id?: string
   tenant_id?: string
   name: string
   slug: string
@@ -121,6 +123,8 @@ export interface RetryPolicy {
 
 export interface Task {
   id: string
+  /** Environment public id — v1 Extension workspace alias. */
+  workspace_id?: string
   name: string
   description?: string | null
   definition_status: TaskDefinitionStatus

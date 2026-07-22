@@ -15,6 +15,7 @@ class AuditLog extends Model
     protected $fillable = [
         'public_id',
         'tenant_id',
+        'environment_id',
         'actor_user_id',
         'action',
         'resource_type',
@@ -40,6 +41,11 @@ class AuditLog extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    public function environment(): BelongsTo
+    {
+        return $this->belongsTo(Environment::class);
     }
 
     public function actor(): BelongsTo

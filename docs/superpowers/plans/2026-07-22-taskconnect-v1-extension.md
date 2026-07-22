@@ -52,7 +52,7 @@ Implement **in order R1→R9**. Do not start R(n+1) until R(n) acceptance tests 
 
 | Req | Status | Notes |
 |-----|--------|-------|
-| R1 | Partial | Environment exists; no `workspace_id` naming; audit not env-scoped; claimer global |
+| R1 | **Done** (#17) | Environment ↔ workspace_id API alias; audit_logs.environment_id; see `docs/architecture/workspace.md` |
 | R2 | Partial | Idempotency middleware optional on create/run-now |
 | R3 | Exists | Stable run key via `X-Task-Idempotency-Key` |
 | R4 | Missing | No task types / priority / weight / caps |
