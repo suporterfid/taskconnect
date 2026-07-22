@@ -67,6 +67,16 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Slow endpoint for delivery timeout tests: /_delay?ms=2500
+  if (pathname === '/_delay') {
+    const delayMs = Math.max(0, Math.min(30_000, Number(url.searchParams.get('ms') || 1000)));
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    const body = await readBody(req);
+    const entry = captureRequest(req, body);
+    sendJson(res, 200, { ok: true, delayedMs: delayMs, capturedId: entry.id });
+    return;
+  }
+
   const body = await readBody(req);
   const entry = captureRequest(req, body);
 

@@ -9,7 +9,7 @@
 | Area | Status | Notes |
 |------|--------|-------|
 | R1–R3, R5–R6, R9, R11, R13, R15–R18 | Done | Tests + architecture docs on `main` |
-| R4 | Partial | Caps/weight/priority done; **`timeout_ms` unused on sockets** (#62) |
+| R4 | Done | Caps/weight/priority + **`timeout_ms` applied on delivery** (#62) |
 | R7 | Partial | SSRF/DNS-pin done; **§6.5 extras** (#63) |
 | R8 | Done (opt-in) | Flags default off — accepted dual-mode / Q1 |
 | R10 | Done | Pipeline DAG; chaining not on bare task create (#66) |
@@ -20,7 +20,7 @@
 
 ## Implementation order
 
-1. **#62** `timeout_ms` → delivery timeouts (behavioral correctness for R4)
+1. **#62** `timeout_ms` → delivery timeouts — **done**
 2. **#63** egress extras (shared-hosting-safe DB rate limit; optional robots)
 3. **#64** audit + S8 clarification/limiter
 4. **#65** Playwright authenticated operator journeys
