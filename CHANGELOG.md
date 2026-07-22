@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- v1 Extension R6: DLQ CLI `tasks:dlq:list|show|replay` over `run_state=dead`; `RETENTION_DEAD_RUNS_DAYS` (default 30); see `docs/architecture/dlq.md`
 - v1 Extension R5: `scheduler:execute-due` / `retry-due` enforce wall-clock budget via chunked claim-execute (`SCHEDULER_TARGET_DURATION_SECONDS`, `SCHEDULER_BUDGET_SAFETY_MARGIN_SECONDS`, `SCHEDULER_CLAIM_CHUNK`)
 - v1 Extension R4: named task types (`document.convert`, `site.crawl`, …) with priority/weight/timeout/egress defaults, per-type concurrency caps + global in-flight ceiling; claimer honors capacity by weight (`config/task_types.php`, `TASK_TYPE_*`)
 - v1 Extension R3: outbound deliveries send canonical `Idempotency-Key` (stable per run) plus deprecated `X-Task-Idempotency-Key` alias; see `docs/architecture/callback-contract.md`

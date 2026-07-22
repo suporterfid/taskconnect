@@ -17,7 +17,7 @@ Every outbound delivery includes:
 
 1. Dedupe side effects on `Idempotency-Key` (fall back to `X-Task-Idempotency-Key` during migration).
 2. Automatic retries and manual retry-from-dead **reuse** the same delivery key for that run.
-3. A future DLQ **replay** (R6) mints a new delivery idempotency group — treat as a new logical delivery.
+3. DLQ **replay** (`tasks:dlq:replay`, R6) mints a new delivery idempotency group — treat as a new logical delivery.
 
 ### Example
 

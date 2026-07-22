@@ -15,6 +15,7 @@ final class RetentionCleaner
         $counts = [
             'payload_snapshots_cleared' => 0,
             'attempt_metadata_cleared' => 0,
+            'dead_runs_deleted' => 0,
             'run_summaries_deleted' => 0,
             'audit_logs_deleted' => 0,
             'idempotency_keys_deleted' => 0,
@@ -25,6 +26,7 @@ final class RetentionCleaner
 
         $snapshotDays = (int) config('retention.payload_snapshots_days', 30);
         $metadataDays = (int) config('retention.attempt_metadata_days', 180);
+        $deadRunsDays = (int) config('retention.dead_runs_days', 30);
         $runSummaryDays = (int) config('retention.run_summary_days', 365);
         $auditLogsDays = (int) config('retention.audit_logs_days', 365);
         $heartbeatDays = (int) config('retention.system_heartbeat_days', 30);
@@ -70,6 +72,27 @@ final class RetentionCleaner
         }
 
         if (Schema::hasTable('task_runs')) {
+            // R6: age DLQ (dead) faster than general terminal run summaries.
+            $deadIds = DB::table('task_runs')
+                ->where('run_state', 'dead')
+                ->where(function ($q) use ($deadRunsDays) {
+                    $q->where('finished_at', '<', now()->subDays($deadRunsDays))
+                        ->orWhere(function ($inner) use ($deadRunsDays) {
+                            $inner->whereNull('finished_at')
+                                ->where('created_at', '<', now()->subDays($deadRunsDays));
+                        });
+                })
+                ->orderBy('id')
+                ->limit($batchSize)
+                ->pluck('id');
+
+            if ($deadIds->isNotEmpty()) {
+                if (Schema::hasTable('task_run_attempts')) {
+                    DB::table('task_run_attempts')->whereIn('task_run_id', $deadIds)->delete();
+                }
+                $counts['dead_runs_deleted'] = DB::table('task_runs')->whereIn('id', $deadIds)->delete();
+            }
+
             $runIds = DB::table('task_runs')
                 ->whereIn('run_state', ['succeeded', 'dead', 'cancelled', 'blocked'])
                 ->where(function ($q) use ($runSummaryDays) {

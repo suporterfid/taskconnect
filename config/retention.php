@@ -17,4 +17,7 @@ return [
 
     'system_heartbeat_days' => (int) env('RETENTION_SYSTEM_HEARTBEAT_DAYS', 30),
 
+    /** Age/prune dead-letter runs (run_state=dead) before general run-summary retention (Q6). */
+    'dead_runs_days' => (int) env('RETENTION_DEAD_RUNS_DAYS', 30),
+
 ];

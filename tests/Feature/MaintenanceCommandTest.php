@@ -28,6 +28,7 @@ class MaintenanceCommandTest extends TestCase
         $this->assertArrayHasKey('run_summaries_deleted', $counts);
         $this->assertArrayHasKey('audit_logs_deleted', $counts);
         $this->assertArrayHasKey('idempotency_keys_deleted', $counts);
+        $this->assertArrayHasKey('dead_runs_deleted', $counts);
         $this->assertArrayHasKey('stale_claims_released', $counts);
     }
 }

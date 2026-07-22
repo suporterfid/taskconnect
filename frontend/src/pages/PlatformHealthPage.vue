@@ -191,6 +191,14 @@ function staleLabel(stale?: boolean): string {
               {{ data.retention.system_heartbeat_days }}
             </dd>
           </div>
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.deadRunsDays') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ data.retention.dead_runs_days ?? '—' }}
+            </dd>
+          </div>
         </dl>
       </section>
     </template>

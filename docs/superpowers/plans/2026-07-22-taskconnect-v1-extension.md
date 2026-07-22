@@ -57,7 +57,7 @@ Implement **in order R1→R9**. Do not start R(n+1) until R(n) acceptance tests 
 | R3 | **Done** (#19) | Outbound `Idempotency-Key` + deprecated `X-Task-Idempotency-Key`; `docs/architecture/callback-contract.md` |
 | R4 | **Done** (#20) | `config/task_types.php` + task columns; claimer priority + weight caps; see CHANGELOG R4 |
 | R5 | **Done** (#21) | `TickBudget` + chunked claim-execute in `SchedulerCycleRunner`; see `docs/deployment/cron.md` |
-| R6 | Partial | `dead` state + API retry; no DLQ artisan |
+| R6 | **Done** (#22) | DLQ = `run_state=dead`; `tasks:dlq:*` CLI + 30d retention; `docs/architecture/dlq.md` |
 | R7 | Partial | Global SSRF + tenant allowlist; no named profiles |
 | R8 | Missing | No GrandpaSSOn / HMAC callback signing |
 | R9 | Partial | Secrets encrypted; release zip scan thin |

@@ -374,4 +374,5 @@ export interface RetentionSettings {
   audit_logs_days: number
   api_idempotency_hours: number
   system_heartbeat_days: number
+  dead_runs_days?: number
 }

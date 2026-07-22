@@ -159,7 +159,8 @@
       "runSummaryDays": "Resumos de execução (dias)",
       "auditLogsDays": "Logs de auditoria (dias)",
       "apiIdempotencyHours": "Chaves de idempotência da API (horas)",
-      "systemHeartbeatDays": "Heartbeats do sistema (dias)"
+      "systemHeartbeatDays": "Heartbeats do sistema (dias)",
+      "deadRunsDays": "Execuções em dead-letter (dias)"
     }
   },
   "saved": "Configurações salvas"
