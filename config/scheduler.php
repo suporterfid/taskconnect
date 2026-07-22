@@ -18,6 +18,13 @@ return [
 
     'failure_emails_enabled' => (bool) env('SCHEDULER_FAILURE_EMAILS_ENABLED', true),
 
+    /** Master switch for per-workspace DLQ webhooks (R13). */
+    'failure_webhooks_enabled' => (bool) env('SCHEDULER_FAILURE_WEBHOOKS_ENABLED', true),
+
+    'failure_webhook_connect_timeout' => (int) env('SCHEDULER_FAILURE_WEBHOOK_CONNECT_TIMEOUT', 2),
+
+    'failure_webhook_total_timeout' => (int) env('SCHEDULER_FAILURE_WEBHOOK_TOTAL_TIMEOUT', 5),
+
     /**
      * Coalesce / debounce window (R11). Submits with the same coalesce_key in a
      * workspace within this many seconds reuse the first effective task.

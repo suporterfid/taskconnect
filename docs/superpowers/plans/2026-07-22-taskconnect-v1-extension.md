@@ -63,6 +63,7 @@ Implement **in order R1→R9**. Do not start R(n+1) until R(n) acceptance tests 
 | R10 | **Done** (#28) | Pipeline templates + instance API + settlement; `docs/architecture/pipelines.md` |
 | R11 | **Done** (#29) | `coalesce_key` + window; `docs/architecture/coalesce.md` |
 | R12 | **Done** (#30) | Workspace weighted RR claiming; `docs/architecture/fairness.md` |
+| R13 | **Done** (#31) | Per-workspace DLQ email/webhook alerts; `docs/architecture/dlq-alerting.md` |
 
 ## Open questions (defaults applied)
 

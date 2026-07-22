@@ -10,6 +10,7 @@ use App\Application\GrandpaSson\HttpIntrospectionClient;
 use App\Application\GrandpaSson\HttpTokenClient;
 use App\Application\GrandpaSson\IntrospectionClientInterface;
 use App\Application\GrandpaSson\TokenClientInterface;
+use App\Application\Notifications\DeadRunWebhookSender;
 use App\Application\Notifications\FailureNotifier;
 use App\Domain\Auth\CallbackHmac;
 use App\Application\Pipelines\PipelineInstanceService;
@@ -87,6 +88,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(PendingRunClaimer::class);
         $this->app->singleton(RetryClaimer::class);
         $this->app->singleton(StaleClaimRecovery::class);
+        $this->app->singleton(DeadRunWebhookSender::class);
         $this->app->singleton(FailureNotifier::class);
         $this->app->singleton(AttemptExecutor::class);
         $this->app->singleton(HeartbeatWriter::class);

@@ -13,6 +13,8 @@ php artisan tasks:dlq:replay --type=document.convert [--workspace=env_…] [--li
 
 `replay` creates a **new** Pending run with attempt count 1 and a **new** delivery `Idempotency-Key` group (see `docs/architecture/callback-contract.md`). The original dead run remains for history until retention deletes it. Replay is audited as `dlq.replayed`.
 
+On DLQ arrival, optional per-workspace email/webhook alerts fire (R13); see `docs/architecture/dlq-alerting.md`.
+
 API `POST …/task-runs/{id}/retry` still reuses the same delivery key (in-run retry semantics). Prefer the DLQ CLI when the operator wants a fresh delivery group after exhaustion.
 
 ## Retention
