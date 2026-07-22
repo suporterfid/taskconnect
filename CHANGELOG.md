@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- v1 Extension R12: weighted round-robin claim fairness across workspaces (`SCHEDULER_FAIRNESS_WORKSPACE_WEIGHT`); see `docs/architecture/fairness.md`
 - v1 Extension R11: `coalesce_key` + `SCHEDULER_COALESCE_WINDOW_SECONDS` collapses bursty workspace enqueues (incl. pipeline `publish.build`); see `docs/architecture/coalesce.md`
 - v1 Extension R10: named pipeline DAGs (`on_success` / `on_failure` / `depends_on`) with `convert-index-publish` template; workspace-scoped instance API; settlement materializes successors; see `docs/architecture/pipelines.md`
 - v1 Extension R8: GrandpaSSOn client-credentials + HMAC callback headers (outbound) and introspected `tasks:write` inbound with workspace `aud` check (dual-mode; flags default off); see `docs/architecture/grandpasson-auth.md`

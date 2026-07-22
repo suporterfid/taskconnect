@@ -24,4 +24,4 @@ All tenant resources remain filtered by `tenant_id` **and** `environment_id`. Cr
 
 ## Claiming
 
-`scheduler:execute-due` continues to claim due work **globally** (all tenants/workspaces) under MySQL leases. Settlement and API visibility remain workspace-scoped via `environment_id` on tasks/runs. Fairness across workspaces is P1 (R12), not R1.
+`scheduler:execute-due` continues to claim due work **globally** (all tenants/workspaces) under MySQL leases. Settlement and API visibility remain workspace-scoped via `environment_id` on tasks/runs. Cross-workspace claim fairness uses weighted round-robin (R12); see `docs/architecture/fairness.md`.

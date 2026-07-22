@@ -11,6 +11,7 @@ use App\Domain\Execution\OccurrenceKeyGenerator;
 use App\Domain\Scheduling\ScheduleCalculator;
 use App\Domain\Scheduling\ScheduleKind;
 use App\Domain\Scheduling\TaskTypeCatalog;
+use App\Domain\Scheduling\WorkspaceFairnessInterleaver;
 use App\Domain\Shared\Clock;
 use App\Infrastructure\Persistence\Eloquent\Task;
 use App\Infrastructure\Persistence\Eloquent\TaskRun;
@@ -28,6 +29,7 @@ final class DueTaskClaimer
         private readonly IdempotencyKeyGenerator $idempotencyKeyGenerator,
         private readonly OccurrenceKeyGenerator $occurrenceKeyGenerator,
         private readonly TaskTypeCatalog $taskTypeCatalog,
+        private readonly WorkspaceFairnessInterleaver $fairness = new WorkspaceFairnessInterleaver,
     ) {
     }
 
@@ -47,9 +49,9 @@ final class DueTaskClaimer
                 return;
             }
 
-            // Over-fetch so saturated high-priority types do not hide other due work.
+            // Over-fetch so saturated high-priority types / workspaces do not hide other due work.
             $candidateLimit = max($batchSize * 20, 100);
-            $tasks = $this->selectDueTasks($candidateLimit, $now);
+            $tasks = $this->fairness->interleave($this->selectDueTasks($candidateLimit, $now));
 
             foreach ($tasks as $task) {
                 if (count($claimed) >= $batchSize) {

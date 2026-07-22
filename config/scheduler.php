@@ -24,4 +24,10 @@ return [
      */
     'coalesce_window_seconds' => (int) env('SCHEDULER_COALESCE_WINDOW_SECONDS', 60),
 
+    /**
+     * Per-workspace picks per fairness round when interleaving due work (R12).
+     * Weight 1 = classic round-robin across workspaces.
+     */
+    'fairness_workspace_weight' => (int) env('SCHEDULER_FAIRNESS_WORKSPACE_WEIGHT', 1),
+
 ];
