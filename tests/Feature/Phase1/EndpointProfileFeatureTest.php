@@ -43,7 +43,7 @@ class EndpointProfileFeatureTest extends TestCase
         );
 
         $response->assertOk()
-            ->assertJsonPath('data.transport_error_code', 'blocked_ip')
+            ->assertJsonPath('data.transport_error_code', 'host_not_allowlisted')
             ->assertJsonPath('data.response_status', null);
     }
 

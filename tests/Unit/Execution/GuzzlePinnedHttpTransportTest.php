@@ -2,10 +2,12 @@
 
 namespace Tests\Unit\Execution;
 
+use App\Domain\Execution\Outbound\EgressProfile;
 use App\Domain\Execution\Outbound\OutboundPolicy;
 use App\Domain\Execution\Outbound\OutboundPolicyConfig;
 use App\Domain\Execution\Outbound\OutboundPolicyViolation;
 use App\Domain\Execution\Outbound\ValidatedEndpoint;
+use App\Domain\Scheduling\TaskTypeCatalog;
 use App\Infrastructure\HttpClient\GuzzlePinnedHttpTransport;
 use App\Infrastructure\HttpClient\PinnedHttpRequest;
 use GuzzleHttp\Client;
@@ -67,6 +69,7 @@ class GuzzlePinnedHttpTransportTest extends TestCase
         $transport->send(new PinnedHttpRequest(
             method: 'GET',
             endpoint: $this->endpoint('http://example.com/start', 'example.com', '93.184.216.34'),
+            egressProfile: EgressProfile::PublicCrawl,
         ));
     }
 
@@ -86,6 +89,7 @@ class GuzzlePinnedHttpTransportTest extends TestCase
         $transport->send(new PinnedHttpRequest(
             method: 'GET',
             endpoint: $this->endpoint('http://example.com/start', 'example.com', '93.184.216.34'),
+            egressProfile: EgressProfile::PublicCrawl,
         ));
     }
 

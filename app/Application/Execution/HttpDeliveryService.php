@@ -4,9 +4,11 @@ namespace App\Application\Execution;
 
 use App\Application\Secrets\SecretService;
 use App\Domain\EndpointProfiles\AuthMode;
+use App\Domain\Execution\Outbound\EgressProfile;
 use App\Domain\Execution\Outbound\OutboundPolicy;
 use App\Domain\Execution\Outbound\OutboundPolicyViolation;
 use App\Domain\Execution\Outbound\ValidatedEndpoint;
+use App\Domain\Scheduling\TaskTypeCatalog;
 use App\Infrastructure\HttpClient\PinnedHttpTransport;
 use App\Infrastructure\HttpClient\PinnedHttpRequest;
 use App\Infrastructure\HttpClient\PinnedHttpResponse;
@@ -23,6 +25,7 @@ final class HttpDeliveryService
         private readonly PinnedHttpTransport $transport,
         private readonly RequestSnapshotRedactor $redactor,
         private readonly SecretService $secretService,
+        private readonly TaskTypeCatalog $taskTypeCatalog,
     ) {
     }
 
@@ -35,8 +38,13 @@ final class HttpDeliveryService
             $resolved = $this->resolveRequest($task);
             $this->outboundPolicy->validateHeaders($resolved['headers']);
 
+            $egressProfile = $this->resolveEgressProfile($task);
             $additionalAllowHosts = $this->tenantAllowHosts($task);
-            $validated = $this->outboundPolicy->validateUrl($resolved['url'], $additionalAllowHosts);
+            $validated = $this->outboundPolicy->validateUrl(
+                $resolved['url'],
+                $additionalAllowHosts,
+                $egressProfile,
+            );
             $endpoint = $this->selectPinnedEndpoint($validated);
             $profile = $task->endpointProfile;
 
@@ -57,6 +65,7 @@ final class HttpDeliveryService
                 connectTimeout: $profile?->connect_timeout,
                 totalTimeout: $profile?->total_timeout,
                 additionalAllowHosts: $additionalAllowHosts,
+                egressProfile: $egressProfile,
             ));
 
             return new DeliveryResult(
@@ -72,6 +81,17 @@ final class HttpDeliveryService
                 blockMessage: $exception->getMessage(),
             );
         }
+    }
+
+    private function resolveEgressProfile(Task $task): EgressProfile
+    {
+        if ($task->egress_profile !== null && $task->egress_profile !== '') {
+            return EgressProfile::tryFromMixed($task->egress_profile);
+        }
+
+        $defaults = $this->taskTypeCatalog->definition($task->task_type);
+
+        return EgressProfile::tryFromMixed($defaults['egress_profile'] ?? null);
     }
 
     /**

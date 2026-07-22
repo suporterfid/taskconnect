@@ -3,6 +3,7 @@
 namespace App\Application\EndpointProfiles;
 
 use App\Domain\EndpointProfiles\AuthMode;
+use App\Domain\Execution\Outbound\EgressProfile;
 use App\Domain\Execution\Outbound\OutboundPolicy;
 use App\Domain\Execution\Outbound\OutboundPolicyViolation;
 use App\Domain\Secrets\SecretRedactor;
@@ -35,7 +36,11 @@ final class EndpointProfileTester
 
         try {
             $additionalAllowHosts = $this->tenantAllowHosts($profile);
-            $validated = $this->outboundPolicy->validateUrl($request['url'], $additionalAllowHosts);
+            $validated = $this->outboundPolicy->validateUrl(
+                $request['url'],
+                $additionalAllowHosts,
+                EgressProfile::Internal,
+            );
             $this->outboundPolicy->validateHeaders($request['headers']);
 
             $response = $this->sendWithProfileOptions(
@@ -51,6 +56,7 @@ final class EndpointProfileTester
                     totalTimeout: $profile->total_timeout,
                     responseBodyLimit: (int) config('outbound.endpoint_test_response_body_limit', 8192),
                     additionalAllowHosts: $additionalAllowHosts,
+                    egressProfile: EgressProfile::Internal,
                 ),
             );
 

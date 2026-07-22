@@ -10,6 +10,7 @@ final readonly class OutboundPolicyConfig
      * @param  list<string>  $testingAllowHosts
      * @param  list<string>  $metadataHosts
      * @param  list<string>  $metadataIps
+     * @param  array<string, EgressProfileDefinition>  $profiles
      */
     public function __construct(
         public array $allowedPorts = [80, 443],
@@ -23,6 +24,7 @@ final readonly class OutboundPolicyConfig
         public int $connectTimeout = 5,
         public int $totalTimeout = 15,
         public int $responseBodyLimit = 65536,
+        public array $profiles = [],
     ) {
     }
 
@@ -31,6 +33,29 @@ final readonly class OutboundPolicyConfig
      */
     public static function fromArray(array $config): self
     {
+        $profiles = [];
+        foreach (($config['profiles'] ?? []) as $name => $profileConfig) {
+            if (! is_array($profileConfig)) {
+                continue;
+            }
+            $profile = EgressProfile::tryFrom((string) $name);
+            if ($profile === null) {
+                continue;
+            }
+            $hosts = array_values(array_filter(array_map(
+                static fn ($host): string => strtolower(trim((string) $host)),
+                (array) ($profileConfig['allow_hosts'] ?? []),
+            )));
+            $profiles[$profile->value] = new EgressProfileDefinition(
+                profile: $profile,
+                allowHosts: $hosts,
+                redirectLimit: isset($profileConfig['redirect_limit']) ? (int) $profileConfig['redirect_limit'] : null,
+                responseBodyLimit: isset($profileConfig['response_body_limit']) ? (int) $profileConfig['response_body_limit'] : null,
+                connectTimeout: isset($profileConfig['connect_timeout']) ? (int) $profileConfig['connect_timeout'] : null,
+                totalTimeout: isset($profileConfig['total_timeout']) ? (int) $profileConfig['total_timeout'] : null,
+            );
+        }
+
         return new self(
             allowedPorts: $config['allowed_ports'] ?? [80, 443],
             allowHttp: (bool) ($config['allow_http'] ?? false),
@@ -43,6 +68,12 @@ final readonly class OutboundPolicyConfig
             connectTimeout: (int) ($config['connect_timeout'] ?? 5),
             totalTimeout: (int) ($config['total_timeout'] ?? 15),
             responseBodyLimit: (int) ($config['response_body_limit'] ?? 65536),
+            profiles: $profiles,
         );
+    }
+
+    public function profile(EgressProfile $profile): EgressProfileDefinition
+    {
+        return $this->profiles[$profile->value] ?? new EgressProfileDefinition($profile);
     }
 }

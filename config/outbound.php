@@ -32,4 +32,30 @@ return [
         '100.100.100.200',
         'fd00:ec2::254',
     ],
+
+    /**
+     * Named egress profiles (R7). Selection comes from task.egress_profile / task type defaults.
+     * Q3: public-crawl is shipped but only assigned to types that need it (e.g. site.crawl).
+     */
+    'profiles' => [
+        'internal' => [
+            // Uses platform_allow_hosts + tenant outbound_allow_hosts + testing_allow_hosts.
+        ],
+        'public-crawl' => [
+            'redirect_limit' => (int) env('OUTBOUND_PUBLIC_CRAWL_REDIRECT_LIMIT', env('OUTBOUND_REDIRECT_LIMIT', 3)),
+            'response_body_limit' => (int) env('OUTBOUND_PUBLIC_CRAWL_RESPONSE_BODY_LIMIT', env('OUTBOUND_RESPONSE_BODY_LIMIT', 65536)),
+            'connect_timeout' => (int) env('OUTBOUND_PUBLIC_CRAWL_CONNECT_TIMEOUT', env('OUTBOUND_CONNECT_TIMEOUT', 5)),
+            'total_timeout' => (int) env('OUTBOUND_PUBLIC_CRAWL_TOTAL_TIMEOUT', env('OUTBOUND_TOTAL_TIMEOUT', 15)),
+        ],
+        'api' => [
+            'allow_hosts' => array_values(array_filter(array_map(
+                static fn (string $host): string => strtolower(trim($host)),
+                explode(',', env('OUTBOUND_API_ALLOW_HOSTS', ''))
+            ))),
+            'redirect_limit' => (int) env('OUTBOUND_API_REDIRECT_LIMIT', env('OUTBOUND_REDIRECT_LIMIT', 3)),
+            'response_body_limit' => (int) env('OUTBOUND_API_RESPONSE_BODY_LIMIT', env('OUTBOUND_RESPONSE_BODY_LIMIT', 65536)),
+            'connect_timeout' => (int) env('OUTBOUND_API_CONNECT_TIMEOUT', env('OUTBOUND_CONNECT_TIMEOUT', 5)),
+            'total_timeout' => (int) env('OUTBOUND_API_TOTAL_TIMEOUT', env('OUTBOUND_TOTAL_TIMEOUT', 15)),
+        ],
+    ],
 ];

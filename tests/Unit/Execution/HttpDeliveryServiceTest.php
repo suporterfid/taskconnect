@@ -7,6 +7,7 @@ use App\Application\Execution\RequestSnapshotRedactor;
 use App\Application\Secrets\SecretService;
 use App\Domain\Execution\Outbound\OutboundPolicy;
 use App\Domain\Execution\Outbound\OutboundPolicyConfig;
+use App\Domain\Scheduling\TaskTypeCatalog;
 use App\Infrastructure\HttpClient\PinnedHttpResponse;
 use App\Infrastructure\Persistence\Eloquent\Task;
 use App\Infrastructure\Persistence\Eloquent\TaskRun;
@@ -153,7 +154,10 @@ class HttpDeliveryServiceTest extends TestCase
                 'metadata_hosts' => ['metadata.google.internal'],
                 'metadata_ips' => ['169.254.169.254'],
             ]),
-            new ArrayDnsResolver(['receiver' => ['127.0.0.1']]),
+            new ArrayDnsResolver([
+                'receiver' => ['127.0.0.1'],
+                'public.example' => ['93.184.216.34'],
+            ]),
         );
 
         $service = new HttpDeliveryService(
@@ -161,8 +165,43 @@ class HttpDeliveryServiceTest extends TestCase
             transport: $transport,
             redactor: new RequestSnapshotRedactor,
             secretService: app(SecretService::class),
+            taskTypeCatalog: app(TaskTypeCatalog::class),
         );
 
         return [$service, $transport];
+    }
+
+    public function test_internal_profile_blocks_non_allowlisted_host_before_connect(): void
+    {
+        [$service] = $this->makeService();
+
+        $task = Task::factory()->create([
+            'url_or_path' => 'https://public.example/hook',
+            'egress_profile' => 'internal',
+        ]);
+
+        $run = TaskRun::query()->create([
+            'tenant_id' => $task->tenant_id,
+            'environment_id' => $task->environment_id,
+            'task_id' => $task->id,
+            'trigger_type' => 'scheduled',
+            'occurrence_key' => '2026-07-18T14:00:00Z',
+            'idempotency_key' => 'idem-blocked',
+            'run_state' => 'pending',
+            'attempt_count' => 1,
+        ]);
+
+        $attempt = TaskRunAttempt::query()->create([
+            'tenant_id' => $task->tenant_id,
+            'environment_id' => $task->environment_id,
+            'task_run_id' => $run->id,
+            'attempt_number' => 1,
+            'attempt_state' => 'pending',
+        ]);
+
+        $result = $service->deliver($attempt);
+
+        $this->assertTrue($result->blocked);
+        $this->assertSame('host_not_allowlisted', $result->blockReason);
     }
 }
