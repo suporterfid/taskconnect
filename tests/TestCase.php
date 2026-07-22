@@ -25,6 +25,43 @@ abstract class TestCase extends BaseTestCase
         ]);
     }
 
+    /**
+     * Auto-attach Idempotency-Key for enqueue routes so legacy tests stay valid
+     * after R2 made the header required. Explicit headers still win.
+     *
+     * @param  array<string, string>  $headers
+     * @return array<string, mixed>
+     */
+    public function postJson($uri, array $data = [], array $headers = [], $options = 0)
+    {
+        if ($this->uriRequiresIdempotencyKey((string) $uri) && ! $this->headersContainIdempotencyKey($headers)) {
+            $headers['Idempotency-Key'] = 'test-auto-'.uniqid('', true);
+        }
+
+        return parent::postJson($uri, $data, $headers, $options);
+    }
+
+    private function uriRequiresIdempotencyKey(string $uri): bool
+    {
+        $path = parse_url($uri, PHP_URL_PATH) ?? $uri;
+
+        return (bool) preg_match('#/tasks(?:/[^/]+/run-now)?$#', $path);
+    }
+
+    /**
+     * @param  array<string, string>  $headers
+     */
+    private function headersContainIdempotencyKey(array $headers): bool
+    {
+        foreach ($headers as $name => $value) {
+            if (strcasecmp((string) $name, 'Idempotency-Key') === 0 && is_string($value) && trim($value) !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private function forceSqliteTestingDatabase(): void
     {
         foreach (['DB_CONNECTION', 'DB_DATABASE', 'DB_URL', 'DB_HOST', 'DB_PORT', 'DB_USERNAME', 'DB_PASSWORD'] as $key) {

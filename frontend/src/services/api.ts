@@ -186,8 +186,25 @@ export const api: AxiosInstance = axios.create({
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const requestId = crypto.randomUUID()
   config.headers.set('X-Request-Id', requestId)
+
+  // R2: enqueue paths require Idempotency-Key (SPA generates one per attempt).
+  if (needsEnqueueIdempotencyKey(config) && !config.headers.get('Idempotency-Key')) {
+    config.headers.set('Idempotency-Key', crypto.randomUUID())
+  }
+
   return config
 })
+
+function needsEnqueueIdempotencyKey(config: InternalAxiosRequestConfig): boolean {
+  const method = (config.method ?? 'get').toLowerCase()
+  if (method !== 'post') {
+    return false
+  }
+  const url = config.url ?? ''
+  // Match .../tasks and .../tasks/{id}/run-now (ignore query string).
+  const path = url.split('?')[0] ?? url
+  return /\/tasks$/.test(path) || /\/tasks\/[^/]+\/run-now$/.test(path)
+}
 
 api.interceptors.response.use(
   (response) => {
