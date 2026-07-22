@@ -24,6 +24,7 @@ const emptyStats = (): DashboardStats => ({
   retry_wait_runs: 0,
   dead_runs: 0,
   upcoming_tasks: [],
+  recent_run_items: [],
   oldest_due_at: null,
   scheduler_last_seen_at: null,
 })
@@ -39,6 +40,7 @@ const { data, loading, error, reload } = useAsyncData(async () => {
     ...emptyStats(),
     ...response.data,
     upcoming_tasks: response.data.upcoming_tasks ?? [],
+    recent_run_items: response.data.recent_run_items ?? [],
   }
 })
 
@@ -59,12 +61,36 @@ const schedulerStale = computed(() => {
 })
 
 const stats = computed(() => [
-  { label: t('dashboard.stats.activeTasks'), value: data.value?.active_tasks ?? 0 },
-  { label: t('dashboard.stats.pausedTasks'), value: data.value?.paused_tasks ?? 0 },
-  { label: t('dashboard.stats.recentRuns'), value: data.value?.recent_runs ?? 0 },
-  { label: t('dashboard.stats.failedRuns'), value: data.value?.failed_runs_24h ?? 0 },
-  { label: t('dashboard.stats.retryWait'), value: data.value?.retry_wait_runs ?? 0 },
-  { label: t('dashboard.stats.deadRuns'), value: data.value?.dead_runs ?? 0 },
+  {
+    label: t('dashboard.stats.activeTasks'),
+    value: data.value?.active_tasks ?? 0,
+    to: '/tasks',
+  },
+  {
+    label: t('dashboard.stats.pausedTasks'),
+    value: data.value?.paused_tasks ?? 0,
+    to: '/tasks',
+  },
+  {
+    label: t('dashboard.stats.recentRuns'),
+    value: data.value?.recent_runs ?? 0,
+    to: '/runs',
+  },
+  {
+    label: t('dashboard.stats.failedRuns'),
+    value: data.value?.failed_runs_24h ?? 0,
+    to: '/runs?run_state=dead',
+  },
+  {
+    label: t('dashboard.stats.retryWait'),
+    value: data.value?.retry_wait_runs ?? 0,
+    to: '/runs?run_state=retry_wait',
+  },
+  {
+    label: t('dashboard.stats.deadRuns'),
+    value: data.value?.dead_runs ?? 0,
+    to: '/runs?run_state=dead',
+  },
 ])
 
 function formatDate(value?: string | null): string {
@@ -84,7 +110,16 @@ function formatDate(value?: string | null): string {
 
 <template>
   <div>
-    <PageHeader :title="$t('dashboard.title')" :subtitle="$t('dashboard.subtitle')" />
+    <PageHeader :title="$t('dashboard.title')" :subtitle="$t('dashboard.subtitle')">
+      <template #actions>
+        <RouterLink
+          to="/tasks/new"
+          class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
+        >
+          {{ $t('dashboard.createTask') }}
+        </RouterLink>
+      </template>
+    </PageHeader>
 
     <LoadingState v-if="loading" />
     <ErrorState v-else-if="error" :message="error" @retry="reload" />
@@ -121,17 +156,58 @@ function formatDate(value?: string | null): string {
       </div>
 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div
+        <RouterLink
           v-for="stat in stats"
           :key="stat.label"
-          class="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900"
+          :to="stat.to"
+          class="rounded-lg border border-gray-200 bg-white p-5 transition hover:border-violet-300 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-violet-700"
         >
           <p class="text-sm text-gray-500">{{ stat.label }}</p>
           <p class="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">
             {{ stat.value }}
           </p>
-        </div>
+        </RouterLink>
       </div>
+
+      <section class="mt-8">
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <h2 class="text-lg font-medium">{{ $t('dashboard.recent.title') }}</h2>
+          <RouterLink to="/runs" class="text-sm text-violet-600 hover:underline">
+            {{ $t('dashboard.recent.viewAll') }}
+          </RouterLink>
+        </div>
+        <div
+          v-if="!data?.recent_run_items?.length"
+          class="rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500"
+        >
+          {{ $t('dashboard.recent.empty') }}
+        </div>
+        <ul
+          v-else
+          class="divide-y divide-gray-200 rounded-lg border border-gray-200 dark:divide-gray-800 dark:border-gray-800"
+        >
+          <li
+            v-for="run in data.recent_run_items"
+            :key="run.id"
+            class="flex items-center justify-between gap-3 bg-white px-4 py-3 dark:bg-gray-900"
+          >
+            <div class="min-w-0">
+              <RouterLink
+                :to="`/runs/${run.id}`"
+                class="text-sm font-medium text-violet-600 hover:underline"
+              >
+                {{ run.task_name || run.task_id || run.id }}
+              </RouterLink>
+              <p class="truncate text-xs text-gray-500">
+                {{ $t(`runs.status.${run.run_state}`, run.run_state) }}
+              </p>
+            </div>
+            <span class="shrink-0 text-sm text-gray-500">
+              {{ formatDate(run.finished_at || run.created_at) }}
+            </span>
+          </li>
+        </ul>
+      </section>
 
       <section class="mt-8">
         <h2 class="mb-3 text-lg font-medium">{{ $t('dashboard.upcoming.title') }}</h2>

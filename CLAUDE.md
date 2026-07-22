@@ -81,7 +81,7 @@ Frontend tests/build (Vitest + `vue-tsc`), prefer the `frontend/` package:
 
 Tests use SQLite `:memory:` (see `phpunit.xml`); the running app uses MySQL. Keep migrations/queries portable enough to pass under SQLite.
 
-Playwright is wired for a minimal smoke suite (`frontend/e2e/`, `frontend/playwright.config.ts`). Run via `./scripts/tc.sh npm --prefix frontend run e2e` after installing browsers in the node container (`npx playwright install`). Not required for MVP merge. Do not run `playwright install` on the host.
+Playwright is wired for a minimal smoke suite (`frontend/e2e/`, `frontend/playwright.config.ts`). Run via `bash ./scripts/tc.sh e2e` (or `bash ./scripts/tc.sh npm --prefix frontend run e2e`) after installing browsers in the node container (`npx playwright install --with-deps chromium`). The slim node image may lack OS packages for headed browsers; install deps in-container as needed. Not required for MVP merge. Do not run `playwright install` on the host.
 
 ### Local verification
 

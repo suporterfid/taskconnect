@@ -15,7 +15,7 @@ test.describe('auth smoke', () => {
     ).toBeVisible()
   })
 
-  test('authenticated operator can open dashboard when credentials are set', async ({
+  test('authenticated operator can open dashboard and tasks when credentials are set', async ({
     page,
   }) => {
     test.skip(
@@ -33,5 +33,11 @@ test.describe('auth smoke', () => {
 
     await expect(page).toHaveURL(/\/(dashboard|tenants)/, { timeout: 15_000 })
     await expect(page.getByRole('navigation')).toBeVisible()
+
+    await page.goto('/tasks')
+    await expect(page.getByRole('heading', { name: /tasks|tarefas/i })).toBeVisible()
+
+    await page.goto('/tasks/new')
+    await expect(page.getByRole('heading', { name: /create|criar|task|tarefa/i })).toBeVisible()
   })
 })

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
@@ -11,17 +11,19 @@ import type {
   EndpointProfile,
   HttpMethod,
   ScheduleConfig,
+  ScheduleHuman,
   ScheduleKind,
   Task,
 } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
+import { formatScheduleHuman } from '@/utils/scheduleHuman'
 import {
   formatSuccessStatusRanges,
   parseSuccessStatusRanges,
 } from '@/utils/successStatusRanges'
 
 const props = defineProps<{ id?: string }>()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const tenant = useTenantStore()
 
@@ -30,7 +32,10 @@ const loading = ref(Boolean(props.id))
 const submitting = ref(false)
 const error = ref<string | null>(null)
 const profiles = ref<EndpointProfile[]>([])
-const scheduleHuman = ref<string | null>(null)
+const scheduleHuman = ref<ScheduleHuman | string | null>(null)
+const previewOccurrences = ref<string[]>([])
+const previewError = ref<string | null>(null)
+const previewLoading = ref(false)
 
 const SCHEDULE_KINDS: ScheduleKind[] = [
   'once',
@@ -98,7 +103,62 @@ const localScheduleSummary = computed(() => {
 })
 
 const reviewSchedule = computed(
-  () => scheduleHuman.value || localScheduleSummary.value,
+  () =>
+    formatScheduleHuman(scheduleHuman.value, t) || localScheduleSummary.value,
+)
+
+function formatPreviewDate(value: string): string {
+  try {
+    return new Intl.DateTimeFormat(locale.value, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(value))
+  } catch {
+    return value
+  }
+}
+
+async function refreshSchedulePreview(): Promise<void> {
+  if (!tenant.currentTenantId || !tenant.currentEnvironmentId) {
+    previewOccurrences.value = []
+    return
+  }
+  if (step.value !== 2 && step.value !== 3) {
+    return
+  }
+
+  previewLoading.value = true
+  previewError.value = null
+  try {
+    const { data } = await api.post<{ data: { occurrences: string[] } }>(
+      tenant.tenantPath('/schedules/preview'),
+      { schedule: buildSchedule(), count: 3 },
+    )
+    previewOccurrences.value = data.data.occurrences ?? []
+  } catch (err) {
+    previewOccurrences.value = []
+    previewError.value =
+      err instanceof ApiError ? err.message : t('tasks.wizard.previewError')
+  } finally {
+    previewLoading.value = false
+  }
+}
+
+watch(
+  () => [
+    step.value,
+    form.schedule_kind,
+    form.timezone,
+    form.at,
+    form.interval_minutes,
+    form.minute,
+    form.time,
+    form.weekdays.join(','),
+    form.day,
+  ],
+  () => {
+    void refreshSchedulePreview()
+  },
 )
 
 function next(): void {
@@ -554,6 +614,24 @@ async function onSubmit(activate: boolean): Promise<void> {
               {{ $t('tasks.fields.successStatusRangesHint') }}
             </span>
           </label>
+
+          <div class="rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950">
+            <p class="text-sm font-medium">{{ $t('tasks.wizard.nextOccurrences') }}</p>
+            <p v-if="previewLoading" class="mt-2 text-sm text-gray-500">
+              {{ $t('common.loading') }}
+            </p>
+            <p v-else-if="previewError" class="mt-2 text-sm text-red-600" role="alert">
+              {{ previewError }}
+            </p>
+            <ul v-else-if="previewOccurrences.length" class="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-300">
+              <li v-for="occurrence in previewOccurrences" :key="occurrence">
+                {{ formatPreviewDate(occurrence) }}
+              </li>
+            </ul>
+            <p v-else class="mt-2 text-sm text-gray-500">
+              {{ $t('tasks.wizard.noOccurrences') }}
+            </p>
+          </div>
         </div>
 
         <div v-else class="space-y-2 text-sm">

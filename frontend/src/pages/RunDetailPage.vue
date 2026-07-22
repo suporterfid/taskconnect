@@ -11,6 +11,7 @@ import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { TaskRun, TaskRunAttempt } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
+import { maskIdempotencyKey } from '@/utils/scheduleHuman'
 
 const props = defineProps<{ id: string }>()
 const { t, locale } = useI18n()
@@ -43,6 +44,28 @@ const canCancel = computed(() => {
 const canRetry = computed(() => {
   const state = data.value?.run.run_state
   return state === 'dead' || state === 'retry_wait'
+})
+
+const terminalExplanation = computed(() => {
+  const run = data.value?.run
+  if (!run) {
+    return null
+  }
+  if (run.run_state === 'dead') {
+    return t('runs.detail.terminal.dead', {
+      code: run.final_error_code || t('runs.detail.terminal.unknownCode'),
+      status: run.final_http_status ?? '—',
+    })
+  }
+  if (run.run_state === 'blocked') {
+    return t('runs.detail.terminal.blocked', {
+      code: run.final_error_code || t('runs.detail.terminal.unknownCode'),
+    })
+  }
+  if (run.run_state === 'cancelled') {
+    return t('runs.detail.terminal.cancelled')
+  }
+  return null
 })
 
 function formatDate(value?: string | null): string {
@@ -126,6 +149,14 @@ async function onRetry(): Promise<void> {
         {{ actionError }}
       </p>
 
+      <p
+        v-if="terminalExplanation"
+        class="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100"
+        role="status"
+      >
+        {{ terminalExplanation }}
+      </p>
+
       <dl class="mb-6 grid gap-4 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 sm:grid-cols-2">
         <div>
           <dt class="text-sm text-gray-500">{{ $t('common.status') }}</dt>
@@ -153,6 +184,20 @@ async function onRetry(): Promise<void> {
         <div>
           <dt class="text-sm text-gray-500">{{ $t('runs.fields.attempts') }}</dt>
           <dd class="mt-1 text-sm">{{ data.run.attempt_count }}</dd>
+        </div>
+        <div>
+          <dt class="text-sm text-gray-500">{{ $t('runs.detail.scheduledFor') }}</dt>
+          <dd class="mt-1 text-sm">{{ formatDate(data.run.scheduled_for) }}</dd>
+        </div>
+        <div>
+          <dt class="text-sm text-gray-500">{{ $t('runs.detail.idempotencyKey') }}</dt>
+          <dd class="mt-1 font-mono text-sm" :title="data.run.idempotency_key ?? undefined">
+            {{ maskIdempotencyKey(data.run.idempotency_key) }}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-gray-500">{{ $t('runs.detail.nextAttemptAt') }}</dt>
+          <dd class="mt-1 text-sm">{{ formatDate(data.run.next_attempt_at) }}</dd>
         </div>
         <div>
           <dt class="text-sm text-gray-500">{{ $t('common.createdAt') }}</dt>
@@ -240,6 +285,10 @@ async function onRetry(): Promise<void> {
             <div>
               <dt class="text-gray-500">{{ $t('runs.detail.responseStatus') }}</dt>
               <dd class="mt-1">{{ attempt.response_status ?? '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-gray-500">{{ $t('runs.detail.nextRetryAt') }}</dt>
+              <dd class="mt-1">{{ formatDate(attempt.next_retry_at) }}</dd>
             </div>
             <div>
               <dt class="text-gray-500">{{ $t('runs.detail.transportError') }}</dt>

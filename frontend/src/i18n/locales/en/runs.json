@@ -4,6 +4,7 @@
   "view": "View",
   "needsTenant": "Select a tenant and environment before viewing runs.",
   "filteredByTask": "Filtered by task",
+  "filteredByState": "Filtered by state",
   "clearFilter": "Clear filter",
   "fields": {
     "id": "Run ID",
@@ -18,6 +19,10 @@
     "noAttempts": "No attempts recorded yet.",
     "attemptNumber": "Attempt {n}",
     "triggeredAt": "Triggered at",
+    "scheduledFor": "Scheduled for",
+    "idempotencyKey": "Idempotency key",
+    "nextAttemptAt": "Next attempt at",
+    "nextRetryAt": "Next retry at",
     "startedAt": "Started at",
     "finishedAt": "Finished at",
     "duration": "Duration",
@@ -27,7 +32,13 @@
     "requestBody": "Request body (redacted)",
     "responseStatus": "Response status",
     "responseBody": "Response body (truncated)",
-    "transportError": "Transport error"
+    "transportError": "Transport error",
+    "terminal": {
+      "dead": "This run ended in a terminal failure ({code}, HTTP {status}). Use Retry to create a new pending attempt.",
+      "blocked": "This run was blocked ({code}). Fix the destination or policy, then retry if appropriate.",
+      "cancelled": "This run was cancelled and will not continue.",
+      "unknownCode": "unknown error"
+    }
   },
   "actions": {
     "cancel": "Cancel run",

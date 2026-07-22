@@ -105,6 +105,11 @@ export interface ScheduleConfig {
   ends_at?: string
 }
 
+export interface ScheduleHuman {
+  kind: ScheduleKind | string
+  parts: Record<string, string | number | Array<string | number>>
+}
+
 export interface RetryPolicy {
   max_attempts?: number
   strategy?: string
@@ -131,7 +136,7 @@ export interface Task {
   last_run_at?: string | null
   last_run_state?: string | null
   schedule?: ScheduleConfig | null
-  schedule_human?: string | null
+  schedule_human?: ScheduleHuman | string | null
   created_at: string
   updated_at: string
 }
@@ -310,6 +315,15 @@ export interface UpcomingTask {
   next_run_at?: string | null
 }
 
+export interface DashboardRecentRun {
+  id: string
+  task_id?: string | null
+  task_name?: string | null
+  run_state: RunState | string
+  finished_at?: string | null
+  created_at?: string | null
+}
+
 export interface DashboardStats {
   active_tasks: number
   paused_tasks: number
@@ -318,6 +332,7 @@ export interface DashboardStats {
   retry_wait_runs: number
   dead_runs: number
   upcoming_tasks: UpcomingTask[]
+  recent_run_items?: DashboardRecentRun[]
   oldest_due_at?: string | null
   scheduler_last_seen_at?: string | null
 }

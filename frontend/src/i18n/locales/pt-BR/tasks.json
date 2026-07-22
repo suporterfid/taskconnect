@@ -14,7 +14,10 @@
       "review": "Revisão"
     },
     "saveDraft": "Salvar rascunho",
-    "activate": "Salvar e ativar"
+    "activate": "Salvar e ativar",
+    "nextOccurrences": "Próximas 3 ocorrências",
+    "noOccurrences": "Nenhuma ocorrência futura para este agendamento.",
+    "previewError": "Não foi possível pré-visualizar as ocorrências"
   },
   "detail": {
     "title": "Detalhes da tarefa",
@@ -23,6 +26,15 @@
     "lastRun": "Última execução",
     "lastRunState": "Estado da última execução",
     "nextRun": "Próxima execução"
+  },
+  "scheduleHuman": {
+    "once": "Uma vez em {at} ({timezone})",
+    "every_n_minutes": "A cada {minutes} minutos",
+    "hourly_at": "A cada hora no minuto {minute}",
+    "daily_at": "Diariamente às {time} ({timezone})",
+    "weekly_on": "Semanalmente em {weekdays} às {time} ({timezone})",
+    "monthly_on_day": "Mensalmente no dia {day} às {time} ({timezone})",
+    "business_days_at": "Dias úteis às {time} ({timezone})"
   },
   "fields": {
     "name": "Nome",

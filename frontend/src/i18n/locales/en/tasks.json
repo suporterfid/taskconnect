@@ -14,7 +14,10 @@
       "review": "Review"
     },
     "saveDraft": "Save draft",
-    "activate": "Save and activate"
+    "activate": "Save and activate",
+    "nextOccurrences": "Next 3 occurrences",
+    "noOccurrences": "No upcoming occurrences for this schedule.",
+    "previewError": "Unable to preview schedule occurrences"
   },
   "detail": {
     "title": "Task details",
@@ -23,6 +26,15 @@
     "lastRun": "Last run",
     "lastRunState": "Last run state",
     "nextRun": "Next run"
+  },
+  "scheduleHuman": {
+    "once": "One time at {at} ({timezone})",
+    "every_n_minutes": "Every {minutes} minutes",
+    "hourly_at": "Hourly at minute {minute}",
+    "daily_at": "Daily at {time} ({timezone})",
+    "weekly_on": "Weekly on {weekdays} at {time} ({timezone})",
+    "monthly_on_day": "Monthly on day {day} at {time} ({timezone})",
+    "business_days_at": "Business days at {time} ({timezone})"
   },
   "fields": {
     "name": "Name",

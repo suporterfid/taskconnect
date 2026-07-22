@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Schedule preview API (`POST …/schedules/preview`) and wizard next-3 occurrence preview
+- Dashboard recent-run list, create-task CTA, and linked dead/retry/failed stats (`run_state` filter on task-run list)
+- Run detail diagnostics: scheduled_for, masked idempotency key, next attempt/retry times, terminal-failure copy
+- Locale-aware `schedule_human` rendering helper
+- Root `npm run e2e` / `tc e2e` proxy to the frontend Playwright suite
 - Operator UI for tenant outbound host allowlist (Settings) and task success status ranges (create/edit wizard)
 - Playwright smoke journey: login → forgot-password; optional authenticated dashboard when `E2E_EMAIL` / `E2E_PASSWORD` are set
 - Frontend helpers/tests for parsing success status range strings

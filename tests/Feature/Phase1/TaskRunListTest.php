@@ -82,6 +82,26 @@ class TaskRunListTest extends TestCase
             ->assertJsonPath('data.0.task_id', $taskA->public_id);
     }
 
+    public function test_filters_by_run_state(): void
+    {
+        [$admin, $tenant, $environment] = $this->createTenantAdmin();
+        $task = $this->createTask($tenant->id, $environment->id, $admin->id);
+
+        $succeeded = $this->createRun($task, 'occ-ok', '2026-07-18 12:00:00');
+        $dead = $this->createRun($task, 'occ-dead', '2026-07-18 12:01:00', RunState::Dead);
+
+        $response = $this->actingAs($admin)->getJson(
+            $this->environmentRoute($tenant, $environment, '/task-runs?run_state=dead')
+        );
+
+        $response->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $dead->public_id)
+            ->assertJsonPath('data.0.run_state', 'dead');
+
+        $this->assertNotSame($succeeded->public_id, $dead->public_id);
+    }
+
     private function createTask(int $tenantId, int $environmentId, int $userId, string $name = 'List Task'): Task
     {
         return Task::factory()->create([
@@ -94,8 +114,12 @@ class TaskRunListTest extends TestCase
         ]);
     }
 
-    private function createRun(Task $task, string $occurrenceKey, string $createdAt): TaskRun
-    {
+    private function createRun(
+        Task $task,
+        string $occurrenceKey,
+        string $createdAt,
+        RunState $state = RunState::Succeeded,
+    ): TaskRun {
         $run = TaskRun::query()->create([
             'tenant_id' => $task->tenant_id,
             'environment_id' => $task->environment_id,
@@ -103,7 +127,7 @@ class TaskRunListTest extends TestCase
             'trigger_type' => TriggerType::Manual,
             'occurrence_key' => $occurrenceKey,
             'idempotency_key' => 'idem-'.$occurrenceKey,
-            'run_state' => RunState::Succeeded,
+            'run_state' => $state,
             'attempt_count' => 1,
         ]);
 
