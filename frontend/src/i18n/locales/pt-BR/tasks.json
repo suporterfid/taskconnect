@@ -118,6 +118,16 @@
     "searchPlaceholder": "Buscar por nome…",
     "anyStatus": "Qualquer status",
     "anyRunState": "Qualquer estado da última execução",
+    "scheduleKind": "Tipo de agendamento",
+    "anyScheduleKind": "Qualquer tipo de agendamento",
     "resultCount": "{count} tarefas"
+  },
+  "bulk": {
+    "selectAll": "Selecionar todas as tarefas",
+    "selectRow": "Selecionar {name}",
+    "selected": "{count} selecionadas",
+    "pause": "Pausar selecionadas",
+    "resume": "Retomar selecionadas",
+    "error": "Não foi possível atualizar as tarefas selecionadas"
   }
 }

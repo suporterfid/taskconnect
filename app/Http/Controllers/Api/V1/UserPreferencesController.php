@@ -25,11 +25,12 @@ class UserPreferencesController extends Controller
         $validated = $request->validate([
             'locale' => ['sometimes', 'required', 'string', Rule::in(['en', 'pt-BR'])],
             'timezone' => ['sometimes', 'required', 'string', 'timezone', 'max:64'],
+            'failure_emails_enabled' => ['sometimes', 'required', 'boolean'],
         ]);
 
         $preferences = UserPreference::query()->firstOrCreate(
             ['user_id' => $user->id],
-            ['locale' => 'en', 'timezone' => 'UTC'],
+            ['locale' => 'en', 'timezone' => 'UTC', 'failure_emails_enabled' => true],
         );
 
         if (array_key_exists('locale', $validated)) {
@@ -38,6 +39,10 @@ class UserPreferencesController extends Controller
 
         if (array_key_exists('timezone', $validated)) {
             $preferences->timezone = $validated['timezone'];
+        }
+
+        if (array_key_exists('failure_emails_enabled', $validated)) {
+            $preferences->failure_emails_enabled = $validated['failure_emails_enabled'];
         }
 
         $preferences->save();

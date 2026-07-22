@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
@@ -7,20 +7,36 @@ import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
+import { ApiError } from '@/services/api'
 import api from '@/services/api'
-import type { Task, TaskDefinitionStatus } from '@/services/types'
+import type { ScheduleKind, Task, TaskDefinitionStatus } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
 
 const { locale, t } = useI18n()
 const tenant = useTenantStore()
 
+const SCHEDULE_KINDS: ScheduleKind[] = [
+  'once',
+  'every_n_minutes',
+  'hourly_at',
+  'daily_at',
+  'weekly_on',
+  'monthly_on_day',
+  'business_days_at',
+]
+
 const filters = reactive({
   q: '',
   definition_status: '' as '' | TaskDefinitionStatus,
   last_run_state: '',
+  schedule_kind: '' as '' | ScheduleKind,
   sort: 'name' as 'name' | 'next_run_at' | 'last_run_at',
   order: 'asc' as 'asc' | 'desc',
 })
+
+const selectedIds = ref<string[]>([])
+const actionError = ref<string | null>(null)
+const bulkBusy = ref(false)
 
 const { data, loading, error, reload } = useAsyncData(async () => {
   if (!tenant.currentTenantId || !tenant.currentEnvironmentId) {
@@ -39,6 +55,9 @@ const { data, loading, error, reload } = useAsyncData(async () => {
   if (filters.last_run_state) {
     params.last_run_state = filters.last_run_state
   }
+  if (filters.schedule_kind) {
+    params.schedule_kind = filters.schedule_kind
+  }
   const { data: response } = await api.get<{ data: Task[] }>(
     tenant.tenantPath('/tasks'),
     { params },
@@ -47,8 +66,63 @@ const { data, loading, error, reload } = useAsyncData(async () => {
 })
 
 watch(filters, () => {
+  selectedIds.value = []
+  actionError.value = null
   void reload()
 })
+
+watch(data, () => {
+  const visible = new Set((data.value ?? []).map((task) => task.id))
+  selectedIds.value = selectedIds.value.filter((id) => visible.has(id))
+})
+
+const allSelected = computed(() => {
+  const tasks = data.value ?? []
+  return tasks.length > 0 && tasks.every((task) => selectedIds.value.includes(task.id))
+})
+
+const someSelected = computed(() => selectedIds.value.length > 0)
+
+function toggleSelectAll(): void {
+  const tasks = data.value ?? []
+  if (allSelected.value) {
+    selectedIds.value = []
+    return
+  }
+  selectedIds.value = tasks.map((task) => task.id)
+}
+
+function toggleRow(id: string): void {
+  if (selectedIds.value.includes(id)) {
+    selectedIds.value = selectedIds.value.filter((item) => item !== id)
+    return
+  }
+  selectedIds.value = [...selectedIds.value, id]
+}
+
+async function bulkAction(action: 'pause' | 'resume'): Promise<void> {
+  if (!someSelected.value || bulkBusy.value) {
+    return
+  }
+
+  bulkBusy.value = true
+  actionError.value = null
+
+  try {
+    const path =
+      action === 'pause' ? '/tasks/bulk-pause' : '/tasks/bulk-resume'
+    await api.post(tenant.tenantPath(path), {
+      task_ids: selectedIds.value,
+    })
+    selectedIds.value = []
+    await reload()
+  } catch (err) {
+    actionError.value =
+      err instanceof ApiError ? err.message : t('tasks.bulk.error')
+  } finally {
+    bulkBusy.value = false
+  }
+}
 
 function toggleSort(column: 'name' | 'next_run_at' | 'last_run_at'): void {
   if (filters.sort === column) {
@@ -108,7 +182,7 @@ function statusClass(status: string): string {
 
     <div
       v-if="tenant.currentTenantId && tenant.currentEnvironmentId"
-      class="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+      class="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5"
     >
       <label class="block text-sm">
         <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('common.search') }}</span>
@@ -146,6 +220,22 @@ function statusClass(status: string): string {
           <option value="blocked">{{ $t('runs.status.blocked') }}</option>
         </select>
       </label>
+      <label class="block text-sm">
+        <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('tasks.filters.scheduleKind') }}</span>
+        <select
+          v-model="filters.schedule_kind"
+          class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
+        >
+          <option value="">{{ $t('tasks.filters.anyScheduleKind') }}</option>
+          <option
+            v-for="kind in SCHEDULE_KINDS"
+            :key="kind"
+            :value="kind"
+          >
+            {{ $t(`tasks.scheduleKinds.${kind}`) }}
+          </option>
+        </select>
+      </label>
       <p class="self-end text-sm text-gray-500">
         {{ t('tasks.filters.resultCount', { count: data?.length ?? 0 }) }}
       </p>
@@ -165,71 +255,120 @@ function statusClass(status: string): string {
     >
       {{ $t('tasks.empty') }}
     </div>
-    <div v-else class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-        <thead class="bg-gray-50 dark:bg-gray-900">
-          <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              <button type="button" class="hover:underline" @click="toggleSort('name')">
-                {{ $t('common.name') }}{{ sortIndicator('name') }}
-              </button>
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              {{ $t('common.status') }}
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              <button type="button" class="hover:underline" @click="toggleSort('next_run_at')">
-                {{ $t('tasks.detail.nextRun') }}{{ sortIndicator('next_run_at') }}
-              </button>
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              <button type="button" class="hover:underline" @click="toggleSort('last_run_at')">
-                {{ $t('tasks.detail.lastRunState') }}{{ sortIndicator('last_run_at') }}
-              </button>
-            </th>
-            <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
-              {{ $t('common.actions') }}
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
-          <tr v-for="task in data" :key="task.id">
-            <td class="px-4 py-3 text-sm font-medium">
-              <RouterLink
-                :to="`/tasks/${task.id}`"
-                class="text-violet-600 hover:underline"
-              >
-                {{ task.name }}
-              </RouterLink>
-            </td>
-            <td class="px-4 py-3 text-sm">
-              <span
-                class="rounded px-2 py-0.5 text-xs font-medium"
-                :class="statusClass(task.definition_status)"
-              >
-                {{ $t(`tasks.status.${task.definition_status}`) }}
-              </span>
-            </td>
-            <td class="px-4 py-3 text-sm text-gray-600">
-              {{ formatDate(task.next_run_at) }}
-            </td>
-            <td class="px-4 py-3 text-sm text-gray-600">
-              <template v-if="task.last_run_state">
-                {{ $t(`runs.status.${task.last_run_state}`, task.last_run_state) }}
-              </template>
-              <template v-else>—</template>
-            </td>
-            <td class="px-4 py-3 text-right text-sm">
-              <RouterLink
-                :to="`/tasks/${task.id}`"
-                class="text-violet-600 hover:underline"
-              >
-                {{ $t('tasks.view') }}
-              </RouterLink>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div v-else>
+      <div
+        v-if="someSelected"
+        class="mb-3 flex flex-wrap items-center gap-3 rounded-md border border-violet-200 bg-violet-50 px-4 py-3 dark:border-violet-900 dark:bg-violet-950/40"
+      >
+        <span class="text-sm font-medium text-violet-900 dark:text-violet-100">
+          {{ $t('tasks.bulk.selected', { count: selectedIds.length }) }}
+        </span>
+        <button
+          type="button"
+          class="rounded-md bg-violet-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-50"
+          :disabled="bulkBusy"
+          @click="bulkAction('pause')"
+        >
+          {{ $t('tasks.bulk.pause') }}
+        </button>
+        <button
+          type="button"
+          class="rounded-md border border-violet-300 bg-white px-3 py-1.5 text-sm font-medium text-violet-700 hover:bg-violet-50 disabled:opacity-50 dark:border-violet-800 dark:bg-gray-950 dark:text-violet-200 dark:hover:bg-violet-950"
+          :disabled="bulkBusy"
+          @click="bulkAction('resume')"
+        >
+          {{ $t('tasks.bulk.resume') }}
+        </button>
+      </div>
+
+      <p v-if="actionError" class="mb-3 text-sm text-red-600" role="alert">
+        {{ actionError }}
+      </p>
+
+      <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+          <thead class="bg-gray-50 dark:bg-gray-900">
+            <tr>
+              <th class="w-10 px-4 py-3 text-left">
+                <input
+                  type="checkbox"
+                  class="rounded"
+                  :checked="allSelected"
+                  :aria-label="$t('tasks.bulk.selectAll')"
+                  @change="toggleSelectAll"
+                />
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                <button type="button" class="hover:underline" @click="toggleSort('name')">
+                  {{ $t('common.name') }}{{ sortIndicator('name') }}
+                </button>
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                {{ $t('common.status') }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                <button type="button" class="hover:underline" @click="toggleSort('next_run_at')">
+                  {{ $t('tasks.detail.nextRun') }}{{ sortIndicator('next_run_at') }}
+                </button>
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                <button type="button" class="hover:underline" @click="toggleSort('last_run_at')">
+                  {{ $t('tasks.detail.lastRunState') }}{{ sortIndicator('last_run_at') }}
+                </button>
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+                {{ $t('common.actions') }}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+            <tr v-for="task in data" :key="task.id">
+              <td class="px-4 py-3">
+                <input
+                  type="checkbox"
+                  class="rounded"
+                  :checked="selectedIds.includes(task.id)"
+                  :aria-label="$t('tasks.bulk.selectRow', { name: task.name })"
+                  @change="toggleRow(task.id)"
+                />
+              </td>
+              <td class="px-4 py-3 text-sm font-medium">
+                <RouterLink
+                  :to="`/tasks/${task.id}`"
+                  class="text-violet-600 hover:underline"
+                >
+                  {{ task.name }}
+                </RouterLink>
+              </td>
+              <td class="px-4 py-3 text-sm">
+                <span
+                  class="rounded px-2 py-0.5 text-xs font-medium"
+                  :class="statusClass(task.definition_status)"
+                >
+                  {{ $t(`tasks.status.${task.definition_status}`) }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-sm text-gray-600">
+                {{ formatDate(task.next_run_at) }}
+              </td>
+              <td class="px-4 py-3 text-sm text-gray-600">
+                <template v-if="task.last_run_state">
+                  {{ $t(`runs.status.${task.last_run_state}`, task.last_run_state) }}
+                </template>
+                <template v-else>—</template>
+              </td>
+              <td class="px-4 py-3 text-right text-sm">
+                <RouterLink
+                  :to="`/tasks/${task.id}`"
+                  class="text-violet-600 hover:underline"
+                >
+                  {{ $t('tasks.view') }}
+                </RouterLink>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>

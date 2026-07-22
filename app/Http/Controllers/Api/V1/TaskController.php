@@ -205,6 +205,16 @@ class TaskController extends Controller
         return response()->json(['data' => new TaskResource($task)]);
     }
 
+    public function bulkPause(Request $request, string $tenantId, string $environmentId): JsonResponse
+    {
+        return $this->bulkLifecycle($request, 'pause');
+    }
+
+    public function bulkResume(Request $request, string $tenantId, string $environmentId): JsonResponse
+    {
+        return $this->bulkLifecycle($request, 'resume');
+    }
+
     public function runNow(Request $request, string $tenantId, string $environmentId, string $taskId): JsonResponse
     {
         $tenant = $this->tenant($request);
@@ -311,6 +321,70 @@ class TaskController extends Controller
             ->where('tenant_id', $tenant->id)
             ->where('environment_id', $environment->id)
             ->value('id');
+    }
+
+    /**
+     * @param  'pause'|'resume'  $action
+     */
+    private function bulkLifecycle(Request $request, string $action): JsonResponse
+    {
+        $tenant = $this->tenant($request);
+        $environment = $this->environment($request);
+        $this->authorize('viewAny', [Task::class, $tenant]);
+
+        if ($action === 'resume') {
+            $this->environmentGuard->assertActive($environment);
+        }
+
+        $validated = $request->validate([
+            'task_ids' => ['required', 'array', 'min:1', 'max:100'],
+            'task_ids.*' => ['required', 'string', 'max:64'],
+        ]);
+
+        $tasks = Task::query()
+            ->where('tenant_id', $tenant->id)
+            ->where('environment_id', $environment->id)
+            ->whereNull('archived_at')
+            ->whereIn('public_id', $validated['task_ids'])
+            ->with(['schedule', 'endpointProfile'])
+            ->get()
+            ->keyBy('public_id');
+
+        $updated = [];
+        $skipped = [];
+
+        foreach ($validated['task_ids'] as $publicId) {
+            $task = $tasks->get($publicId);
+            if ($task === null) {
+                $skipped[] = ['id' => $publicId, 'reason' => 'not_found'];
+                continue;
+            }
+
+            try {
+                $this->authorize('operate', [$task, $tenant]);
+                $task = $action === 'pause'
+                    ? $this->lifecycle->pause($task)
+                    : $this->lifecycle->resume($task);
+                $this->audit(
+                    $request,
+                    $tenant,
+                    $action === 'pause' ? 'task.paused' : 'task.resumed',
+                    $task->public_id,
+                    ['bulk' => true],
+                );
+                $updated[] = $task->public_id;
+            } catch (\Throwable) {
+                $skipped[] = ['id' => $publicId, 'reason' => 'not_operable'];
+            }
+        }
+
+        return response()->json([
+            'data' => [
+                'action' => $action,
+                'updated' => $updated,
+                'skipped' => $skipped,
+            ],
+        ]);
     }
 
     private function resolveTask(Request $request): Task

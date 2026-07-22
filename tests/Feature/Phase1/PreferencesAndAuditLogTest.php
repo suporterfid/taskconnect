@@ -40,6 +40,27 @@ class PreferencesAndAuditLogTest extends TestCase
         ]);
     }
 
+    public function test_user_can_opt_out_of_failure_emails(): void
+    {
+        $user = User::factory()->create([
+            'password' => Hash::make('secret-password'),
+        ]);
+
+        $this->actingAs($user);
+
+        $response = $this->patchJson('/api/v1/me/preferences', [
+            'failure_emails_enabled' => false,
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('data.preferences.failure_emails_enabled', false);
+
+        $this->assertDatabaseHas('user_preferences', [
+            'user_id' => $user->id,
+            'failure_emails_enabled' => false,
+        ]);
+    }
+
     public function test_tenant_member_can_list_audit_logs(): void
     {
         $user = User::factory()->create();

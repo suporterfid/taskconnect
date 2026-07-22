@@ -15,6 +15,13 @@
     "label": "Fuso horário",
     "save": "Salvar fuso horário"
   },
+  "notifications": {
+    "title": "Notificações",
+    "hint": "Escolha quais alertas por e-mail você recebe nesta conta.",
+    "failureEmails": "Enviar e-mail quando uma execução falhar permanentemente",
+    "failureEmailsHint": "Envia uma mensagem quando uma execução chega ao estado dead após esgotar as tentativas.",
+    "save": "Salvar preferências de notificação"
+  },
   "saveError": "Não foi possível salvar as preferências",
   "outboundAllowHosts": {
     "title": "Lista de hosts de saída",

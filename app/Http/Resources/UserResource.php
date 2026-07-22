@@ -21,6 +21,7 @@ class UserResource extends JsonResource
             'preferences' => $this->whenLoaded('preferences', fn () => [
                 'locale' => $this->preferences?->locale ?? 'en',
                 'timezone' => $this->preferences?->timezone ?? 'UTC',
+                'failure_emails_enabled' => $this->preferences?->failure_emails_enabled ?? true,
             ]),
             'created_at' => $this->created_at?->utc()->toIso8601String(),
         ];

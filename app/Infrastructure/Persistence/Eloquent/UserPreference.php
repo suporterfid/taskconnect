@@ -11,7 +11,15 @@ class UserPreference extends Model
         'user_id',
         'locale',
         'timezone',
+        'failure_emails_enabled',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'failure_emails_enabled' => 'boolean',
+        ];
+    }
 
     public function user(): BelongsTo
     {

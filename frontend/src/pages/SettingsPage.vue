@@ -24,6 +24,9 @@ const note = ref<string | null>(null)
 const saveError = ref<string | null>(null)
 const saving = ref(false)
 const timezone = ref(auth.user?.preferences?.timezone ?? 'UTC')
+const failureEmailsEnabled = ref(
+  auth.user?.preferences?.failure_emails_enabled ?? true,
+)
 const allowHostsText = ref('')
 const allowHostsNote = ref<string | null>(null)
 const allowHostsError = ref<string | null>(null)
@@ -78,9 +81,16 @@ async function onTimezoneSave(): Promise<void> {
   await persistPreferences({ timezone: timezone.value.trim() || 'UTC' })
 }
 
+async function onFailureEmailsSave(): Promise<void> {
+  await persistPreferences({
+    failure_emails_enabled: failureEmailsEnabled.value,
+  })
+}
+
 async function persistPreferences(payload: {
   locale?: SupportedLocale
   timezone?: string
+  failure_emails_enabled?: boolean
 }): Promise<void> {
   saving.value = true
   saveError.value = null
@@ -95,6 +105,8 @@ async function persistPreferences(payload: {
     if (data.data.preferences?.timezone) {
       timezone.value = data.data.preferences.timezone
     }
+    failureEmailsEnabled.value =
+      data.data.preferences?.failure_emails_enabled ?? true
     note.value = t('settings.saved')
   } catch (err) {
     saveError.value =
@@ -209,6 +221,38 @@ function formatWhen(value?: string | null): string {
         <p v-if="saveError" class="mt-3 text-sm text-red-600" role="alert">
           {{ saveError }}
         </p>
+      </section>
+
+      <section class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <h2 class="text-lg font-medium">
+          {{ $t('settings.notifications.title') }}
+        </h2>
+        <p class="mt-2 text-sm text-gray-500">
+          {{ $t('settings.notifications.hint') }}
+        </p>
+
+        <label class="mt-4 inline-flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+          <input
+            v-model="failureEmailsEnabled"
+            type="checkbox"
+            class="mt-0.5 rounded"
+            :disabled="saving"
+          />
+          <span>
+            <span class="font-medium">{{ $t('settings.notifications.failureEmails') }}</span>
+            <span class="mt-1 block text-gray-500">
+              {{ $t('settings.notifications.failureEmailsHint') }}
+            </span>
+          </span>
+        </label>
+        <button
+          type="button"
+          class="mt-3 rounded-md bg-violet-600 px-4 py-2 text-sm text-white hover:bg-violet-700 disabled:opacity-50"
+          :disabled="saving"
+          @click="onFailureEmailsSave"
+        >
+          {{ $t('settings.notifications.save') }}
+        </button>
       </section>
 
       <section class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">

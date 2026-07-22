@@ -111,6 +111,52 @@ class TaskFeatureTest extends TestCase
             $this->environmentRoute($tenant, $environment, '/tasks?sort=name&order=desc')
         );
         $sorted->assertOk()->assertJsonPath('data.0.name', 'Beta Hook');
+
+        $byKind = $this->actingAs($admin)->getJson(
+            $this->environmentRoute($tenant, $environment, '/tasks?schedule_kind=daily_at')
+        );
+        $byKind->assertOk()->assertJsonCount(2, 'data');
+    }
+
+    public function test_bulk_pause_and_resume(): void
+    {
+        [$admin, $tenant, $environment] = $this->createTenantAdmin();
+
+        $a = $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks'),
+            $this->draftTaskPayload('Bulk A'),
+        )->json('data.id');
+        $b = $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks'),
+            $this->draftTaskPayload('Bulk B'),
+        )->json('data.id');
+
+        $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks/'.$a.'/activate')
+        )->assertOk();
+        $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks/'.$b.'/activate')
+        )->assertOk();
+
+        $pause = $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks/bulk-pause'),
+            ['task_ids' => [$a, $b]],
+        );
+        $pause->assertOk()
+            ->assertJsonPath('data.action', 'pause')
+            ->assertJsonCount(2, 'data.updated');
+
+        $this->actingAs($admin)->getJson(
+            $this->environmentRoute($tenant, $environment, '/tasks/'.$a)
+        )->assertJsonPath('data.definition_status', 'paused');
+
+        $resume = $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks/bulk-resume'),
+            ['task_ids' => [$a, $b]],
+        );
+        $resume->assertOk()
+            ->assertJsonPath('data.action', 'resume')
+            ->assertJsonCount(2, 'data.updated');
     }
 
     /**
