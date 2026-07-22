@@ -77,6 +77,42 @@ class TaskFeatureTest extends TestCase
         )->assertNotFound();
     }
 
+    public function test_task_index_supports_search_status_and_sort(): void
+    {
+        [$admin, $tenant, $environment] = $this->createTenantAdmin();
+
+        $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks'),
+            $this->draftTaskPayload('Alpha Hook'),
+        )->assertCreated();
+
+        $betaId = $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks'),
+            $this->draftTaskPayload('Beta Hook'),
+        )->json('data.id');
+
+        $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks/'.$betaId.'/activate')
+        )->assertOk();
+
+        $search = $this->actingAs($admin)->getJson(
+            $this->environmentRoute($tenant, $environment, '/tasks?q=Alpha')
+        );
+        $search->assertOk()->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', 'Alpha Hook');
+
+        $status = $this->actingAs($admin)->getJson(
+            $this->environmentRoute($tenant, $environment, '/tasks?definition_status=active')
+        );
+        $status->assertOk()->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', 'Beta Hook');
+
+        $sorted = $this->actingAs($admin)->getJson(
+            $this->environmentRoute($tenant, $environment, '/tasks?sort=name&order=desc')
+        );
+        $sorted->assertOk()->assertJsonPath('data.0.name', 'Beta Hook');
+    }
+
     /**
      * @return array<string, mixed>
      */

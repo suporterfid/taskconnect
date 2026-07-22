@@ -9,5 +9,6 @@
 | Secrets unreadable | `APP_KEY` mismatch after restore |
 | Assets 404 | Ensure `public/build` from release is deployed |
 | Playwright browsers missing | In the node container: `npx playwright install --with-deps chromium`. Slim images may need apt packages; e2e is optional for merge |
+| Need end-to-end acceptance without browsers | Follow `docs/deployment/acceptance-checklist.md` |
 
 Logs: `storage/logs/laravel.log`. Mail capture in development: Mailpit at port 8025.

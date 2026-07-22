@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Task wizard expansion: headers editor, separate Retry/Test steps, sync profile test, review security warnings
+- Task list search, status/last-run filters, and sortable columns (`q`, `definition_status`, `last_run_state`, `sort`, `order`)
+- Login-page axe-core a11y smoke (Vitest) and global `:focus-visible` outline
+- Dependency audit process doc + manual §26.4 acceptance checklist
+- i18n’d store/API fallback error strings and main nav aria-label
 - Schedule preview API (`POST …/schedules/preview`) and wizard next-3 occurrence preview
 - Dashboard recent-run list, create-task CTA, and linked dead/retry/failed stats (`run_state` filter on task-run list)
 - Run detail diagnostics: scheduled_for, masked idempotency key, next attempt/retry times, terminal-failure copy

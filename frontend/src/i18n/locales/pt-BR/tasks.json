@@ -113,5 +113,11 @@
     "error": "Não foi possível executar essa ação"
   },
   "empty": "Nenhuma tarefa ainda. Crie uma para agendar sua primeira requisição HTTP.",
-  "loadError": "Não foi possível carregar as tarefas"
+  "loadError": "Não foi possível carregar as tarefas",
+  "filters": {
+    "searchPlaceholder": "Buscar por nome…",
+    "anyStatus": "Qualquer status",
+    "anyRunState": "Qualquer estado da última execução",
+    "resultCount": "{count} tarefas"
+  }
 }

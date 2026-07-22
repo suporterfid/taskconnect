@@ -113,5 +113,11 @@
     "error": "Unable to perform that action"
   },
   "empty": "No tasks yet. Create one to schedule your first HTTP request.",
-  "loadError": "Unable to load tasks"
+  "loadError": "Unable to load tasks",
+  "filters": {
+    "searchPlaceholder": "Search by name…",
+    "anyStatus": "Any status",
+    "anyRunState": "Any last run state",
+    "resultCount": "{count} tasks"
+  }
 }

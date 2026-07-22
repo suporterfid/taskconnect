@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 
 import api, { ApiError, ensureCsrfCookie, resetCsrfCookie } from '@/services/api'
 import type { User } from '@/services/types'
-import { setLocale, type SupportedLocale, SUPPORTED_LOCALES } from '@/i18n'
+import { i18n, setLocale, type SupportedLocale, SUPPORTED_LOCALES } from '@/i18n'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (err) {
       user.value = null
       error.value =
-        err instanceof ApiError ? err.message : 'Login failed'
+        err instanceof ApiError ? err.message : i18n.global.t('common.errors.loginFailed')
       throw err
     } finally {
       loading.value = false
