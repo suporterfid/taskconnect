@@ -18,6 +18,8 @@ const navItems = computed(() => {
   const items = [
     { name: 'dashboard', label: t('common.nav.dashboard'), to: '/dashboard' },
     { name: 'tasks', label: t('common.nav.tasks'), to: '/tasks' },
+    { name: 'dlq', label: t('common.nav.dlq'), to: '/dlq' },
+    { name: 'pipelines', label: t('common.nav.pipelines'), to: '/pipelines' },
     {
       name: 'endpoint-profiles',
       label: t('common.nav.endpointProfiles'),

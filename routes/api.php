@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\Auth\LoginController;
 use App\Http\Controllers\Api\V1\Auth\LogoutController;
 use App\Http\Controllers\Api\V1\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\DlqController;
 use App\Http\Controllers\Api\V1\EndpointProfileController;
 use App\Http\Controllers\Api\V1\EnvironmentController;
 use App\Http\Controllers\Api\V1\MeController;
@@ -78,9 +79,14 @@ Route::prefix('v1')->group(function (): void {
             Route::post('tenants/{tenantId}/environments/{environmentId}/endpoint-profiles/{profileId}/test', [EndpointProfileController::class, 'test']);
 
             Route::get('tenants/{tenantId}/environments/{environmentId}/pipelines', [PipelineInstanceController::class, 'templates']);
+            Route::get('tenants/{tenantId}/environments/{environmentId}/pipeline-instances', [PipelineInstanceController::class, 'index']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/pipelines/{templateName}/instances', [PipelineInstanceController::class, 'store'])
                 ->middleware(['submit.throttle', 'idempotency']);
             Route::get('tenants/{tenantId}/environments/{environmentId}/pipelines/{templateName}/instances/{instanceId}', [PipelineInstanceController::class, 'show']);
+
+            Route::get('tenants/{tenantId}/environments/{environmentId}/dlq', [DlqController::class, 'index']);
+            Route::get('tenants/{tenantId}/environments/{environmentId}/dlq/{runId}', [DlqController::class, 'show']);
+            Route::post('tenants/{tenantId}/environments/{environmentId}/dlq/{runId}/replay', [DlqController::class, 'replay']);
 
             Route::get('tenants/{tenantId}/environments/{environmentId}/tasks', [TaskController::class, 'index']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks', [TaskController::class, 'store'])

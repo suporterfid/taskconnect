@@ -21,6 +21,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "tasks": "Tasks",
+    "dlq": "DLQ",
+    "pipelines": "Pipelines",
     "endpointProfiles": "Endpoint Profiles",
     "secrets": "Secrets",
     "runs": "Runs",

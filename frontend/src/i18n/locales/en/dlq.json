@@ -1,0 +1,23 @@
+{
+  "title": "Dead letter queue",
+  "subtitle": "Inspect and replay failed runs in this workspace",
+  "needsTenant": "Select a tenant and environment before viewing the DLQ.",
+  "empty": "No dead runs in this workspace.",
+  "columns": {
+    "run": "Run",
+    "task": "Task",
+    "type": "Type",
+    "finished": "Finished",
+    "error": "Error"
+  },
+  "actions": {
+    "inspect": "Inspect",
+    "replay": "Replay",
+    "replayConfirm": "Replay this dead run with a fresh delivery idempotency key?",
+    "error": "Unable to replay run"
+  },
+  "filters": {
+    "type": "Task type",
+    "anyType": "Any type"
+  }
+}

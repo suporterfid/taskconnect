@@ -242,6 +242,10 @@ export type TriggerType = 'scheduled' | 'manual' | 'test' | 'retry' | string
 export interface TaskRun {
   id: string
   task_id: string
+  task_name?: string | null
+  task_type?: string | null
+  /** Environment public id — v1 Extension workspace alias. */
+  workspace_id?: string
   trigger_type: TriggerType
   scheduled_for?: string | null
   idempotency_key?: string | null
@@ -253,6 +257,42 @@ export interface TaskRun {
   final_http_status?: number | null
   final_error_code?: string | null
   created_at: string
+}
+
+export interface PipelineTemplateNode {
+  node_key: string
+  task_type: string
+  depends_on: string[]
+  on_success?: string | null
+  on_failure?: string | null
+}
+
+export interface PipelineTemplate {
+  name: string
+  description?: string | null
+  nodes: PipelineTemplateNode[]
+}
+
+export interface PipelineInstanceNode {
+  id: string
+  node_key: string
+  task_type: string
+  status: string
+  depends_on?: string[]
+  on_success?: string | null
+  on_failure?: string | null
+  task_id?: string | null
+  task_run_id?: string | null
+  run_state?: string | null
+}
+
+export interface PipelineInstance {
+  id: string
+  template_name: string
+  status: string
+  workspace_id?: string
+  nodes?: PipelineInstanceNode[]
+  created_at?: string
 }
 
 /** @deprecated Prefer TaskRun — kept as alias for existing imports. */

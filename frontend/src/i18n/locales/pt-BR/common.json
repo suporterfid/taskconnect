@@ -21,6 +21,8 @@
   "nav": {
     "dashboard": "Painel",
     "tasks": "Tarefas",
+    "dlq": "DLQ",
+    "pipelines": "Pipelines",
     "endpointProfiles": "Perfis de endpoint",
     "secrets": "Segredos",
     "runs": "Execuções",
