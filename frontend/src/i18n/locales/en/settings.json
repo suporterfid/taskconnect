@@ -16,6 +16,16 @@
     "save": "Save timezone"
   },
   "saveError": "Unable to save preferences",
+  "outboundAllowHosts": {
+    "title": "Outbound host allowlist",
+    "hint": "Optional. When set, scheduled HTTP calls may only target these hostnames (in addition to built-in SSRF protections). Leave empty to allow any public host.",
+    "label": "Allowed hosts (one per line)",
+    "placeholder": "api.example.com\nhooks.partner.test",
+    "save": "Save allowlist",
+    "saved": "Outbound allowlist saved",
+    "saveError": "Unable to save outbound allowlist",
+    "needsTenant": "Select a tenant before editing the outbound allowlist."
+  },
   "audit": {
     "title": "Audit logs",
     "subtitle": "Recent tenant activity",

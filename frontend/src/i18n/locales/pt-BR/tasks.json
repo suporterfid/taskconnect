@@ -44,7 +44,12 @@
     "endpointProfileNone": "Nenhum (URL direta)",
     "endpointProfileHint": "Opcional. Quando definido, a URL/caminho é relativo à URL base do perfil.",
     "maxAttempts": "Máximo de tentativas",
-    "retryStrategy": "Estratégia de retry"
+    "retryStrategy": "Estratégia de retry",
+    "successStatusRanges": "Faixas de status de sucesso",
+    "successStatusRangesHint": "Status HTTP ou faixas separados por vírgula tratados como sucesso (padrão 200-299).",
+    "successStatusRangesPlaceholder": "200-299",
+    "successStatusRangesDefault": "200-299 (padrão)",
+    "successStatusRangesInvalid": "Use status ou faixas como 200-299,204"
   },
   "scheduleKinds": {
     "once": "Uma vez",

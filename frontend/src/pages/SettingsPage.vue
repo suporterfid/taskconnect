@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
@@ -10,7 +10,7 @@ import { useAsyncData } from '@/composables/useAsyncData'
 import type { SupportedLocale } from '@/i18n'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
-import type { AuditLog, User } from '@/services/types'
+import type { AuditLog, Tenant, User } from '@/services/types'
 import { useAuthStore } from '@/stores/auth'
 import { useLocaleStore } from '@/stores/locale'
 import { useTenantStore } from '@/stores/tenant'
@@ -24,8 +24,33 @@ const note = ref<string | null>(null)
 const saveError = ref<string | null>(null)
 const saving = ref(false)
 const timezone = ref(auth.user?.preferences?.timezone ?? 'UTC')
+const allowHostsText = ref('')
+const allowHostsNote = ref<string | null>(null)
+const allowHostsError = ref<string | null>(null)
+const savingAllowHosts = ref(false)
 
 const canLoadAudit = computed(() => Boolean(tenant.currentTenantId))
+const canEditAllowHosts = computed(() => Boolean(tenant.currentTenantId))
+
+function syncAllowHostsFromTenant(): void {
+  const hosts = tenant.currentTenant?.outbound_allow_hosts ?? []
+  allowHostsText.value = hosts.join('\n')
+}
+
+watch(
+  () => tenant.currentTenantId,
+  () => {
+    syncAllowHostsFromTenant()
+    allowHostsNote.value = null
+    allowHostsError.value = null
+  },
+  { immediate: true },
+)
+
+watch(
+  () => tenant.currentTenant?.outbound_allow_hosts,
+  () => syncAllowHostsFromTenant(),
+)
 
 const {
   data: auditLogs,
@@ -80,6 +105,44 @@ async function persistPreferences(payload: {
     }
   } finally {
     saving.value = false
+  }
+}
+
+async function onSaveAllowHosts(): Promise<void> {
+  if (!tenant.currentTenantId) {
+    return
+  }
+
+  savingAllowHosts.value = true
+  allowHostsError.value = null
+  allowHostsNote.value = null
+
+  const hosts = allowHostsText.value
+    .split('\n')
+    .map((line) => line.trim().toLowerCase())
+    .filter((line) => line !== '')
+
+  try {
+    const { data } = await api.patch<{ data: Tenant }>(
+      `/tenants/${tenant.currentTenantId}`,
+      { outbound_allow_hosts: hosts },
+    )
+    const index = tenant.tenants.findIndex((item) => item.id === data.data.id)
+    if (index >= 0) {
+      tenant.tenants[index] = {
+        ...tenant.tenants[index],
+        ...data.data,
+      }
+    }
+    syncAllowHostsFromTenant()
+    allowHostsNote.value = t('settings.outboundAllowHosts.saved')
+  } catch (err) {
+    allowHostsError.value =
+      err instanceof ApiError
+        ? err.message
+        : t('settings.outboundAllowHosts.saveError')
+  } finally {
+    savingAllowHosts.value = false
   }
 }
 
@@ -146,6 +209,58 @@ function formatWhen(value?: string | null): string {
         <p v-if="saveError" class="mt-3 text-sm text-red-600" role="alert">
           {{ saveError }}
         </p>
+      </section>
+
+      <section class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <h2 class="text-lg font-medium">
+          {{ $t('settings.outboundAllowHosts.title') }}
+        </h2>
+        <p class="mt-2 text-sm text-gray-500">
+          {{ $t('settings.outboundAllowHosts.hint') }}
+        </p>
+
+        <p
+          v-if="!canEditAllowHosts"
+          class="mt-4 rounded-md border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500"
+        >
+          {{ $t('settings.outboundAllowHosts.needsTenant') }}
+        </p>
+        <template v-else>
+          <label class="mt-4 block text-sm">
+            <span class="font-medium text-gray-700 dark:text-gray-300">
+              {{ $t('settings.outboundAllowHosts.label') }}
+            </span>
+            <textarea
+              v-model="allowHostsText"
+              rows="5"
+              class="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-800"
+              :disabled="savingAllowHosts"
+              :placeholder="$t('settings.outboundAllowHosts.placeholder')"
+            />
+          </label>
+          <button
+            type="button"
+            class="mt-3 rounded-md bg-violet-600 px-4 py-2 text-sm text-white hover:bg-violet-700 disabled:opacity-50"
+            :disabled="savingAllowHosts"
+            @click="onSaveAllowHosts"
+          >
+            {{ $t('settings.outboundAllowHosts.save') }}
+          </button>
+          <p
+            v-if="allowHostsNote"
+            class="mt-3 text-sm text-green-700"
+            role="status"
+          >
+            {{ allowHostsNote }}
+          </p>
+          <p
+            v-if="allowHostsError"
+            class="mt-3 text-sm text-red-600"
+            role="alert"
+          >
+            {{ allowHostsError }}
+          </p>
+        </template>
       </section>
 
       <section class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
