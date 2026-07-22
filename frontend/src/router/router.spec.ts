@@ -62,9 +62,26 @@ describe('router', () => {
     expect(dashboard?.path).toBe('/dashboard')
   })
 
+  it('defines dlq and pipelines routes under authenticated layout', async () => {
+    const router = (await import('@/router')).default
+    expect(router.getRoutes().find((r) => r.name === 'dlq')?.path).toBe('/dlq')
+    expect(router.getRoutes().find((r) => r.name === 'pipelines')?.path).toBe('/pipelines')
+    expect(router.getRoutes().find((r) => r.name === 'pipelines-detail')?.path).toBe(
+      '/pipelines/:templateName/instances/:id',
+    )
+  })
+
   it('redirects unauthenticated users to login', async () => {
     const router = (await import('@/router')).default
     await router.push('/dashboard')
+    expect(router.currentRoute.value.name).toBe('login')
+  })
+
+  it('redirects unauthenticated dlq and pipelines visits to login', async () => {
+    const router = (await import('@/router')).default
+    await router.push('/dlq')
+    expect(router.currentRoute.value.name).toBe('login')
+    await router.push('/pipelines')
     expect(router.currentRoute.value.name).toBe('login')
   })
 })

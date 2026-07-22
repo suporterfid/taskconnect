@@ -1,0 +1,34 @@
+{
+  "title": "Pipelines",
+  "subtitle": "Workspace pipeline instances and node status",
+  "needsTenant": "Select a tenant and environment before viewing pipelines.",
+  "empty": "No pipeline instances yet.",
+  "templates": "Templates",
+  "instances": "Instances",
+  "columns": {
+    "id": "Instance",
+    "template": "Template",
+    "status": "Status",
+    "created": "Created",
+    "nodes": "Nodes"
+  },
+  "detail": {
+    "title": "Pipeline instance",
+    "nodes": "Nodes",
+    "nodeKey": "Node",
+    "taskType": "Type",
+    "status": "Status",
+    "task": "Task",
+    "run": "Run"
+  },
+  "status": {
+    "pending": "Pending",
+    "running": "Running",
+    "succeeded": "Succeeded",
+    "failed": "Failed",
+    "cancelled": "Cancelled",
+    "ready": "Ready",
+    "halted": "Halted",
+    "skipped": "Skipped"
+  }
+}

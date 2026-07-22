@@ -1,0 +1,34 @@
+{
+  "title": "Pipelines",
+  "subtitle": "Instâncias de pipeline e status dos nós neste workspace",
+  "needsTenant": "Selecione um tenant e ambiente antes de ver pipelines.",
+  "empty": "Nenhuma instância de pipeline ainda.",
+  "templates": "Modelos",
+  "instances": "Instâncias",
+  "columns": {
+    "id": "Instância",
+    "template": "Modelo",
+    "status": "Status",
+    "created": "Criado",
+    "nodes": "Nós"
+  },
+  "detail": {
+    "title": "Instância de pipeline",
+    "nodes": "Nós",
+    "nodeKey": "Nó",
+    "taskType": "Tipo",
+    "status": "Status",
+    "task": "Tarefa",
+    "run": "Run"
+  },
+  "status": {
+    "pending": "Pendente",
+    "running": "Em execução",
+    "succeeded": "Sucesso",
+    "failed": "Falhou",
+    "cancelled": "Cancelado",
+    "ready": "Pronto",
+    "halted": "Interrompido",
+    "skipped": "Ignorado"
+  }
+}

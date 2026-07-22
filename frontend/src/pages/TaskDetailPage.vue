@@ -168,6 +168,22 @@ async function onArchive(): Promise<void> {
           </dd>
         </div>
         <div>
+          <dt class="text-sm text-gray-500">{{ $t('tasks.fields.workspaceId') }}</dt>
+          <dd class="mt-1 font-mono text-sm">{{ data.workspace_id || '—' }}</dd>
+        </div>
+        <div>
+          <dt class="text-sm text-gray-500">{{ $t('tasks.fields.taskType') }}</dt>
+          <dd class="mt-1 font-mono text-sm">{{ data.task_type || '—' }}</dd>
+        </div>
+        <div>
+          <dt class="text-sm text-gray-500">{{ $t('tasks.fields.priority') }}</dt>
+          <dd class="mt-1 text-sm">{{ data.priority ?? '—' }}</dd>
+        </div>
+        <div>
+          <dt class="text-sm text-gray-500">{{ $t('tasks.fields.egressProfile') }}</dt>
+          <dd class="mt-1 font-mono text-sm">{{ data.egress_profile || '—' }}</dd>
+        </div>
+        <div>
           <dt class="text-sm text-gray-500">{{ $t('common.description') }}</dt>
           <dd class="mt-1 text-sm">{{ data.description || '—' }}</dd>
         </div>

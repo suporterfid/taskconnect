@@ -370,6 +370,15 @@ function statusClass(status: string): string {
                 {{ $t('common.status') }}
               </th>
               <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                {{ $t('tasks.fields.taskType') }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                {{ $t('tasks.fields.priority') }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                {{ $t('tasks.fields.egressProfile') }}
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
                 {{ $t('tasks.detail.schedule') }}
               </th>
               <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
@@ -413,6 +422,15 @@ function statusClass(status: string): string {
                 >
                   {{ $t(`tasks.status.${task.definition_status}`) }}
                 </span>
+              </td>
+              <td class="px-4 py-3 font-mono text-xs text-gray-600">
+                {{ task.task_type || '—' }}
+              </td>
+              <td class="px-4 py-3 text-sm text-gray-600">
+                {{ task.priority ?? '—' }}
+              </td>
+              <td class="px-4 py-3 font-mono text-xs text-gray-600">
+                {{ task.egress_profile || '—' }}
               </td>
               <td class="max-w-xs truncate px-4 py-3 text-sm text-gray-600">
                 {{ scheduleLabel(task) }}

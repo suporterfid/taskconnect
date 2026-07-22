@@ -37,6 +37,12 @@ test.describe('auth smoke', () => {
     await page.goto('/tasks')
     await expect(page.getByRole('heading', { name: /tasks|tarefas/i })).toBeVisible()
 
+    await page.goto('/dlq')
+    await expect(page.getByRole('heading', { name: /dead letter|dlq|fila/i })).toBeVisible()
+
+    await page.goto('/pipelines')
+    await expect(page.getByRole('heading', { name: /pipelines/i })).toBeVisible()
+
     await page.goto('/tasks/new')
     await expect(page.getByRole('heading', { name: /create|criar|task|tarefa/i })).toBeVisible()
   })

@@ -15,6 +15,16 @@ php artisan tasks:dlq:replay --type=document.convert [--workspace=env_…] [--li
 
 On DLQ arrival, optional per-workspace email/webhook alerts fire (R13); see `docs/architecture/dlq-alerting.md`.
 
+## Operator UI (R14)
+
+```
+GET  /api/v1/tenants/{tenant}/environments/{env}/dlq
+GET  /api/v1/tenants/{tenant}/environments/{env}/dlq/{runId}
+POST /api/v1/tenants/{tenant}/environments/{env}/dlq/{runId}/replay
+```
+
+The SPA `/dlq` page lists dead runs and calls `replay` (fresh delivery idempotency group, same as the CLI).
+
 API `POST …/task-runs/{id}/retry` still reuses the same delivery key (in-run retry semantics). Prefer the DLQ CLI when the operator wants a fresh delivery group after exhaustion.
 
 ## Retention

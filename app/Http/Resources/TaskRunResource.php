@@ -14,6 +14,8 @@ class TaskRunResource extends JsonResource
         return [
             'id' => $this->public_id,
             'task_id' => $this->task?->public_id,
+            'task_name' => $this->task?->name,
+            'task_type' => $this->task?->task_type,
             /** Environment public id — v1 Extension workspace alias (R1). */
             'workspace_id' => $this->environment?->public_id,
             'trigger_type' => $this->trigger_type->value,

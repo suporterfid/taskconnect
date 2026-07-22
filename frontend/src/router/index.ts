@@ -61,6 +61,22 @@ const router = createRouter({
           props: true,
         },
         {
+          path: 'dlq',
+          name: 'dlq',
+          component: () => import('@/pages/DlqPage.vue'),
+        },
+        {
+          path: 'pipelines',
+          name: 'pipelines',
+          component: () => import('@/pages/PipelineListPage.vue'),
+        },
+        {
+          path: 'pipelines/:templateName/instances/:id',
+          name: 'pipelines-detail',
+          component: () => import('@/pages/PipelineDetailPage.vue'),
+          props: true,
+        },
+        {
           path: 'endpoint-profiles',
           name: 'endpoint-profiles',
           component: () => import('@/pages/EndpointProfileListPage.vue'),

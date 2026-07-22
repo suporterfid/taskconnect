@@ -1,0 +1,23 @@
+{
+  "title": "Fila de dead letter",
+  "subtitle": "Inspecionar e reexecutar runs com falha neste workspace",
+  "needsTenant": "Selecione um tenant e ambiente antes de ver a DLQ.",
+  "empty": "Nenhum run morto neste workspace.",
+  "columns": {
+    "run": "Run",
+    "task": "Tarefa",
+    "type": "Tipo",
+    "finished": "Finalizado",
+    "error": "Erro"
+  },
+  "actions": {
+    "inspect": "Inspecionar",
+    "replay": "Reexecutar",
+    "replayConfirm": "Reexecutar este run morto com uma nova chave de idempotência de entrega?",
+    "error": "Não foi possível reexecutar o run"
+  },
+  "filters": {
+    "type": "Tipo de tarefa",
+    "anyType": "Qualquer tipo"
+  }
+}

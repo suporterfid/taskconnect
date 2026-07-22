@@ -53,6 +53,37 @@ class PipelineInstanceController extends Controller
         return response()->json(['data' => $items]);
     }
 
+    public function index(Request $request, string $tenantId, string $environmentId): JsonResponse
+    {
+        $tenant = $this->tenant($request);
+        $environment = $this->environment($request);
+        $this->authorize('viewAny', [PipelineInstance::class, $tenant]);
+
+        $validated = $request->validate([
+            'template' => ['sometimes', 'nullable', 'string', 'max:128'],
+            'limit' => ['sometimes', 'integer', 'min:1', 'max:200'],
+        ]);
+
+        $limit = (int) ($validated['limit'] ?? 50);
+
+        $query = PipelineInstance::query()
+            ->where('tenant_id', $tenant->id)
+            ->where('environment_id', $environment->id)
+            ->with(['nodes.task', 'nodes.taskRun', 'environment'])
+            ->orderByDesc('created_at')
+            ->orderByDesc('id');
+
+        if (! empty($validated['template'])) {
+            $query->where('template_name', $validated['template']);
+        }
+
+        $instances = $query->limit($limit)->get();
+
+        return response()->json([
+            'data' => PipelineInstanceResource::collection($instances),
+        ]);
+    }
+
     public function store(Request $request, string $tenantId, string $environmentId, string $templateName): JsonResponse
     {
         $tenant = $this->tenant($request);

@@ -65,6 +65,7 @@ Implement **in order R1→R9**. Do not start R(n+1) until R(n) acceptance tests 
 | R12 | **Done** (#30) | Workspace weighted RR claiming; `docs/architecture/fairness.md` |
 | R13 | **Done** (#31) | Per-workspace DLQ email/webhook alerts; `docs/architecture/dlq-alerting.md` |
 | R15 | **Done** (#33) | DB-backed submit rate limits; `docs/architecture/submit-rate-limiting.md` |
+| R14 | **Done** (#32) | Operator UI: task governance fields, DLQ page, pipelines pages + REST |
 
 ## Open questions (defaults applied)
 
