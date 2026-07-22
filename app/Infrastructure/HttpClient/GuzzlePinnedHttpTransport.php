@@ -48,6 +48,9 @@ final class GuzzlePinnedHttpTransport implements PinnedHttpTransport
                     [
                         'headers' => $headers,
                         'body' => $request->body,
+                        'connect_timeout' => $connectTimeout,
+                        'timeout' => $totalTimeout,
+                        'verify' => $request->verifyTls,
                         'curl' => [
                             CURLOPT_RESOLVE => [
                                 sprintf('%s:%d:%s', $currentEndpoint->host, $currentEndpoint->port, $currentEndpoint->pinnedIp),

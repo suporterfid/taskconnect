@@ -58,6 +58,8 @@ final class HttpDeliveryService
 
             $this->persistRequestSnapshot($attempt, $resolved['url'], $headers, $resolved['body']);
 
+            [$connectTimeout, $totalTimeout] = $this->resolveDeliveryTimeouts($task, $profile, $egressProfile);
+
             $response = $this->transport->send(new PinnedHttpRequest(
                 method: $task->method,
                 endpoint: $endpoint,
@@ -65,8 +67,8 @@ final class HttpDeliveryService
                 body: $resolved['body'],
                 verifyTls: $profile?->verify_tls ?? true,
                 followRedirects: $profile?->follow_redirects ?? false,
-                connectTimeout: $profile?->connect_timeout,
-                totalTimeout: $profile?->total_timeout,
+                connectTimeout: $connectTimeout,
+                totalTimeout: $totalTimeout,
                 additionalAllowHosts: $additionalAllowHosts,
                 egressProfile: $egressProfile,
             ));
@@ -95,6 +97,50 @@ final class HttpDeliveryService
         $defaults = $this->taskTypeCatalog->definition($task->task_type);
 
         return EgressProfile::tryFromMixed($defaults['egress_profile'] ?? null);
+    }
+
+    /**
+     * R4: task.timeout_ms (or type default) drives delivery timeouts, capped by
+     * endpoint-profile / egress-profile / global outbound ceilings (seconds).
+     *
+     * @return array{0: int, 1: int} connectTimeout, totalTimeout
+     */
+    private function resolveDeliveryTimeouts(
+        Task $task,
+        ?EndpointProfile $profile,
+        EgressProfile $egressProfile,
+    ): array {
+        $config = $this->outboundPolicy->config();
+        $egressLimits = $config->profile($egressProfile);
+
+        $timeoutMs = $task->timeout_ms;
+        if ($timeoutMs === null || (int) $timeoutMs < 1) {
+            $timeoutMs = $this->taskTypeCatalog->definition($task->task_type)['timeout_ms'];
+        }
+
+        $desiredTotal = max(1, (int) ceil(((int) $timeoutMs) / 1000));
+
+        $ceilingTotal = $config->totalTimeout;
+        if ($egressLimits->totalTimeout !== null) {
+            $ceilingTotal = min($ceilingTotal, $egressLimits->totalTimeout);
+        }
+        if ($profile?->total_timeout !== null) {
+            $ceilingTotal = min($ceilingTotal, (int) $profile->total_timeout);
+        }
+
+        $totalTimeout = max(1, min($desiredTotal, max(1, $ceilingTotal)));
+
+        $ceilingConnect = $config->connectTimeout;
+        if ($egressLimits->connectTimeout !== null) {
+            $ceilingConnect = min($ceilingConnect, $egressLimits->connectTimeout);
+        }
+        if ($profile?->connect_timeout !== null) {
+            $ceilingConnect = min($ceilingConnect, (int) $profile->connect_timeout);
+        }
+
+        $connectTimeout = max(1, min(max(1, $ceilingConnect), $totalTimeout));
+
+        return [$connectTimeout, $totalTimeout];
     }
 
     /**

@@ -128,50 +128,6 @@ class HttpDeliveryServiceTest extends TestCase
         $this->assertCount(1, $appliedOnce);
     }
 
-    /**
-     * @return array{0: HttpDeliveryService, 1: MockPinnedHttpTransport}
-     */
-    private function makeService(): array
-    {
-        $transport = new MockPinnedHttpTransport(
-            new PinnedHttpResponse(
-                statusCode: 200,
-                headers: ['Content-Type' => ['application/json']],
-                bodyTruncated: '{"ok":true}',
-                bodySha256: hash('sha256', '{"ok":true}'),
-                bodyTruncatedFlag: false,
-                finalUrl: 'http://receiver:8080/hook',
-                redirectCount: 0,
-            ),
-        );
-
-        $policy = OutboundPolicy::fromConfig(
-            OutboundPolicyConfig::fromArray([
-                'allowed_ports' => [80, 443, 8080],
-                'allow_http' => true,
-                'platform_allow_hosts' => [],
-                'testing_allow_hosts' => ['receiver'],
-                'metadata_hosts' => ['metadata.google.internal'],
-                'metadata_ips' => ['169.254.169.254'],
-            ]),
-            new ArrayDnsResolver([
-                'receiver' => ['127.0.0.1'],
-                'public.example' => ['93.184.216.34'],
-            ]),
-        );
-
-        $service = new HttpDeliveryService(
-            outboundPolicy: $policy,
-            transport: $transport,
-            redactor: new RequestSnapshotRedactor,
-            secretService: app(SecretService::class),
-            taskTypeCatalog: app(TaskTypeCatalog::class),
-            callbackAuthHeaderBuilder: app(\App\Application\GrandpaSson\CallbackAuthHeaderBuilder::class),
-        );
-
-        return [$service, $transport];
-    }
-
     public function test_internal_profile_blocks_non_allowlisted_host_before_connect(): void
     {
         [$service] = $this->makeService();
@@ -204,5 +160,125 @@ class HttpDeliveryServiceTest extends TestCase
 
         $this->assertTrue($result->blocked);
         $this->assertSame('host_not_allowlisted', $result->blockReason);
+    }
+
+    public function test_timeout_ms_is_applied_to_pinned_request(): void
+    {
+        [$service, $transport] = $this->makeService();
+
+        $task = Task::factory()->create([
+            'url_or_path' => 'http://receiver:8080/hook',
+            'timeout_ms' => 2500,
+        ]);
+
+        $run = TaskRun::query()->create([
+            'tenant_id' => $task->tenant_id,
+            'environment_id' => $task->environment_id,
+            'task_id' => $task->id,
+            'trigger_type' => 'scheduled',
+            'occurrence_key' => '2026-07-18T15:00:00Z',
+            'idempotency_key' => 'idem-timeout-ms',
+            'run_state' => 'pending',
+            'attempt_count' => 1,
+        ]);
+
+        $attempt = TaskRunAttempt::query()->create([
+            'tenant_id' => $task->tenant_id,
+            'environment_id' => $task->environment_id,
+            'task_run_id' => $run->id,
+            'attempt_number' => 1,
+            'attempt_state' => 'pending',
+        ]);
+
+        $service->deliver($attempt);
+
+        $this->assertCount(1, $transport->requests);
+        $this->assertSame(3, $transport->requests[0]->totalTimeout);
+        $this->assertSame(3, $transport->requests[0]->connectTimeout);
+    }
+
+    public function test_timeout_ms_is_capped_by_global_outbound_ceiling(): void
+    {
+        [$service, $transport] = $this->makeService([
+            'connect_timeout' => 5,
+            'total_timeout' => 4,
+        ]);
+
+        $task = Task::factory()->create([
+            'url_or_path' => 'http://receiver:8080/hook',
+            'timeout_ms' => 60_000,
+        ]);
+
+        $run = TaskRun::query()->create([
+            'tenant_id' => $task->tenant_id,
+            'environment_id' => $task->environment_id,
+            'task_id' => $task->id,
+            'trigger_type' => 'scheduled',
+            'occurrence_key' => '2026-07-18T16:00:00Z',
+            'idempotency_key' => 'idem-timeout-cap',
+            'run_state' => 'pending',
+            'attempt_count' => 1,
+        ]);
+
+        $attempt = TaskRunAttempt::query()->create([
+            'tenant_id' => $task->tenant_id,
+            'environment_id' => $task->environment_id,
+            'task_run_id' => $run->id,
+            'attempt_number' => 1,
+            'attempt_state' => 'pending',
+        ]);
+
+        $service->deliver($attempt);
+
+        $this->assertCount(1, $transport->requests);
+        $this->assertSame(4, $transport->requests[0]->totalTimeout);
+        $this->assertSame(4, $transport->requests[0]->connectTimeout);
+    }
+
+    /**
+     * @param  array<string, mixed>  $outboundOverrides
+     * @return array{0: HttpDeliveryService, 1: MockPinnedHttpTransport}
+     */
+    private function makeService(array $outboundOverrides = []): array
+    {
+        $transport = new MockPinnedHttpTransport(
+            new PinnedHttpResponse(
+                statusCode: 200,
+                headers: ['Content-Type' => ['application/json']],
+                bodyTruncated: '{"ok":true}',
+                bodySha256: hash('sha256', '{"ok":true}'),
+                bodyTruncatedFlag: false,
+                finalUrl: 'http://receiver:8080/hook',
+                redirectCount: 0,
+            ),
+        );
+
+        $policy = OutboundPolicy::fromConfig(
+            OutboundPolicyConfig::fromArray(array_merge([
+                'allowed_ports' => [80, 443, 8080],
+                'allow_http' => true,
+                'platform_allow_hosts' => [],
+                'testing_allow_hosts' => ['receiver'],
+                'metadata_hosts' => ['metadata.google.internal'],
+                'metadata_ips' => ['169.254.169.254'],
+                'connect_timeout' => 5,
+                'total_timeout' => 15,
+            ], $outboundOverrides)),
+            new ArrayDnsResolver([
+                'receiver' => ['127.0.0.1'],
+                'public.example' => ['93.184.216.34'],
+            ]),
+        );
+
+        $service = new HttpDeliveryService(
+            outboundPolicy: $policy,
+            transport: $transport,
+            redactor: new RequestSnapshotRedactor,
+            secretService: app(SecretService::class),
+            taskTypeCatalog: app(TaskTypeCatalog::class),
+            callbackAuthHeaderBuilder: app(\App\Application\GrandpaSson\CallbackAuthHeaderBuilder::class),
+        );
+
+        return [$service, $transport];
     }
 }
