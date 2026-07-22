@@ -73,6 +73,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(IntrospectionClientInterface::class, HttpIntrospectionClient::class);
         $this->app->singleton(CallbackAuthHeaderBuilder::class);
         $this->app->singleton(HttpDeliveryService::class);
+        $this->app->singleton(\App\Application\Execution\EgressHostRateLimiter::class);
+        $this->app->singleton(\App\Domain\Execution\Outbound\RobotsTxtParser::class);
+        $this->app->singleton(\App\Application\Execution\RobotsTxtChecker::class);
         $this->app->singleton(ScheduleCalculator::class);
         $this->app->singleton(TaskTypeCatalog::class);
         $this->app->singleton(WorkspaceFairnessInterleaver::class);

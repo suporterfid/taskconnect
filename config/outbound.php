@@ -58,4 +58,20 @@ return [
             'total_timeout' => (int) env('OUTBOUND_API_TOTAL_TIMEOUT', env('OUTBOUND_TOTAL_TIMEOUT', 15)),
         ],
     ],
+
+    /**
+     * Per-destination-host rate limits for public-crawl / api (R7 §6.5 extras).
+     * Stored in rate_limit_buckets; set to 0 to disable a profile.
+     */
+    'host_rate_limit_per_minute' => [
+        'public-crawl' => (int) env('OUTBOUND_PUBLIC_CRAWL_HOST_RATE_LIMIT', 30),
+        'api' => (int) env('OUTBOUND_API_HOST_RATE_LIMIT', 60),
+    ],
+    'host_rate_limit_window_seconds' => (int) env('OUTBOUND_HOST_RATE_LIMIT_WINDOW_SECONDS', 60),
+
+    /** Optional robots.txt respect for public-crawl only (default off). */
+    'robots_txt' => [
+        'enabled' => filter_var(env('OUTBOUND_PUBLIC_CRAWL_ROBOTS_TXT', false), FILTER_VALIDATE_BOOL),
+        'cache_seconds' => (int) env('OUTBOUND_PUBLIC_CRAWL_ROBOTS_CACHE_SECONDS', 3600),
+    ],
 ];

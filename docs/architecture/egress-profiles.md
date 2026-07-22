@@ -11,3 +11,11 @@ Named profiles select SSRF / allowlist policy **before** DNS-pinned connect.
 Task `egress_profile` (or type default from `config/task_types.php`) is applied in `HttpDeliveryService` and re-checked on redirects in `GuzzlePinnedHttpTransport`.
 
 Q3: `public-crawl` is shipped; only types that need public fetch (e.g. crawl) reference it by default.
+
+## §6.5 extras
+
+| Extra | Profiles | Behavior |
+|-------|----------|----------|
+| Max redirects / response-size / timeouts | all (profile overrides) | `config/outbound.php` `profiles.*` |
+| Per-host rate limit | `public-crawl`, `api` | DB fixed window (`rate_limit_buckets` key `egress:{profile}:{tenant_id}:{host}`). Exceeded deliveries return synthetic **429** + `Retry-After` (retryable). Disable with limit `0`. |
+| Optional `robots.txt` | `public-crawl` only | `OUTBOUND_PUBLIC_CRAWL_ROBOTS_TXT` (default **false**). Fetches `/robots.txt` via the pinned transport, caches the body, fail-open on fetch errors; `robots_disallow` blocks the attempt when the path is denied. |
