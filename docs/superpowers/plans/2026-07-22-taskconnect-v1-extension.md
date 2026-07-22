@@ -59,7 +59,7 @@ Implement **in order R1→R9**. Do not start R(n+1) until R(n) acceptance tests 
 | R5 | **Done** (#21) | `TickBudget` + chunked claim-execute in `SchedulerCycleRunner`; see `docs/deployment/cron.md` |
 | R6 | **Done** (#22) | DLQ = `run_state=dead`; `tasks:dlq:*` CLI + 30d retention; `docs/architecture/dlq.md` |
 | R7 | **Done** (#23) | Named egress profiles on DNS-pinned SSRF; `docs/architecture/egress-profiles.md` |
-| R8 | Missing | No GrandpaSSOn / HMAC callback signing |
+| R8 | **Done** (#24) | GrandpaSSOn outbound bearer+HMAC + inbound introspection (flags off by default); `docs/architecture/grandpasson-auth.md` |
 | R9 | **Done** (#25) | Release zip secret scan + `.env.example` v1 placeholders; `docs/architecture/secret-hygiene.md` |
 
 ## Open questions (defaults applied)

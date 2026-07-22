@@ -38,7 +38,7 @@ Route::prefix('v1')->group(function (): void {
         Route::get('tenants', [TenantController::class, 'index']);
         Route::post('tenants', [TenantController::class, 'store']);
 
-        Route::middleware('tenant.context')->group(function (): void {
+        Route::middleware(['tenant.context', 'grandpasson.workspace'])->group(function (): void {
             Route::get('tenants/{tenantId}', [TenantController::class, 'show']);
             Route::patch('tenants/{tenantId}', [TenantController::class, 'update']);
 

@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Infrastructure\Persistence\Eloquent\Environment;
 use App\Infrastructure\Persistence\Eloquent\Tenant;
 use App\Infrastructure\Persistence\Eloquent\ApiKey;
+use App\Auth\GrandpaSsonActor;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -71,6 +72,11 @@ class ResolveTenantEnvironment
 
     private function canAccessTenant($user, Tenant $tenant): bool
     {
+        if ($user instanceof GrandpaSsonActor) {
+            // Workspace audience is enforced by EnforceGrandpaSsonWorkspaceAud after env resolves.
+            return true;
+        }
+
         if ($user->isPlatformAdmin()) {
             return true;
         }
