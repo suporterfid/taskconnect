@@ -18,6 +18,7 @@
   "saveError": "Não foi possível salvar o perfil de endpoint",
   "archiveError": "Não foi possível arquivar o perfil de endpoint",
   "testError": "Falha no teste de conexão",
+  "testSuccess": "Teste de conexão concluído",
   "needsTenant": "Selecione um tenant e um ambiente antes de gerenciar perfis de endpoint.",
   "tlsWarning": "A verificação de certificados TLS está desativada. As conexões podem ficar vulneráveis a ataques man-in-the-middle. Use apenas para endpoints internos confiáveis.",
   "tlsConfirm": "Entendo que a verificação TLS está desativada",

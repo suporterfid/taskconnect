@@ -17,6 +17,8 @@ class SecretResource extends JsonResource
             'id' => $this->public_id,
             'name' => $this->name,
             'version' => $this->version,
+            'usage_count' => (int) ($this->endpoint_profiles_count
+                ?? $this->endpointProfiles()->notArchived()->count()),
             'archived_at' => $this->archived_at?->utc()->toIso8601String(),
             'created_at' => $this->created_at?->utc()->toIso8601String(),
             'updated_at' => $this->updated_at?->utc()->toIso8601String(),

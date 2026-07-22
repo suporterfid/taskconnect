@@ -121,7 +121,13 @@ async function onDelete(secret: Secret): Promise<void> {
   if (!tenant.currentTenantId || !tenant.currentEnvironmentId) {
     return
   }
-  if (!confirm(t('secrets.deleteConfirm'))) {
+  const usage = secret.usage_count ?? 0
+  const confirmed = confirm(
+    usage > 0
+      ? t('secrets.deleteConfirmInUse', { count: usage })
+      : t('secrets.deleteConfirm'),
+  )
+  if (!confirmed) {
     return
   }
 
@@ -335,6 +341,9 @@ function dismissPlaintext(): void {
               {{ $t('secrets.fields.version') }}
             </th>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+              {{ $t('secrets.fields.usage') }}
+            </th>
+            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
               {{ $t('common.updatedAt') }}
             </th>
             <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
@@ -346,6 +355,9 @@ function dismissPlaintext(): void {
           <tr v-for="secret in data" :key="secret.id">
             <td class="px-4 py-3 font-medium">{{ secret.name }}</td>
             <td class="px-4 py-3 text-sm text-gray-600">v{{ secret.version }}</td>
+            <td class="px-4 py-3 text-sm text-gray-600">
+              {{ secret.usage_count ?? 0 }}
+            </td>
             <td class="px-4 py-3 text-sm text-gray-600">
               {{ formatDate(secret.updated_at) }}
             </td>

@@ -52,4 +52,36 @@ class SecretFeatureTest extends TestCase
             ['name' => 'Denied', 'value' => 'nope'],
         )->assertForbidden();
     }
+
+    public function test_secret_list_includes_usage_count(): void
+    {
+        [$admin, $tenant, $environment] = $this->createTenantAdmin();
+
+        $create = $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/secrets'),
+            [
+                'name' => 'Shared Token',
+                'value' => 'token-value',
+            ],
+        )->assertCreated();
+
+        $secretId = $create->json('data.id');
+
+        $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/endpoint-profiles'),
+            [
+                'name' => 'Uses Secret',
+                'base_url' => 'https://example.com/hook',
+                'method' => 'POST',
+                'auth_mode' => 'bearer',
+                'secret_id' => $secretId,
+            ],
+        )->assertCreated();
+
+        $this->actingAs($admin)->getJson(
+            $this->environmentRoute($tenant, $environment, '/secrets'),
+        )
+            ->assertOk()
+            ->assertJsonPath('data.0.usage_count', 1);
+    }
 }

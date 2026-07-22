@@ -6,6 +6,7 @@ use App\Infrastructure\Persistence\Eloquent\Concerns\HasPublicId;
 use App\Infrastructure\Persistence\Eloquent\Concerns\SoftArchivable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Secret extends Model
 {
@@ -48,5 +49,10 @@ class Secret extends Model
     public function environment(): BelongsTo
     {
         return $this->belongsTo(Environment::class);
+    }
+
+    public function endpointProfiles(): HasMany
+    {
+        return $this->hasMany(EndpointProfile::class);
     }
 }

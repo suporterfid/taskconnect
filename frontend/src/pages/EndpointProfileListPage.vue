@@ -1,15 +1,23 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
+import { ApiError } from '@/services/api'
 import api from '@/services/api'
-import type { EndpointProfile } from '@/services/types'
+import type { EndpointProfile, EndpointTestResult } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
 
+const { t } = useI18n()
 const tenant = useTenantStore()
+
+const testingId = ref<string | null>(null)
+const actionError = ref<string | null>(null)
+const actionMessage = ref<string | null>(null)
 
 const { data, loading, error, reload } = useAsyncData(async () => {
   if (!tenant.currentTenantId || !tenant.currentEnvironmentId) {
@@ -20,6 +28,33 @@ const { data, loading, error, reload } = useAsyncData(async () => {
   )
   return response.data ?? []
 })
+
+async function onTest(profile: EndpointProfile): Promise<void> {
+  if (testingId.value) {
+    return
+  }
+  testingId.value = profile.id
+  actionError.value = null
+  actionMessage.value = null
+  try {
+    const { data: response } = await api.post<{ data: EndpointTestResult }>(
+      tenant.tenantPath(`/endpoint-profiles/${profile.id}/test`),
+      {},
+    )
+    const result = response.data
+    if (result?.transport_error_code) {
+      actionError.value =
+        result.transport_error_code || t('endpointProfiles.testError')
+    } else {
+      actionMessage.value = t('endpointProfiles.testSuccess')
+    }
+  } catch (err) {
+    actionError.value =
+      err instanceof ApiError ? err.message : t('endpointProfiles.testError')
+  } finally {
+    testingId.value = null
+  }
+}
 </script>
 
 <template>
@@ -36,6 +71,13 @@ const { data, loading, error, reload } = useAsyncData(async () => {
         {{ $t('endpointProfiles.create') }}
       </RouterLink>
     </div>
+
+    <p v-if="actionError" class="mb-4 text-sm text-red-600" role="alert">
+      {{ actionError }}
+    </p>
+    <p v-else-if="actionMessage" class="mb-4 text-sm text-green-700" role="status">
+      {{ actionMessage }}
+    </p>
 
     <LoadingState v-if="loading" />
     <ErrorState
@@ -122,6 +164,18 @@ const { data, loading, error, reload } = useAsyncData(async () => {
               </span>
             </td>
             <td class="space-x-3 px-4 py-3 text-right text-sm">
+              <button
+                type="button"
+                class="text-violet-600 hover:underline disabled:opacity-60"
+                :disabled="testingId === profile.id"
+                @click="onTest(profile)"
+              >
+                {{
+                  testingId === profile.id
+                    ? $t('endpointProfiles.test.running')
+                    : $t('endpointProfiles.detail.test')
+                }}
+              </button>
               <RouterLink
                 :to="`/endpoint-profiles/${profile.id}`"
                 class="text-violet-600 hover:underline"

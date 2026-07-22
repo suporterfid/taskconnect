@@ -1324,7 +1324,7 @@ A protected platform health endpoint SHOULD report:
   "scheduler_last_seen_at": "2026-07-18T14:20:00Z",
   "retry_executor_last_seen_at": "2026-07-18T14:20:00Z",
   "stale_claims": 0,
-  "version": "1.1.0"
+  "version": "1.2.0"
 }
 ```
 

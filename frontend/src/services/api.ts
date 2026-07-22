@@ -12,6 +12,7 @@ export class ApiError extends Error {
   readonly code?: string
   readonly errors?: Record<string, string[]>
   readonly requestId?: string
+  readonly retryAfterSeconds?: number
 
   constructor(
     message: string,
@@ -20,6 +21,7 @@ export class ApiError extends Error {
       code?: string
       errors?: Record<string, string[]>
       requestId?: string
+      retryAfterSeconds?: number
     },
   ) {
     super(message)
@@ -28,6 +30,7 @@ export class ApiError extends Error {
     this.code = options?.code
     this.errors = options?.errors
     this.requestId = options?.requestId
+    this.retryAfterSeconds = options?.retryAfterSeconds
   }
 }
 
@@ -56,7 +59,10 @@ function asStringRecord(value: unknown): Record<string, string[]> | undefined {
 export function parseErrorEnvelope(error: AxiosError): ApiError {
   const status = error.response?.status ?? 0
   const data = error.response?.data
-  const headerRequestId = error.response?.headers['x-request-id']
+  const headers = error.response?.headers ?? {}
+  const headerRequestId =
+    typeof headers['x-request-id'] === 'string' ? headers['x-request-id'] : undefined
+  const retryAfterSeconds = parseRetryAfterSeconds(headers['retry-after'])
 
   if (isRecord(data) && isRecord(data.error)) {
     const body = data.error as unknown as ApiErrorBody
@@ -65,7 +71,7 @@ export function parseErrorEnvelope(error: AxiosError): ApiError {
       status === 429 || code === 'too_many_requests'
     return new ApiError(
       tooManyRequests
-        ? i18n.global.t('common.errors.tooManyRequests')
+        ? tooManyRequestsMessage(retryAfterSeconds)
         : typeof body.message === 'string' && body.message
           ? body.message
           : i18n.global.t('common.errors.requestFailed'),
@@ -77,6 +83,7 @@ export function parseErrorEnvelope(error: AxiosError): ApiError {
           typeof body.request_id === 'string'
             ? body.request_id
             : headerRequestId,
+        retryAfterSeconds,
       },
     )
   }
@@ -88,7 +95,7 @@ export function parseErrorEnvelope(error: AxiosError): ApiError {
       status === 429 || code === 'too_many_requests'
     return new ApiError(
       tooManyRequests
-        ? i18n.global.t('common.errors.tooManyRequests')
+        ? tooManyRequestsMessage(retryAfterSeconds)
         : data.message,
       status,
       {
@@ -97,19 +104,49 @@ export function parseErrorEnvelope(error: AxiosError): ApiError {
         requestId:
           (typeof data.request_id === 'string' ? data.request_id : undefined) ??
           headerRequestId,
+        retryAfterSeconds,
       },
     )
   }
 
   if (status === 429) {
-    return new ApiError(i18n.global.t('common.errors.tooManyRequests'), status, {
+    return new ApiError(tooManyRequestsMessage(retryAfterSeconds), status, {
       requestId: headerRequestId,
+      retryAfterSeconds,
     })
   }
 
   return new ApiError(error.message || i18n.global.t('common.errors.requestFailed'), status, {
     requestId: headerRequestId,
+    retryAfterSeconds,
   })
+}
+
+function parseRetryAfterSeconds(raw: unknown): number | undefined {
+  if (typeof raw === 'number' && Number.isFinite(raw) && raw >= 0) {
+    return Math.ceil(raw)
+  }
+  if (typeof raw !== 'string' || raw.trim() === '') {
+    return undefined
+  }
+  const asInt = Number.parseInt(raw, 10)
+  if (!Number.isNaN(asInt) && String(asInt) === raw.trim()) {
+    return Math.max(0, asInt)
+  }
+  const asDate = Date.parse(raw)
+  if (!Number.isNaN(asDate)) {
+    return Math.max(0, Math.ceil((asDate - Date.now()) / 1000))
+  }
+  return undefined
+}
+
+function tooManyRequestsMessage(retryAfterSeconds?: number): string {
+  if (retryAfterSeconds != null && retryAfterSeconds > 0) {
+    return i18n.global.t('common.errors.tooManyRequestsRetryAfter', {
+      seconds: retryAfterSeconds,
+    })
+  }
+  return i18n.global.t('common.errors.tooManyRequests')
 }
 
 let csrfInitialized = false

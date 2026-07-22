@@ -21,6 +21,7 @@ const emptyStats = (): DashboardStats => ({
   paused_tasks: 0,
   recent_runs: 0,
   failed_runs_24h: 0,
+  failed_tasks: 0,
   retry_wait_runs: 0,
   dead_runs: 0,
   upcoming_tasks: [],
@@ -80,6 +81,11 @@ const stats = computed(() => [
     label: t('dashboard.stats.failedRuns'),
     value: data.value?.failed_runs_24h ?? 0,
     to: '/runs?run_state=dead',
+  },
+  {
+    label: t('dashboard.stats.failedTasks'),
+    value: data.value?.failed_tasks ?? 0,
+    to: '/tasks?last_run_state=dead',
   },
   {
     label: t('dashboard.stats.retryWait'),

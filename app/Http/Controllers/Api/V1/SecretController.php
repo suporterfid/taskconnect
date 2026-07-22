@@ -34,6 +34,7 @@ class SecretController extends Controller
             ->where('tenant_id', $tenant->id)
             ->where('environment_id', $environment->id)
             ->notArchived()
+            ->withCount(['endpointProfiles as endpoint_profiles_count' => fn ($query) => $query->notArchived()])
             ->orderBy('name')
             ->get();
 

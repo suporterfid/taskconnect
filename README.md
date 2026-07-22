@@ -2,6 +2,8 @@
 
 Open-source multi-tenant HTTP task scheduler for PHP/MySQL shared hosting.
 
+**Current release:** [1.2.0](CHANGELOG.md)
+
 ## Requirements
 
 ### Production (shared hosting)
