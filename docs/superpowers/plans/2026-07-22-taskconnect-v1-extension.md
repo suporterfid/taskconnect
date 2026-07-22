@@ -70,14 +70,16 @@ Implement **in order R1→R9**. Do not start R(n+1) until R(n) acceptance tests 
 
 ## Open questions (defaults applied)
 
-| # | Default we will implement |
-|---|---------------------------|
-| Q1 | Cross-repo GrandpaSSOn `tasks:write`; dual-mode inbound until ready |
-| Q2 | Delayed `run_at` formalized if missing; recurring stays structured kinds |
-| Q3 | Ship `public-crawl` profile unused |
-| Q4 | Global 4; convert 2; crawl 1; index 2; reminder 4 |
-| Q5 | Introspect inbound; cache outbound client-credentials |
-| Q6 | DLQ 30d; enqueue idempotency 24h |
+Audit record: `docs/architecture/open-questions.md` (closes [#35](https://github.com/suporterfid/taskconnect/issues/35)).
+
+| # | Default we will implement | Status |
+|---|---------------------------|--------|
+| Q1 | Cross-repo GrandpaSSOn `tasks:write`; dual-mode inbound until ready | Applied |
+| Q2 | Delayed `run_at` formalized; recurring stays structured kinds (+ optional cron) | Applied (R16) |
+| Q3 | Ship `public-crawl` profile unused by non-crawl types | Applied |
+| Q4 | Global 4; convert 2; crawl 1; index 2; reminder 4 | Applied |
+| Q5 | Introspect inbound; cache outbound client-credentials | Applied |
+| Q6 | DLQ 30d; enqueue idempotency 24h | Applied |
 
 ## GitHub issues
 
