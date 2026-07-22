@@ -22,9 +22,11 @@ final class GuzzlePinnedHttpTransport implements PinnedHttpTransport
     public function send(PinnedHttpRequest $request): PinnedHttpResponse
     {
         $config = $this->policy->config();
-        $connectTimeout = $request->connectTimeout ?? $config->connectTimeout;
-        $totalTimeout = $request->totalTimeout ?? $config->totalTimeout;
-        $bodyLimit = $request->responseBodyLimit ?? $config->responseBodyLimit;
+        $profileLimits = $config->profile($request->egressProfile);
+        $connectTimeout = $request->connectTimeout ?? $profileLimits->connectTimeout ?? $config->connectTimeout;
+        $totalTimeout = $request->totalTimeout ?? $profileLimits->totalTimeout ?? $config->totalTimeout;
+        $bodyLimit = $request->responseBodyLimit ?? $profileLimits->responseBodyLimit ?? $config->responseBodyLimit;
+        $redirectLimit = $profileLimits->redirectLimit ?? $config->redirectLimit;
         $client = $this->client ?? new Client([
             'http_errors' => false,
             'allow_redirects' => false,
@@ -67,7 +69,7 @@ final class GuzzlePinnedHttpTransport implements PinnedHttpTransport
             }
 
             if ($request->followRedirects && $this->isRedirect($response->getStatusCode())) {
-                if ($redirectCount >= $config->redirectLimit) {
+                if ($redirectCount >= $redirectLimit) {
                     throw new OutboundPolicyViolation(
                         'redirect_limit_exceeded',
                         'Redirect limit exceeded.',
@@ -83,7 +85,11 @@ final class GuzzlePinnedHttpTransport implements PinnedHttpTransport
                     );
                 }
 
-                $validated = $this->policy->validateUrl($location, $request->additionalAllowHosts);
+                $validated = $this->policy->validateUrl(
+                    $location,
+                    $request->additionalAllowHosts,
+                    $request->egressProfile,
+                );
                 $currentEndpoint = $this->selectPinnedEndpoint($validated);
                 $currentUrl = $currentEndpoint->url;
                 $redirectCount++;

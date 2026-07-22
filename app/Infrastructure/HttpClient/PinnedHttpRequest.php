@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\HttpClient;
 
+use App\Domain\Execution\Outbound\EgressProfile;
 use App\Domain\Execution\Outbound\ValidatedEndpoint;
 
 final readonly class PinnedHttpRequest
@@ -21,6 +22,7 @@ final readonly class PinnedHttpRequest
         public ?int $totalTimeout = null,
         public ?int $responseBodyLimit = null,
         public array $additionalAllowHosts = [],
+        public EgressProfile $egressProfile = EgressProfile::Internal,
     ) {
     }
 }

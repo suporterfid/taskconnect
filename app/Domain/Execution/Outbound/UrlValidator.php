@@ -12,10 +12,13 @@ final class UrlValidator
     }
 
     /**
-     * @param  list<string>  $additionalAllowHosts
+     * @param  list<string>  $additionalAllowHosts  Tenant / request RP allow hosts (internal profile).
      */
-    public function validate(string $url, array $additionalAllowHosts = []): ValidatedEndpoint
-    {
+    public function validate(
+        string $url,
+        array $additionalAllowHosts = [],
+        EgressProfile $egressProfile = EgressProfile::Internal,
+    ): ValidatedEndpoint {
         $parts = parse_url($url);
 
         if ($parts === false || ! isset($parts['scheme'], $parts['host'])) {
@@ -59,23 +62,15 @@ final class UrlValidator
             );
         }
 
+        $testingAllowlisted = $this->isInHostList($host, $this->config->testingAllowHosts);
+        $platformAllowlisted = $this->isInHostList($host, $this->config->platformAllowHosts);
+        $tenantAllowlisted = $this->isInHostList($host, $additionalAllowHosts);
+        $apiAllowlisted = $this->isInHostList($host, $this->config->profile(EgressProfile::Api)->allowHosts);
+        $rpAllowlisted = $platformAllowlisted || $testingAllowlisted || $tenantAllowlisted;
+
         if (filter_var($host, FILTER_VALIDATE_IP)) {
-            if ($this->ipClassifier->isBlocked($host)) {
-                throw new OutboundPolicyViolation('blocked_ip', 'The destination IP address is not allowed.');
-            }
-
-            return new ValidatedEndpoint(
-                url: $url,
-                scheme: $scheme,
-                host: $host,
-                port: $port,
-                pinnedIp: $host,
-                resolvedIps: [$host],
-                hostAllowlisted: false,
-            );
+            return $this->validateLiteralIp($url, $scheme, $host, $port, $egressProfile, $testingAllowlisted);
         }
-
-        $hostAllowlisted = $this->isHostAllowlisted($host, $additionalAllowHosts);
 
         $resolvedIps = $this->dnsResolver->resolve($host);
 
@@ -83,9 +78,19 @@ final class UrlValidator
             throw new OutboundPolicyViolation('dns_resolution_failed', 'Unable to resolve destination hostname.');
         }
 
-        if (! $hostAllowlisted && $this->ipClassifier->containsBlocked($resolvedIps)) {
-            throw new OutboundPolicyViolation('blocked_ip', 'The destination resolves to a blocked IP address.');
-        }
+        $blocked = $this->ipClassifier->containsBlocked($resolvedIps);
+
+        match ($egressProfile) {
+            EgressProfile::Internal => $this->assertInternal($rpAllowlisted, $blocked),
+            EgressProfile::PublicCrawl => $this->assertPublicCrawl($blocked, $testingAllowlisted),
+            EgressProfile::Api => $this->assertApi($apiAllowlisted || $testingAllowlisted, $blocked, $testingAllowlisted),
+        };
+
+        $hostAllowlisted = match ($egressProfile) {
+            EgressProfile::Internal => $rpAllowlisted,
+            EgressProfile::Api => $apiAllowlisted || $testingAllowlisted,
+            EgressProfile::PublicCrawl => $testingAllowlisted,
+        };
 
         return new ValidatedEndpoint(
             url: $url,
@@ -96,6 +101,86 @@ final class UrlValidator
             resolvedIps: $resolvedIps,
             hostAllowlisted: $hostAllowlisted,
         );
+    }
+
+    private function validateLiteralIp(
+        string $url,
+        string $scheme,
+        string $host,
+        int $port,
+        EgressProfile $egressProfile,
+        bool $testingAllowlisted,
+    ): ValidatedEndpoint {
+        $blocked = $this->ipClassifier->isBlocked($host);
+
+        if ($egressProfile === EgressProfile::PublicCrawl) {
+            if ($blocked && ! $testingAllowlisted) {
+                throw new OutboundPolicyViolation(
+                    'blocked_ip',
+                    'The destination IP address is not allowed.',
+                );
+            }
+        } elseif ($egressProfile === EgressProfile::Api) {
+            throw new OutboundPolicyViolation(
+                'host_not_allowlisted',
+                'The api egress profile only allows allowlisted API hostnames.',
+            );
+        } else {
+            throw new OutboundPolicyViolation(
+                'host_not_allowlisted',
+                'The internal egress profile only allows allowlisted hostnames.',
+            );
+        }
+
+        return new ValidatedEndpoint(
+            url: $url,
+            scheme: $scheme,
+            host: $host,
+            port: $port,
+            pinnedIp: $host,
+            resolvedIps: [$host],
+            hostAllowlisted: false,
+        );
+    }
+
+    private function assertInternal(bool $allowlisted, bool $blocked): void
+    {
+        if (! $allowlisted) {
+            throw new OutboundPolicyViolation(
+                'host_not_allowlisted',
+                'The internal egress profile only allows allowlisted RP hosts.',
+            );
+        }
+
+        // Allowlisted RP hosts may resolve to private ranges (on-prem / docker). Metadata hostnames already denied.
+        unset($blocked);
+    }
+
+    private function assertPublicCrawl(bool $blocked, bool $testingAllowlisted): void
+    {
+        if ($blocked && ! $testingAllowlisted) {
+            throw new OutboundPolicyViolation(
+                'blocked_ip',
+                'The destination resolves to a blocked IP address.',
+            );
+        }
+    }
+
+    private function assertApi(bool $allowlisted, bool $blocked, bool $testingAllowlisted): void
+    {
+        if (! $allowlisted) {
+            throw new OutboundPolicyViolation(
+                'host_not_allowlisted',
+                'The api egress profile only allows allowlisted API hosts.',
+            );
+        }
+
+        if ($blocked && ! $testingAllowlisted) {
+            throw new OutboundPolicyViolation(
+                'blocked_ip',
+                'The destination resolves to a blocked IP address.',
+            );
+        }
     }
 
     private function isLocalhostHostname(string $host): bool
@@ -119,24 +204,13 @@ final class UrlValidator
     }
 
     /**
-     * @param  list<string>  $additionalAllowHosts
+     * @param  list<string>  $hosts
      */
-    private function isHostAllowlisted(string $host, array $additionalAllowHosts = []): bool
+    private function isInHostList(string $host, array $hosts): bool
     {
-        $allowlist = array_merge(
-            $this->config->platformAllowHosts,
-            $this->config->testingAllowHosts,
-            array_map(
-                static fn (string $allowedHost): string => strtolower(trim($allowedHost)),
-                array_values(array_filter(
-                    $additionalAllowHosts,
-                    static fn ($value): bool => is_string($value) && trim($value) !== '',
-                )),
-            ),
-        );
-
-        foreach ($allowlist as $allowedHost) {
-            if ($host === $allowedHost) {
+        foreach ($hosts as $allowedHost) {
+            $normalized = strtolower(trim((string) $allowedHost));
+            if ($normalized !== '' && $host === $normalized) {
                 return true;
             }
         }

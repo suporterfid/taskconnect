@@ -27,9 +27,16 @@ final class OutboundPolicy
     /**
      * @param  list<string>  $additionalAllowHosts
      */
-    public function validateUrl(string $url, array $additionalAllowHosts = []): ValidatedEndpoint
-    {
-        return $this->urlValidator->validate($url, $additionalAllowHosts);
+    public function validateUrl(
+        string $url,
+        array $additionalAllowHosts = [],
+        EgressProfile|string|null $egressProfile = EgressProfile::Internal,
+    ): ValidatedEndpoint {
+        $profile = $egressProfile instanceof EgressProfile
+            ? $egressProfile
+            : EgressProfile::tryFromMixed(is_string($egressProfile) ? $egressProfile : null);
+
+        return $this->urlValidator->validate($url, $additionalAllowHosts, $profile);
     }
 
     /**
