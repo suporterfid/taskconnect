@@ -2,11 +2,15 @@
 
 namespace Tests\Unit\Execution;
 
+use App\Application\Execution\EgressHostRateLimiter;
 use App\Application\Execution\HttpDeliveryService;
 use App\Application\Execution\RequestSnapshotRedactor;
+use App\Application\Execution\RobotsTxtChecker;
+use App\Application\RateLimiting\DatabaseRateLimiter;
 use App\Application\Secrets\SecretService;
 use App\Domain\Execution\Outbound\OutboundPolicy;
 use App\Domain\Execution\Outbound\OutboundPolicyConfig;
+use App\Domain\Execution\Outbound\RobotsTxtParser;
 use App\Domain\Scheduling\TaskTypeCatalog;
 use App\Infrastructure\HttpClient\PinnedHttpResponse;
 use App\Infrastructure\Persistence\Eloquent\Task;
@@ -277,8 +281,134 @@ class HttpDeliveryServiceTest extends TestCase
             secretService: app(SecretService::class),
             taskTypeCatalog: app(TaskTypeCatalog::class),
             callbackAuthHeaderBuilder: app(\App\Application\GrandpaSson\CallbackAuthHeaderBuilder::class),
+            egressHostRateLimiter: new EgressHostRateLimiter(app(DatabaseRateLimiter::class)),
+            robotsTxtChecker: new RobotsTxtChecker($policy, $transport, new RobotsTxtParser),
         );
 
         return [$service, $transport];
+    }
+
+    public function test_public_crawl_host_rate_limit_returns_retryable_429(): void
+    {
+        config([
+            'outbound.host_rate_limit_per_minute' => ['public-crawl' => 1, 'api' => 60],
+            'outbound.host_rate_limit_window_seconds' => 60,
+            'outbound.robots_txt.enabled' => false,
+        ]);
+
+        [$service, $transport] = $this->makeService([
+            'profiles' => [
+                'public-crawl' => [],
+            ],
+        ]);
+
+        $task = Task::factory()->create([
+            'url_or_path' => 'http://public.example/page',
+            'egress_profile' => 'public-crawl',
+        ]);
+
+        $first = $this->makeAttempt($task, 'occ-rl-1', 'idem-rl-1');
+        $second = $this->makeAttempt($task, 'occ-rl-2', 'idem-rl-2');
+
+        $ok = $service->deliver($first);
+        $limited = $service->deliver($second);
+
+        $this->assertFalse($ok->blocked);
+        $this->assertCount(1, $transport->requests);
+
+        $this->assertFalse($limited->blocked);
+        $this->assertSame(429, $limited->response?->statusCode);
+        $this->assertSame('host_rate_limited', $limited->response?->transportError);
+        $this->assertSame(1, count($transport->requests));
+    }
+
+    public function test_public_crawl_robots_disallow_blocks_delivery(): void
+    {
+        config([
+            'outbound.host_rate_limit_per_minute' => ['public-crawl' => 0, 'api' => 0],
+            'outbound.robots_txt.enabled' => true,
+            'outbound.robots_txt.cache_seconds' => 60,
+            'outbound.user_agent' => 'OpenHttpScheduler/1.1',
+        ]);
+
+        $robotsBody = "User-agent: *\nDisallow: /private\n";
+        $transport = new MockPinnedHttpTransport(
+            new PinnedHttpResponse(
+                statusCode: 200,
+                headers: ['Content-Type' => ['text/plain']],
+                bodyTruncated: $robotsBody,
+                bodySha256: hash('sha256', $robotsBody),
+                bodyTruncatedFlag: false,
+                finalUrl: 'http://public.example/robots.txt',
+                redirectCount: 0,
+            ),
+            new PinnedHttpResponse(
+                statusCode: 200,
+                headers: [],
+                bodyTruncated: 'should-not-run',
+                bodySha256: hash('sha256', 'should-not-run'),
+                bodyTruncatedFlag: false,
+                finalUrl: 'http://public.example/private',
+                redirectCount: 0,
+            ),
+        );
+
+        $policy = OutboundPolicy::fromConfig(
+            OutboundPolicyConfig::fromArray([
+                'allowed_ports' => [80, 443, 8080],
+                'allow_http' => true,
+                'testing_allow_hosts' => [],
+                'profiles' => ['public-crawl' => []],
+            ]),
+            new ArrayDnsResolver([
+                'public.example' => ['93.184.216.34'],
+            ]),
+        );
+
+        $service = new HttpDeliveryService(
+            outboundPolicy: $policy,
+            transport: $transport,
+            redactor: new RequestSnapshotRedactor,
+            secretService: app(SecretService::class),
+            taskTypeCatalog: app(TaskTypeCatalog::class),
+            callbackAuthHeaderBuilder: app(\App\Application\GrandpaSson\CallbackAuthHeaderBuilder::class),
+            egressHostRateLimiter: new EgressHostRateLimiter(app(DatabaseRateLimiter::class)),
+            robotsTxtChecker: new RobotsTxtChecker($policy, $transport, new RobotsTxtParser),
+        );
+
+        $task = Task::factory()->create([
+            'url_or_path' => 'http://public.example/private/page',
+            'egress_profile' => 'public-crawl',
+        ]);
+
+        $result = $service->deliver($this->makeAttempt($task, 'occ-robots', 'idem-robots'));
+
+        $this->assertTrue($result->blocked);
+        $this->assertSame('robots_disallow', $result->blockReason);
+        // Only the robots.txt fetch should have been sent.
+        $this->assertCount(1, $transport->requests);
+        $this->assertSame('/robots.txt', parse_url($transport->requests[0]->endpoint->url, PHP_URL_PATH));
+    }
+
+    private function makeAttempt(Task $task, string $occurrenceKey, string $idempotencyKey): TaskRunAttempt
+    {
+        $run = TaskRun::query()->create([
+            'tenant_id' => $task->tenant_id,
+            'environment_id' => $task->environment_id,
+            'task_id' => $task->id,
+            'trigger_type' => 'scheduled',
+            'occurrence_key' => $occurrenceKey,
+            'idempotency_key' => $idempotencyKey,
+            'run_state' => 'pending',
+            'attempt_count' => 1,
+        ]);
+
+        return TaskRunAttempt::query()->create([
+            'tenant_id' => $task->tenant_id,
+            'environment_id' => $task->environment_id,
+            'task_run_id' => $run->id,
+            'attempt_number' => 1,
+            'attempt_state' => 'pending',
+        ]);
     }
 }

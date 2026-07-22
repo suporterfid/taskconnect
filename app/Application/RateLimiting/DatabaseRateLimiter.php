@@ -25,11 +25,26 @@ final class DatabaseRateLimiter
      */
     public function hitOrFail(string $bucketKey, int $maxAttempts, int $windowSeconds = 60): void
     {
+        $retryAfter = $this->tryHit($bucketKey, $maxAttempts, $windowSeconds);
+
+        if ($retryAfter !== null) {
+            throw new TooManyRequestsHttpException(
+                $retryAfter,
+                'Submission rate limit exceeded. Try again later.',
+            );
+        }
+    }
+
+    /**
+     * Fixed-window hit. Returns seconds until reset when denied; null when allowed.
+     */
+    public function tryHit(string $bucketKey, int $maxAttempts, int $windowSeconds = 60): ?int
+    {
         $maxAttempts = max(1, $maxAttempts);
         $windowSeconds = max(1, $windowSeconds);
         $now = $this->clock->nowUtc();
 
-        $retryAfter = DB::transaction(function () use ($bucketKey, $maxAttempts, $windowSeconds, $now): ?int {
+        return DB::transaction(function () use ($bucketKey, $maxAttempts, $windowSeconds, $now): ?int {
             /** @var RateLimitBucket|null $bucket */
             $bucket = RateLimitBucket::query()
                 ->where('bucket_key', $bucketKey)
@@ -64,13 +79,6 @@ final class DatabaseRateLimiter
 
             return null;
         });
-
-        if ($retryAfter !== null) {
-            throw new TooManyRequestsHttpException(
-                $retryAfter,
-                'Submission rate limit exceeded. Try again later.',
-            );
-        }
     }
 
     public function limitForWorkspace(?Tenant $tenant, ?Environment $environment): int

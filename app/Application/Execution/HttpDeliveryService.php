@@ -28,6 +28,8 @@ final class HttpDeliveryService
         private readonly SecretService $secretService,
         private readonly TaskTypeCatalog $taskTypeCatalog,
         private readonly CallbackAuthHeaderBuilder $callbackAuthHeaderBuilder,
+        private readonly EgressHostRateLimiter $egressHostRateLimiter,
+        private readonly RobotsTxtChecker $robotsTxtChecker,
     ) {
     }
 
@@ -49,6 +51,35 @@ final class HttpDeliveryService
             );
             $endpoint = $this->selectPinnedEndpoint($validated);
             $profile = $task->endpointProfile;
+
+            $retryAfter = $this->egressHostRateLimiter->check(
+                $egressProfile,
+                $validated->host,
+                (int) $task->tenant_id,
+            );
+            if ($retryAfter !== null) {
+                return new DeliveryResult(
+                    response: new PinnedHttpResponse(
+                        statusCode: 429,
+                        headers: ['Retry-After' => [(string) $retryAfter]],
+                        bodyTruncated: '',
+                        bodySha256: hash('sha256', ''),
+                        bodyTruncatedFlag: false,
+                        finalUrl: $resolved['url'],
+                        redirectCount: 0,
+                        transportError: 'host_rate_limited',
+                    ),
+                    blocked: false,
+                    blockReason: null,
+                    blockMessage: 'Per-host egress rate limit exceeded.',
+                );
+            }
+
+            $this->robotsTxtChecker->assertAllowed(
+                $resolved['url'],
+                $egressProfile,
+                $additionalAllowHosts,
+            );
 
             $headers = array_merge(
                 $this->outboundPolicy->sanitizeHeaders($resolved['headers']),

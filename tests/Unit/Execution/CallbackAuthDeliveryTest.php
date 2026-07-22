@@ -2,13 +2,17 @@
 
 namespace Tests\Unit\Execution;
 
+use App\Application\Execution\EgressHostRateLimiter;
 use App\Application\Execution\HttpDeliveryService;
 use App\Application\Execution\RequestSnapshotRedactor;
+use App\Application\Execution\RobotsTxtChecker;
 use App\Application\GrandpaSson\CallbackAuthHeaderBuilder;
+use App\Application\RateLimiting\DatabaseRateLimiter;
 use App\Application\Secrets\SecretService;
 use App\Domain\Auth\CallbackHmac;
 use App\Domain\Execution\Outbound\OutboundPolicy;
 use App\Domain\Execution\Outbound\OutboundPolicyConfig;
+use App\Domain\Execution\Outbound\RobotsTxtParser;
 use App\Domain\Scheduling\TaskTypeCatalog;
 use App\Infrastructure\HttpClient\PinnedHttpResponse;
 use App\Infrastructure\Persistence\Eloquent\Task;
@@ -65,6 +69,8 @@ class CallbackAuthDeliveryTest extends TestCase
                 new FakeGrandpaSsonTokenClient('gss-callback-token'),
                 new CallbackHmac,
             ),
+            egressHostRateLimiter: new EgressHostRateLimiter(app(DatabaseRateLimiter::class)),
+            robotsTxtChecker: new RobotsTxtChecker($policy, $transport, new RobotsTxtParser),
         );
 
         $task = Task::factory()->create([
