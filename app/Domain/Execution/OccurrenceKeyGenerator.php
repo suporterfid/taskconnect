@@ -21,4 +21,9 @@ final class OccurrenceKeyGenerator
     {
         return 'test:'.($token ?? PublicId::generate());
     }
+
+    public function forDlqReplay(string $idempotencyKey): string
+    {
+        return 'dlq:'.$idempotencyKey;
+    }
 }

@@ -386,6 +386,14 @@ function formatWhen(value?: string | null): string {
               {{ retention.system_heartbeat_days }}
             </dd>
           </div>
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.deadRunsDays') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ retention.dead_runs_days ?? '—' }}
+            </dd>
+          </div>
         </dl>
       </section>
 

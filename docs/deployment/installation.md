@@ -29,6 +29,7 @@ Cleanup is driven by minute/hourly cron (`scheduler:maintenance`) using env vars
 | `RETENTION_AUDIT_LOGS_DAYS` | 365 | Audit log rows |
 | `RETENTION_API_IDEMPOTENCY_HOURS` | 24 | Idempotency keys |
 | `RETENTION_SYSTEM_HEARTBEAT_DAYS` | 30 | Old heartbeat rows |
+| `RETENTION_DEAD_RUNS_DAYS` | 30 | Dead-letter (`run_state=dead`) runs (R6 / Q6) |
 
 Operators can view the effective values in **Settings → Retention** (read-only) or Platform Health (admins).
 

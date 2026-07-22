@@ -23,4 +23,10 @@ final class IdempotencyKeyGenerator
     {
         return PublicId::generate('idem');
     }
+
+    /** Fresh delivery Idempotency-Key group for DLQ replay (R6). */
+    public function forDlqReplay(): string
+    {
+        return PublicId::generate('idem');
+    }
 }

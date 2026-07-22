@@ -55,6 +55,7 @@ class PlatformHealthController extends Controller
                 'audit_logs_days' => (int) config('retention.audit_logs_days'),
                 'api_idempotency_hours' => (int) config('retention.api_idempotency_hours'),
                 'system_heartbeat_days' => (int) config('retention.system_heartbeat_days'),
+                'dead_runs_days' => (int) config('retention.dead_runs_days'),
             ],
         ]);
     }
