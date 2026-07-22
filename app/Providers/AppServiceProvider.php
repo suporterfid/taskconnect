@@ -38,6 +38,7 @@ use App\Domain\Pipelines\PipelineDagValidator;
 use App\Domain\Pipelines\PipelineTemplateCatalog;
 use App\Domain\Scheduling\ScheduleCalculator;
 use App\Domain\Scheduling\TaskTypeCatalog;
+use App\Domain\Scheduling\WorkspaceFairnessInterleaver;
 use App\Domain\Shared\Clock;
 use App\Domain\Shared\SystemClock;
 use App\Infrastructure\Dns\SystemDnsResolver;
@@ -72,6 +73,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(HttpDeliveryService::class);
         $this->app->singleton(ScheduleCalculator::class);
         $this->app->singleton(TaskTypeCatalog::class);
+        $this->app->singleton(WorkspaceFairnessInterleaver::class);
         $this->app->singleton(PipelineDagValidator::class);
         $this->app->singleton(PipelineTemplateCatalog::class);
         $this->app->singleton(PipelineInstanceService::class);

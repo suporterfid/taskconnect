@@ -4,6 +4,7 @@ namespace App\Application\Scheduling;
 
 use App\Domain\Execution\Enums\AttemptState;
 use App\Domain\Execution\Enums\RunState;
+use App\Domain\Scheduling\WorkspaceFairnessInterleaver;
 use App\Domain\Shared\Clock;
 use App\Infrastructure\Persistence\Eloquent\TaskRun;
 use App\Infrastructure\Persistence\Eloquent\TaskRunAttempt;
@@ -15,6 +16,7 @@ final class PendingRunClaimer
 {
     public function __construct(
         private readonly Clock $clock,
+        private readonly WorkspaceFairnessInterleaver $fairness = new WorkspaceFairnessInterleaver,
     ) {
     }
 
@@ -27,9 +29,13 @@ final class PendingRunClaimer
         $claimed = [];
 
         DB::transaction(function () use ($batchSize, $now, &$claimed): void {
-            $runs = $this->selectPendingRuns($batchSize);
+            $runs = $this->fairness->interleaveByEnvironmentId($this->selectPendingRuns($batchSize));
 
             foreach ($runs as $run) {
+                if (count($claimed) >= $batchSize) {
+                    break;
+                }
+
                 $attempt = $this->tryClaimPending($run, $now);
 
                 if ($attempt !== null) {
@@ -48,10 +54,13 @@ final class PendingRunClaimer
     {
         $driver = DB::connection()->getDriverName();
 
+        // Over-fetch across workspaces so fairness interleave can mix them.
+        $candidateLimit = max($batchSize * 20, 100);
+
         $query = TaskRun::query()
             ->where('run_state', RunState::Pending)
             ->orderBy('created_at')
-            ->limit($batchSize);
+            ->limit($candidateLimit);
 
         if ($driver === 'mysql') {
             $query->lock('FOR UPDATE SKIP LOCKED');

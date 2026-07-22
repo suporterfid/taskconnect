@@ -7,6 +7,7 @@ use App\Domain\Execution\Enums\AttemptState;
 use App\Domain\Execution\Enums\RunState;
 use App\Domain\Execution\RunStateMachine;
 use App\Domain\Scheduling\TaskTypeCatalog;
+use App\Domain\Scheduling\WorkspaceFairnessInterleaver;
 use App\Domain\Shared\Clock;
 use App\Infrastructure\Persistence\Eloquent\TaskRun;
 use App\Infrastructure\Persistence\Eloquent\TaskRunAttempt;
@@ -21,6 +22,7 @@ final class RetryClaimer
         private readonly RunStateMachine $runStateMachine,
         private readonly AttemptStateMachine $attemptStateMachine,
         private readonly TaskTypeCatalog $taskTypeCatalog,
+        private readonly WorkspaceFairnessInterleaver $fairness = new WorkspaceFairnessInterleaver,
     ) {
     }
 
@@ -41,7 +43,9 @@ final class RetryClaimer
             }
 
             $candidateLimit = max($batchSize * 5, 50);
-            $runs = $this->selectRetryableRuns($candidateLimit, $now);
+            $runs = $this->fairness->interleaveByEnvironmentId(
+                $this->selectRetryableRuns($candidateLimit, $now),
+            );
 
             foreach ($runs as $run) {
                 if (count($claimed) >= $batchSize) {
