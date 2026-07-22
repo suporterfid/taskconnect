@@ -37,4 +37,12 @@ return [
      */
     'fairness_workspace_weight' => (int) env('SCHEDULER_FAIRNESS_WORKSPACE_WEIGHT', 1),
 
+    /**
+     * Submission API rate limit (R15). Fixed window per workspace; stored in MySQL
+     * (`rate_limit_buckets`). Override per workspace via environments.submit_rate_limit_per_minute.
+     */
+    'submit_rate_limit_per_minute' => (int) env('SCHEDULER_SUBMIT_RATE_LIMIT_PER_MINUTE', 60),
+
+    'submit_rate_limit_window_seconds' => (int) env('SCHEDULER_SUBMIT_RATE_LIMIT_WINDOW_SECONDS', 60),
+
 ];

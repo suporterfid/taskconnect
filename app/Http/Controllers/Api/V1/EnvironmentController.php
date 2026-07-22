@@ -90,6 +90,7 @@ class EnvironmentController extends Controller
             'dead_run_email_enabled' => ['sometimes', 'required', 'boolean'],
             'dead_run_webhook_enabled' => ['sometimes', 'required', 'boolean'],
             'dead_run_webhook_url' => ['sometimes', 'nullable', 'string', 'max:2048'],
+            'submit_rate_limit_per_minute' => ['sometimes', 'nullable', 'integer', 'min:1', 'max:10000'],
         ]);
 
         $attributes = [];
@@ -98,6 +99,9 @@ class EnvironmentController extends Controller
         }
         if (isset($validated['slug'])) {
             $attributes['slug'] = $validated['slug'];
+        }
+        if (array_key_exists('submit_rate_limit_per_minute', $validated)) {
+            $attributes['submit_rate_limit_per_minute'] = $validated['submit_rate_limit_per_minute'];
         }
 
         $notifications = is_array($validated['notifications'] ?? null) ? $validated['notifications'] : [];

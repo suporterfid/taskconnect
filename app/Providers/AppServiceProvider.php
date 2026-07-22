@@ -15,6 +15,7 @@ use App\Application\Notifications\FailureNotifier;
 use App\Domain\Auth\CallbackHmac;
 use App\Application\Pipelines\PipelineInstanceService;
 use App\Application\Pipelines\PipelineSettlementService;
+use App\Application\RateLimiting\DatabaseRateLimiter;
 use App\Application\Scheduling\AttemptExecutor;
 use App\Application\Scheduling\DueTaskClaimer;
 use App\Application\Scheduling\HeartbeatWriter;
@@ -97,6 +98,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(TaskScheduleService::class);
         $this->app->singleton(TaskLifecycleService::class);
         $this->app->singleton(CoalesceService::class);
+        $this->app->singleton(DatabaseRateLimiter::class);
         $this->app->singleton(RunLifecycleService::class);
     }
 
