@@ -25,6 +25,7 @@ use App\Domain\Execution\Outbound\OutboundPolicyConfig;
 use App\Domain\Execution\RetryDecider;
 use App\Domain\Execution\RunStateMachine;
 use App\Domain\Scheduling\ScheduleCalculator;
+use App\Domain\Scheduling\TaskTypeCatalog;
 use App\Domain\Shared\Clock;
 use App\Domain\Shared\SystemClock;
 use App\Infrastructure\Dns\SystemDnsResolver;
@@ -51,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(RequestSnapshotRedactor::class);
         $this->app->singleton(HttpDeliveryService::class);
         $this->app->singleton(ScheduleCalculator::class);
+        $this->app->singleton(TaskTypeCatalog::class);
         $this->app->singleton(RunStateMachine::class);
         $this->app->singleton(AttemptStateMachine::class);
         $this->app->singleton(RetryDecider::class);
