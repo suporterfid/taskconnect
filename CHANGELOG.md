@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- v1 Extension R3: outbound deliveries send canonical `Idempotency-Key` (stable per run) plus deprecated `X-Task-Idempotency-Key` alias; see `docs/architecture/callback-contract.md`
 - v1 Extension R2: required workspace-scoped `Idempotency-Key` on task create / run-now; 200 on create replay; `IDEMPOTENCY_ENQUEUE_TTL_HOURS`
 - v1 Extension R1: `workspace_id` API alias for Environment; audit logs store `environment_id` with `?workspace_id=` filter (`docs/architecture/workspace.md`)
 ## [1.2.0] — 2026-07-22

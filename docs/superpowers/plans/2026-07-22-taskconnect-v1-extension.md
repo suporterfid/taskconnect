@@ -54,7 +54,7 @@ Implement **in order R1→R9**. Do not start R(n+1) until R(n) acceptance tests 
 |-----|--------|-------|
 | R1 | **Done** (#17) | Environment ↔ workspace_id API alias; audit_logs.environment_id; see `docs/architecture/workspace.md` |
 | R2 | **Done** (#18) | Required Idempotency-Key on create/run-now; workspace-scoped; 24h TTL; 200 replay; prune via retention |
-| R3 | Exists | Stable run key via `X-Task-Idempotency-Key` |
+| R3 | **Done** (#19) | Outbound `Idempotency-Key` + deprecated `X-Task-Idempotency-Key`; `docs/architecture/callback-contract.md` |
 | R4 | Missing | No task types / priority / weight / caps |
 | R5 | Partial | `target_duration_seconds` unused |
 | R6 | Partial | `dead` state + API retry; no DLQ artisan |
