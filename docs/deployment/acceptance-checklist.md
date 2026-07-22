@@ -24,6 +24,7 @@ Optional automated smoke (after `npx playwright install --with-deps chromium` in
 
 ```bash
 bash ./scripts/tc.sh e2e
-# Authenticated path:
+# Authenticated DLQ inspect/replay + pipeline detail:
+# see docs/deployment/e2e-operator.md
 # E2E_EMAIL=… E2E_PASSWORD=… bash ./scripts/tc.sh e2e
 ```

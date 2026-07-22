@@ -190,13 +190,17 @@ function Invoke-E2E {
         throw 'No package.json found.'
     }
 
-    $scripts = & $Compose @ComposeFiles @('--profile', 'dev', 'run', '--rm', 'node', 'npm', 'run') 2>$null
-    if ($scripts -match '(?m)^  e2e$') {
-        Invoke-Compose @('--profile', 'dev', 'run', '--rm', '--service-ports', 'node', 'npm', 'run', 'e2e', '--') + $Args
-        return
+    $pkg = Get-Content -Raw 'package.json'
+    if ($pkg -notmatch '"e2e"\s*:') {
+        throw 'No e2e script defined in package.json.'
     }
 
-    throw 'No e2e script defined in package.json.'
+    $envArgs = @(
+        '-e', "E2E_EMAIL=$env:E2E_EMAIL",
+        '-e', "E2E_PASSWORD=$env:E2E_PASSWORD",
+        '-e', "PLAYWRIGHT_BASE_URL=$(if ($env:PLAYWRIGHT_BASE_URL) { $env:PLAYWRIGHT_BASE_URL } else { 'http://app' })"
+    )
+    Invoke-Compose (@('--profile', 'dev', 'run', '--rm', '--service-ports') + $envArgs + @('node', 'npm', 'run', 'e2e', '--') + $Args)
 }
 
 function Invoke-Release {

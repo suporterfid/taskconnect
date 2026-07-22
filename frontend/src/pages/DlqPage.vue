@@ -70,7 +70,7 @@ function onFilter(): void {
 </script>
 
 <template>
-  <div>
+  <div data-testid="dlq-page">
     <PageHeader :title="$t('dlq.title')" :subtitle="$t('dlq.subtitle')" class="mb-8" />
 
     <div
@@ -106,11 +106,12 @@ function onFilter(): void {
     </div>
     <div
       v-else-if="!data?.length"
+      data-testid="dlq-empty"
       class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
     >
       {{ $t('dlq.empty') }}
     </div>
-    <div v-else>
+    <div v-else data-testid="dlq-table">
       <p v-if="actionError" class="mb-3 text-sm text-red-600" role="alert">{{ actionError }}</p>
       <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
@@ -125,9 +126,13 @@ function onFilter(): void {
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
-            <tr v-for="run in data" :key="run.id">
+            <tr v-for="run in data" :key="run.id" :data-testid="`dlq-row-${run.id}`">
               <td class="px-4 py-3 font-mono text-xs">
-                <RouterLink :to="`/runs/${run.id}`" class="text-violet-600 hover:underline">
+                <RouterLink
+                  :to="`/runs/${run.id}`"
+                  class="text-violet-600 hover:underline"
+                  data-testid="dlq-run-link"
+                >
                   {{ run.id }}
                 </RouterLink>
               </td>
@@ -147,12 +152,17 @@ function onFilter(): void {
                 {{ run.final_error_code || run.final_http_status || '—' }}
               </td>
               <td class="space-x-3 px-4 py-3 text-right text-sm">
-                <RouterLink :to="`/runs/${run.id}`" class="text-violet-600 hover:underline">
+                <RouterLink
+                  :to="`/runs/${run.id}`"
+                  class="text-violet-600 hover:underline"
+                  data-testid="dlq-inspect"
+                >
                   {{ $t('dlq.actions.inspect') }}
                 </RouterLink>
                 <button
                   type="button"
                   class="text-violet-600 hover:underline disabled:opacity-60"
+                  data-testid="dlq-replay"
                   :disabled="actionLoading === run.id"
                   @click="onReplay(run)"
                 >

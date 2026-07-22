@@ -44,7 +44,7 @@ function statusLabel(status: string): string {
 </script>
 
 <template>
-  <div>
+  <div data-testid="pipeline-detail-page">
     <div class="mb-4">
       <RouterLink to="/pipelines" class="text-sm text-violet-600 hover:underline">
         ← {{ $t('common.back') }}

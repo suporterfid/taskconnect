@@ -14,7 +14,7 @@
 | R8 | Done (opt-in) | Flags default off — accepted dual-mode / Q1 |
 | R10 | Done | Pipeline DAG; chaining not on bare task create (#66) |
 | R12 / R17 | Done | RR + WFQ; claim-time preemption only |
-| R14 | Done (UI) | Missing authenticated Playwright depth (#65) |
+| R14 | Done | UI + authenticated Playwright DLQ/pipelines (#65) |
 | §8 S8/S10 | Done | Claim/delivery audit + S8 docs (callback verify = receiver) (#64) |
 | §6.1 literal schema | Done | Mapping doc `docs/architecture/api-contract-v1.md` (#66) |
 
@@ -23,7 +23,7 @@
 1. **#62** `timeout_ms` → delivery timeouts — **done**
 2. **#63** egress extras — **done**
 3. **#64** audit + S8 clarification — **done**
-4. **#65** Playwright authenticated operator journeys
+4. **#65** Playwright authenticated operator journeys — **done**
 5. **#66** contract mapping doc — **done**
 
 ## Non-goals for this epic
@@ -35,3 +35,7 @@
 ## Verification
 
 For each child: unit/feature tests green via `./scripts/tc.sh test` (and Playwright when #65); update `docs/architecture/*` when behavior changes; keep hard constraints (no Redis/daemon).
+
+## Closeout
+
+Children **#62–#66** are implemented on `main`. Epic **#67** can close once #65 lands.
