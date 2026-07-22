@@ -88,6 +88,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(RetryDecider::class);
         $this->app->singleton(IdempotencyKeyGenerator::class);
         $this->app->singleton(OccurrenceKeyGenerator::class);
+        $this->app->singleton(\App\Application\Scheduling\SchedulerAuditRecorder::class);
         $this->app->singleton(DueTaskClaimer::class);
         $this->app->singleton(PendingRunClaimer::class);
         $this->app->singleton(RetryClaimer::class);

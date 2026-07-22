@@ -29,6 +29,7 @@ final class AttemptExecutor
         private readonly AttemptStateMachine $attemptStateMachine,
         private readonly FailureNotifier $failureNotifier,
         private readonly PipelineSettlementService $pipelineSettlement,
+        private readonly SchedulerAuditRecorder $auditRecorder,
     ) {
     }
 
@@ -153,6 +154,13 @@ final class AttemptExecutor
         $run->save();
 
         $this->updateTaskLastRun($task, $now, RunState::Succeeded);
+        $this->auditRecorder->recordDeliveryOutcome(
+            $run,
+            $attempt,
+            $task,
+            outcome: 'succeeded',
+            httpStatus: $statusCode,
+        );
         $this->pipelineSettlement->handleSettledRun($run->fresh());
     }
 
@@ -186,6 +194,14 @@ final class AttemptExecutor
         $run->save();
 
         $this->updateTaskLastRun($task, $now, RunState::RetryWait);
+        $this->auditRecorder->recordDeliveryOutcome(
+            $run,
+            $attempt,
+            $task,
+            outcome: 'retry_wait',
+            httpStatus: $statusCode ?: null,
+            errorCode: $transportError !== null ? 'transport_error' : (string) $statusCode,
+        );
     }
 
     private function finalizeTerminal(
@@ -213,6 +229,14 @@ final class AttemptExecutor
         $run->save();
 
         $this->updateTaskLastRun($task, $now, RunState::Dead);
+        $this->auditRecorder->recordDeliveryOutcome(
+            $run,
+            $attempt,
+            $task,
+            outcome: 'dead',
+            httpStatus: $statusCode ?: null,
+            errorCode: $transportError !== null ? 'transport_error' : (string) $statusCode,
+        );
         $this->failureNotifier->notifyDeadRun($run);
         $this->pipelineSettlement->handleSettledRun($run->fresh());
     }
@@ -241,6 +265,13 @@ final class AttemptExecutor
 
         $task = $run->task()->firstOrFail();
         $this->updateTaskLastRun($task, $now, RunState::Blocked);
+        $this->auditRecorder->recordDeliveryOutcome(
+            $run,
+            $attempt,
+            $task,
+            outcome: 'blocked',
+            errorCode: $result->blockReason,
+        );
         $this->pipelineSettlement->handleSettledRun($run->fresh());
     }
 

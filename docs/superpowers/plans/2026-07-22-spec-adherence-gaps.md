@@ -15,14 +15,14 @@
 | R10 | Done | Pipeline DAG; chaining not on bare task create (#66) |
 | R12 / R17 | Done | RR + WFQ; claim-time preemption only |
 | R14 | Done (UI) | Missing authenticated Playwright depth (#65) |
-| §8 S8/S10 | Partial | Submit limits yes; claim/delivery audit + callback verify limit (#64) |
+| §8 S8/S10 | Done | Claim/delivery audit + S8 docs (callback verify = receiver) (#64) |
 | §6.1 literal schema | Done | Mapping doc `docs/architecture/api-contract-v1.md` (#66) |
 
 ## Implementation order
 
 1. **#62** `timeout_ms` → delivery timeouts — **done**
 2. **#63** egress extras — **done**
-3. **#64** audit + S8 clarification/limiter
+3. **#64** audit + S8 clarification — **done**
 4. **#65** Playwright authenticated operator journeys
 5. **#66** contract mapping doc — **done**
 

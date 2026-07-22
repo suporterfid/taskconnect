@@ -22,6 +22,7 @@ final class RetryClaimer
         private readonly RunStateMachine $runStateMachine,
         private readonly AttemptStateMachine $attemptStateMachine,
         private readonly TaskTypeCatalog $taskTypeCatalog,
+        private readonly SchedulerAuditRecorder $auditRecorder,
         private readonly WorkspaceFairnessInterleaver $fairness = new WorkspaceFairnessInterleaver,
     ) {
     }
@@ -65,6 +66,10 @@ final class RetryClaimer
                 }
             }
         });
+
+        foreach ($claimed as $claimedAttempt) {
+            $this->auditRecorder->recordClaim($claimedAttempt, 'retry');
+        }
 
         return $claimed;
     }

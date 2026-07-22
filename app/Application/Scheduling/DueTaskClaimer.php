@@ -29,6 +29,7 @@ final class DueTaskClaimer
         private readonly IdempotencyKeyGenerator $idempotencyKeyGenerator,
         private readonly OccurrenceKeyGenerator $occurrenceKeyGenerator,
         private readonly TaskTypeCatalog $taskTypeCatalog,
+        private readonly SchedulerAuditRecorder $auditRecorder,
         private readonly WorkspaceFairnessInterleaver $fairness = new WorkspaceFairnessInterleaver,
     ) {
     }
@@ -70,6 +71,10 @@ final class DueTaskClaimer
                 }
             }
         });
+
+        foreach ($claimed as $claimedAttempt) {
+            $this->auditRecorder->recordClaim($claimedAttempt, 'due');
+        }
 
         return $claimed;
     }
