@@ -148,12 +148,17 @@ cmd_e2e() {
     return 1
   fi
 
-  if compose --profile dev run --rm node npm run 2>/dev/null | grep -qE '^  e2e$'; then
-    compose --profile dev run --rm --service-ports node npm run e2e -- "$@"
-  else
+  # Root package.json defines "e2e" → frontend Playwright suite.
+  if ! grep -qE '"e2e"[[:space:]]*:' package.json; then
     echo "No e2e script defined in package.json." >&2
     return 1
   fi
+
+  compose --profile dev run --rm --service-ports \
+    -e "E2E_EMAIL=${E2E_EMAIL:-}" \
+    -e "E2E_PASSWORD=${E2E_PASSWORD:-}" \
+    -e "PLAYWRIGHT_BASE_URL=${PLAYWRIGHT_BASE_URL:-http://app}" \
+    node npm run e2e -- "$@"
 }
 
 cmd_release() {

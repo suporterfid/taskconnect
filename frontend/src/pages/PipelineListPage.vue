@@ -49,7 +49,7 @@ function statusLabel(status: string): string {
 </script>
 
 <template>
-  <div>
+  <div data-testid="pipelines-page">
     <PageHeader :title="$t('pipelines.title')" :subtitle="$t('pipelines.subtitle')" class="mb-8" />
 
     <LoadingState v-if="loading" />
@@ -107,6 +107,7 @@ function statusLabel(status: string): string {
                   <RouterLink
                     :to="`/pipelines/${instance.template_name}/instances/${instance.id}`"
                     class="text-violet-600 hover:underline"
+                    data-testid="pipeline-instance-link"
                   >
                     {{ instance.id }}
                   </RouterLink>
