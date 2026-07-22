@@ -138,8 +138,28 @@
       "version": "Version",
       "scheduler": "Scheduler last seen",
       "retryExecutor": "Retry executor last seen",
+      "maintenance": "Maintenance last seen",
+      "schedulerStale": "Scheduler stale",
+      "retryExecutorStale": "Retry executor stale",
+      "staleYes": "Yes",
+      "staleNo": "No",
       "staleClaims": "Stale claims",
-      "pendingRuns": "Pending / in-flight runs"
+      "pendingRuns": "Pending / in-flight runs",
+      "retention": "Retention defaults"
+    }
+  },
+  "retention": {
+    "title": "Retention",
+    "subtitle": "Platform defaults for how long execution and audit data is kept. Read-only.",
+    "loadError": "Unable to load retention settings",
+    "hint": "These values come from server configuration (RETENTION_*). Per-tenant overrides are not available yet.",
+    "fields": {
+      "payloadSnapshotsDays": "Payload snapshots (days)",
+      "attemptMetadataDays": "Attempt metadata (days)",
+      "runSummaryDays": "Run summaries (days)",
+      "auditLogsDays": "Audit logs (days)",
+      "apiIdempotencyHours": "API idempotency keys (hours)",
+      "systemHeartbeatDays": "System heartbeats (days)"
     }
   },
   "saved": "Settings saved"

@@ -48,6 +48,7 @@
   "navMain": "Principal",
   "errors": {
     "requestFailed": "Falha na requisição",
+    "tooManyRequests": "Muitas requisições. Aguarde um momento e tente novamente.",
     "loginFailed": "Falha no login",
     "loadTenantsFailed": "Não foi possível carregar os tenants",
     "loadEnvironmentsFailed": "Não foi possível carregar os ambientes"

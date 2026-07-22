@@ -23,7 +23,7 @@ import {
   parseSuccessStatusRanges,
 } from '@/utils/successStatusRanges'
 
-type HeaderRow = { key: string; value: string }
+type KeyValueRow = { key: string; value: string }
 
 const props = defineProps<{ id?: string }>()
 const { t, locale } = useI18n()
@@ -64,7 +64,8 @@ const form = reactive({
   endpoint_profile_id: '',
   content_type: 'application/json',
   body: '',
-  headers: [] as HeaderRow[],
+  headers: [] as KeyValueRow[],
+  query: [] as KeyValueRow[],
   schedule_kind: 'daily_at' as ScheduleKind,
   timezone: 'America/Sao_Paulo',
   time: '09:00',
@@ -225,6 +226,25 @@ function headersToRecord(): Record<string, string> {
   return record
 }
 
+function addQuery(): void {
+  form.query.push({ key: '', value: '' })
+}
+
+function removeQuery(index: number): void {
+  form.query.splice(index, 1)
+}
+
+function queryToRecord(): Record<string, string> {
+  const record: Record<string, string> = {}
+  for (const row of form.query) {
+    const key = row.key.trim()
+    if (key) {
+      record[key] = row.value
+    }
+  }
+  return record
+}
+
 function buildSchedule(): ScheduleConfig {
   const base: ScheduleConfig = {
     kind: form.schedule_kind,
@@ -271,6 +291,10 @@ function applyTask(task: Task): void {
   form.content_type = task.content_type ?? 'application/json'
   form.body = task.body ?? ''
   form.headers = Object.entries(task.headers ?? {}).map(([key, value]) => ({
+    key,
+    value,
+  }))
+  form.query = Object.entries(task.query ?? {}).map(([key, value]) => ({
     key,
     value,
   }))
@@ -353,6 +377,7 @@ function buildPayload(): Record<string, unknown> | null {
     content_type: form.content_type || null,
     body: form.body || null,
     headers: headersToRecord(),
+    query: queryToRecord(),
     timezone: form.timezone,
     schedule: buildSchedule(),
     retry_policy: {
@@ -648,6 +673,46 @@ async function onSubmit(activate: boolean): Promise<void> {
               </button>
             </div>
           </fieldset>
+
+          <fieldset>
+            <legend class="mb-2 text-sm font-medium">
+              {{ $t('tasks.fields.query') }}
+            </legend>
+            <div class="space-y-2">
+              <div
+                v-for="(row, index) in form.query"
+                :key="index"
+                class="flex gap-2"
+              >
+                <input
+                  v-model="row.key"
+                  type="text"
+                  class="w-1/3 rounded-md border border-gray-300 px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-950"
+                  placeholder="Key"
+                />
+                <input
+                  v-model="row.value"
+                  type="text"
+                  class="flex-1 rounded-md border border-gray-300 px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-950"
+                  placeholder="Value"
+                />
+                <button
+                  type="button"
+                  class="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+                  @click="removeQuery(index)"
+                >
+                  {{ $t('tasks.fields.removeQuery') }}
+                </button>
+              </div>
+              <button
+                type="button"
+                class="text-sm text-violet-600 hover:underline"
+                @click="addQuery"
+              >
+                + {{ $t('tasks.fields.addQuery') }}
+              </button>
+            </div>
+          </fieldset>
         </div>
 
         <div v-else-if="step === 2" class="space-y-4">
@@ -911,6 +976,17 @@ async function onSubmit(activate: boolean): Promise<void> {
               $t(`endpointProfiles.authModes.${selectedProfile.auth_mode}`)
             }}
           </p>
+          <div v-if="form.query.some((row) => row.key.trim())">
+            <p class="font-medium">{{ $t('tasks.fields.query') }}:</p>
+            <ul class="mt-1 list-inside list-disc font-mono text-xs">
+              <li
+                v-for="(row, index) in form.query.filter((r) => r.key.trim())"
+                :key="index"
+              >
+                {{ row.key }}={{ row.value }}
+              </li>
+            </ul>
+          </div>
           <p>
             <strong>{{ $t('tasks.fields.schedule') }}:</strong>
             {{ reviewSchedule }}

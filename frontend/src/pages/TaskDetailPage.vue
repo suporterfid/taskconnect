@@ -202,6 +202,16 @@ async function onArchive(): Promise<void> {
           <dt class="text-sm text-gray-500">{{ $t('tasks.fields.url') }}</dt>
           <dd class="mt-1 break-all font-mono text-sm">{{ data.url_or_path || '—' }}</dd>
         </div>
+        <div v-if="data.query && Object.keys(data.query).length">
+          <dt class="text-sm text-gray-500">{{ $t('tasks.fields.query') }}</dt>
+          <dd class="mt-1">
+            <ul class="space-y-1 font-mono text-sm">
+              <li v-for="(value, key) in data.query" :key="key">
+                {{ key }}={{ value }}
+              </li>
+            </ul>
+          </dd>
+        </div>
         <div>
           <dt class="text-sm text-gray-500">{{ $t('common.createdAt') }}</dt>
           <dd class="mt-1 text-sm">{{ formatDate(data.created_at) }}</dd>

@@ -52,4 +52,36 @@ describe('parseErrorEnvelope', () => {
     expect(err.requestId).toBe('hdr-1')
     expect(err.message).toBe('Nope')
   })
+
+  it('maps 429 to a localized too-many-requests message', () => {
+    const err = parseErrorEnvelope(
+      axiosError({
+        error: {
+          code: 'too_many_requests',
+          message: 'Slow down',
+        },
+      }, 429),
+    )
+
+    expect(err.status).toBe(429)
+    expect(err.code).toBe('too_many_requests')
+    expect(err.message).toBe(
+      'Too many requests. Please wait a moment and try again.',
+    )
+  })
+
+  it('maps too_many_requests code even when status is not 429', () => {
+    const err = parseErrorEnvelope(
+      axiosError({
+        error: {
+          code: 'too_many_requests',
+          message: 'Slow down',
+        },
+      }, 400),
+    )
+
+    expect(err.message).toBe(
+      'Too many requests. Please wait a moment and try again.',
+    )
+  })
 })

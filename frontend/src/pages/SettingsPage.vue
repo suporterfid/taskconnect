@@ -10,7 +10,7 @@ import { useAsyncData } from '@/composables/useAsyncData'
 import type { SupportedLocale } from '@/i18n'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
-import type { AuditLog, Tenant, User } from '@/services/types'
+import type { AuditLog, RetentionSettings, Tenant, User } from '@/services/types'
 import { useAuthStore } from '@/stores/auth'
 import { useLocaleStore } from '@/stores/locale'
 import { useTenantStore } from '@/stores/tenant'
@@ -69,6 +69,18 @@ const {
     `/tenants/${tenant.currentTenantId}/audit-logs`,
   )
   return response.data ?? []
+})
+
+const {
+  data: retention,
+  loading: retentionLoading,
+  error: retentionError,
+  reload: reloadRetention,
+} = useAsyncData(async () => {
+  const { data: response } = await api.get<{ data: RetentionSettings }>(
+    '/platform/retention',
+  )
+  return response.data
 })
 
 async function onLocaleChange(event: Event): Promise<void> {
@@ -305,6 +317,76 @@ function formatWhen(value?: string | null): string {
             {{ allowHostsError }}
           </p>
         </template>
+      </section>
+
+      <section class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+        <h2 class="text-lg font-medium">{{ $t('settings.retention.title') }}</h2>
+        <p class="mt-2 text-sm text-gray-500">
+          {{ $t('settings.retention.subtitle') }}
+        </p>
+        <p class="mt-1 text-sm text-gray-500">
+          {{ $t('settings.retention.hint') }}
+        </p>
+
+        <LoadingState v-if="retentionLoading" />
+        <ErrorState
+          v-else-if="retentionError"
+          :message="retentionError ?? $t('settings.retention.loadError')"
+          @retry="reloadRetention"
+        />
+        <dl
+          v-else-if="retention"
+          class="mt-4 grid gap-3 sm:grid-cols-2"
+        >
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.payloadSnapshotsDays') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ retention.payload_snapshots_days }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.attemptMetadataDays') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ retention.attempt_metadata_days }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.runSummaryDays') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ retention.run_summary_days }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.auditLogsDays') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ retention.audit_logs_days }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.apiIdempotencyHours') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ retention.api_idempotency_hours }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.systemHeartbeatDays') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ retention.system_heartbeat_days }}
+            </dd>
+          </div>
+        </dl>
       </section>
 
       <section class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">

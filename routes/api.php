@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\EnvironmentController;
 use App\Http\Controllers\Api\V1\MeController;
 use App\Http\Controllers\Api\V1\MemberController;
 use App\Http\Controllers\Api\V1\PlatformHealthController;
+use App\Http\Controllers\Api\V1\RetentionSettingsController;
 use App\Http\Controllers\Api\V1\SchedulePreviewController;
 use App\Http\Controllers\Api\V1\SecretController;
 use App\Http\Controllers\Api\V1\TaskController;
@@ -32,6 +33,7 @@ Route::prefix('v1')->group(function (): void {
         Route::get('me', MeController::class);
         Route::patch('me/preferences', [UserPreferencesController::class, 'update']);
         Route::get('platform/health', PlatformHealthController::class);
+        Route::get('platform/retention', RetentionSettingsController::class);
 
         Route::get('tenants', [TenantController::class, 'index']);
         Route::post('tenants', [TenantController::class, 'store']);

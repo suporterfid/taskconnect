@@ -130,10 +130,16 @@ function environmentLabel(environmentId?: string | null): string {
 }
 
 function permissionsLabel(permissions: string[]): string {
-  if (permissions.includes('*')) {
-    return t('settings.apiKeys.permissions.full')
-  }
-  return permissions.join(', ')
+  return permissions
+    .map((code) => {
+      const key =
+        code === '*'
+          ? 'settings.apiKeys.permissions.full'
+          : `settings.apiKeys.permissions.${code}`
+      const label = t(key)
+      return label === key ? code : label
+    })
+    .join(', ')
 }
 
 function toDatetimeLocal(value?: string | null): string {

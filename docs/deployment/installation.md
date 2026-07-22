@@ -17,6 +17,21 @@
 8. Log in, create a tenant, verify the platform health endpoint and scheduler heartbeat after one minute.
 9. Complete the [security checklist](security.md).
 
+## Retention (platform defaults)
+
+Cleanup is driven by minute/hourly cron (`scheduler:maintenance`) using env vars from `.env.example` / `config/retention.php`:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `RETENTION_PAYLOAD_SNAPSHOTS_DAYS` | 30 | Redacted request/response bodies |
+| `RETENTION_ATTEMPT_METADATA_DAYS` | 180 | Attempt rows metadata |
+| `RETENTION_RUN_SUMMARY_DAYS` | 365 | Run summaries |
+| `RETENTION_AUDIT_LOGS_DAYS` | 365 | Audit log rows |
+| `RETENTION_API_IDEMPOTENCY_HOURS` | 24 | Idempotency keys |
+| `RETENTION_SYSTEM_HEARTBEAT_DAYS` | 30 | Old heartbeat rows |
+
+Operators can view the effective values in **Settings → Retention** (read-only) or Platform Health (admins).
+
 ## Application key backup
 
 Secrets are encrypted with `APP_KEY`. Losing the key makes stored secrets unrecoverable. Back up `.env` securely offline.
