@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { reactive, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
@@ -7,21 +8,63 @@ import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import api from '@/services/api'
-import type { Task } from '@/services/types'
+import type { Task, TaskDefinitionStatus } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 const tenant = useTenantStore()
+
+const filters = reactive({
+  q: '',
+  definition_status: '' as '' | TaskDefinitionStatus,
+  last_run_state: '',
+  sort: 'name' as 'name' | 'next_run_at' | 'last_run_at',
+  order: 'asc' as 'asc' | 'desc',
+})
 
 const { data, loading, error, reload } = useAsyncData(async () => {
   if (!tenant.currentTenantId || !tenant.currentEnvironmentId) {
     return [] as Task[]
   }
+  const params: Record<string, string> = {
+    sort: filters.sort,
+    order: filters.order,
+  }
+  if (filters.q.trim()) {
+    params.q = filters.q.trim()
+  }
+  if (filters.definition_status) {
+    params.definition_status = filters.definition_status
+  }
+  if (filters.last_run_state) {
+    params.last_run_state = filters.last_run_state
+  }
   const { data: response } = await api.get<{ data: Task[] }>(
     tenant.tenantPath('/tasks'),
+    { params },
   )
   return response.data ?? []
 })
+
+watch(filters, () => {
+  void reload()
+})
+
+function toggleSort(column: 'name' | 'next_run_at' | 'last_run_at'): void {
+  if (filters.sort === column) {
+    filters.order = filters.order === 'asc' ? 'desc' : 'asc'
+    return
+  }
+  filters.sort = column
+  filters.order = column === 'name' ? 'asc' : 'desc'
+}
+
+function sortIndicator(column: string): string {
+  if (filters.sort !== column) {
+    return ''
+  }
+  return filters.order === 'asc' ? ' ↑' : ' ↓'
+}
 
 function formatDate(value?: string | null): string {
   if (!value) {
@@ -63,6 +106,51 @@ function statusClass(status: string): string {
       </RouterLink>
     </div>
 
+    <div
+      v-if="tenant.currentTenantId && tenant.currentEnvironmentId"
+      class="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+    >
+      <label class="block text-sm">
+        <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('common.search') }}</span>
+        <input
+          v-model="filters.q"
+          type="search"
+          class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
+          :placeholder="$t('tasks.filters.searchPlaceholder')"
+        />
+      </label>
+      <label class="block text-sm">
+        <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('common.status') }}</span>
+        <select
+          v-model="filters.definition_status"
+          class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
+        >
+          <option value="">{{ $t('tasks.filters.anyStatus') }}</option>
+          <option value="draft">{{ $t('tasks.status.draft') }}</option>
+          <option value="active">{{ $t('tasks.status.active') }}</option>
+          <option value="paused">{{ $t('tasks.status.paused') }}</option>
+          <option value="completed">{{ $t('tasks.status.completed') }}</option>
+        </select>
+      </label>
+      <label class="block text-sm">
+        <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('tasks.detail.lastRunState') }}</span>
+        <select
+          v-model="filters.last_run_state"
+          class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
+        >
+          <option value="">{{ $t('tasks.filters.anyRunState') }}</option>
+          <option value="succeeded">{{ $t('runs.status.succeeded') }}</option>
+          <option value="dead">{{ $t('runs.status.dead') }}</option>
+          <option value="retry_wait">{{ $t('runs.status.retry_wait') }}</option>
+          <option value="pending">{{ $t('runs.status.pending') }}</option>
+          <option value="blocked">{{ $t('runs.status.blocked') }}</option>
+        </select>
+      </label>
+      <p class="self-end text-sm text-gray-500">
+        {{ t('tasks.filters.resultCount', { count: data?.length ?? 0 }) }}
+      </p>
+    </div>
+
     <LoadingState v-if="loading" />
     <ErrorState v-else-if="error" :message="error ?? $t('tasks.loadError')" @retry="reload" />
     <div
@@ -82,16 +170,22 @@ function statusClass(status: string): string {
         <thead class="bg-gray-50 dark:bg-gray-900">
           <tr>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              {{ $t('common.name') }}
+              <button type="button" class="hover:underline" @click="toggleSort('name')">
+                {{ $t('common.name') }}{{ sortIndicator('name') }}
+              </button>
             </th>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
               {{ $t('common.status') }}
             </th>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              {{ $t('tasks.detail.nextRun') }}
+              <button type="button" class="hover:underline" @click="toggleSort('next_run_at')">
+                {{ $t('tasks.detail.nextRun') }}{{ sortIndicator('next_run_at') }}
+              </button>
             </th>
             <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-              {{ $t('tasks.detail.lastRunState') }}
+              <button type="button" class="hover:underline" @click="toggleSort('last_run_at')">
+                {{ $t('tasks.detail.lastRunState') }}{{ sortIndicator('last_run_at') }}
+              </button>
             </th>
             <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
               {{ $t('common.actions') }}

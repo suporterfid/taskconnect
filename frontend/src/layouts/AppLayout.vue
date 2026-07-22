@@ -91,7 +91,7 @@ function onLocaleChange(event: Event): void {
         </p>
       </div>
 
-      <nav class="flex-1 space-y-1 p-3" aria-label="Main">
+      <nav class="flex-1 space-y-1 p-3" :aria-label="$t('common.navMain')">
         <RouterLink
           v-for="item in navItems"
           :key="item.name"

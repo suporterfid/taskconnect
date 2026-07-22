@@ -44,5 +44,12 @@
   "environment": {
     "label": "Environment",
     "select": "Select environment"
+  },
+  "navMain": "Main",
+  "errors": {
+    "requestFailed": "Request failed",
+    "loginFailed": "Login failed",
+    "loadTenantsFailed": "Failed to load tenants",
+    "loadEnvironmentsFailed": "Failed to load environments"
   }
 }

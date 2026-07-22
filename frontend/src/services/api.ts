@@ -4,6 +4,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios'
 
+import { i18n } from '@/i18n'
 import type { ApiErrorBody, ApiErrorEnvelope } from './types'
 
 export class ApiError extends Error {
@@ -60,7 +61,9 @@ export function parseErrorEnvelope(error: AxiosError): ApiError {
   if (isRecord(data) && isRecord(data.error)) {
     const body = data.error as unknown as ApiErrorBody
     return new ApiError(
-      typeof body.message === 'string' && body.message ? body.message : 'Request failed',
+      typeof body.message === 'string' && body.message
+        ? body.message
+        : i18n.global.t('common.errors.requestFailed'),
       status,
       {
         code: typeof body.code === 'string' ? body.code : undefined,
@@ -84,7 +87,7 @@ export function parseErrorEnvelope(error: AxiosError): ApiError {
     })
   }
 
-  return new ApiError(error.message || 'Request failed', status, {
+  return new ApiError(error.message || i18n.global.t('common.errors.requestFailed'), status, {
     requestId: headerRequestId,
   })
 }

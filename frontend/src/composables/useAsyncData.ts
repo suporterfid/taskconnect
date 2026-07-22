@@ -1,6 +1,7 @@
 import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch, type Ref } from 'vue'
 
+import { i18n } from '@/i18n'
 import { ApiError } from '@/services/api'
 import { useTenantStore } from '@/stores/tenant'
 
@@ -20,7 +21,10 @@ export function useAsyncData<T>(loader: () => Promise<T>) {
       data.value = await loader()
     } catch (err) {
       data.value = null
-      error.value = err instanceof ApiError ? err.message : 'Request failed'
+      error.value =
+        err instanceof ApiError
+          ? err.message
+          : i18n.global.t('common.errors.requestFailed')
     } finally {
       loading.value = false
     }

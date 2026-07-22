@@ -44,5 +44,12 @@
   "environment": {
     "label": "Ambiente",
     "select": "Selecionar ambiente"
+  },
+  "navMain": "Principal",
+  "errors": {
+    "requestFailed": "Falha na requisição",
+    "loginFailed": "Falha no login",
+    "loadTenantsFailed": "Não foi possível carregar os tenants",
+    "loadEnvironmentsFailed": "Não foi possível carregar os ambientes"
   }
 }

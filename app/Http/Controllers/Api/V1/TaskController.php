@@ -33,13 +33,48 @@ class TaskController extends Controller
         $environment = $this->environment($request);
         $this->authorize('viewAny', [Task::class, $tenant]);
 
-        $tasks = Task::query()
-            ->where('tenant_id', $tenant->id)
-            ->where('environment_id', $environment->id)
-            ->whereNull('archived_at')
-            ->orderBy('name')
-            ->with(['schedule', 'endpointProfile'])
-            ->get();
+        $validated = $request->validate([
+            'q' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'definition_status' => ['sometimes', 'nullable', Rule::in(array_column(TaskDefinitionStatus::cases(), 'value'))],
+            'last_run_state' => ['sometimes', 'nullable', 'string', 'max:64'],
+            'schedule_kind' => ['sometimes', 'nullable', 'string', 'max:64'],
+            'sort' => ['sometimes', 'nullable', Rule::in(['name', 'next_run_at', 'last_run_at'])],
+            'order' => ['sometimes', 'nullable', Rule::in(['asc', 'desc'])],
+        ]);
+
+        $query = Task::query()
+            ->where('tasks.tenant_id', $tenant->id)
+            ->where('tasks.environment_id', $environment->id)
+            ->whereNull('tasks.archived_at')
+            ->with(['schedule', 'endpointProfile']);
+
+        if (! empty($validated['q'])) {
+            $term = '%'.$validated['q'].'%';
+            $query->where(function ($builder) use ($term): void {
+                $builder->where('tasks.name', 'like', $term)
+                    ->orWhere('tasks.description', 'like', $term);
+            });
+        }
+
+        if (! empty($validated['definition_status'])) {
+            $query->where('tasks.definition_status', $validated['definition_status']);
+        }
+
+        if (! empty($validated['last_run_state'])) {
+            $query->where('tasks.last_run_state', $validated['last_run_state']);
+        }
+
+        if (! empty($validated['schedule_kind'])) {
+            $query->whereHas('schedule', function ($builder) use ($validated): void {
+                $builder->where('schedule_kind', $validated['schedule_kind']);
+            });
+        }
+
+        $sort = $validated['sort'] ?? 'name';
+        $order = $validated['order'] ?? 'asc';
+        $query->orderBy('tasks.'.$sort, $order)->orderBy('tasks.id');
+
+        $tasks = $query->get();
 
         return response()->json(['data' => TaskResource::collection($tasks)]);
     }

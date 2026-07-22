@@ -11,10 +11,21 @@
       "basics": "Básico",
       "destination": "Destino",
       "schedule": "Agendamento",
+      "retry": "Retry",
+      "test": "Teste",
       "review": "Revisão"
     },
     "saveDraft": "Salvar rascunho",
     "activate": "Salvar e ativar",
+    "addHeader": "Adicionar cabeçalho",
+    "testRun": "Executar teste síncrono",
+    "testing": "Testando…",
+    "testNeedsProfile": "O teste síncrono precisa de um perfil de endpoint. Salve um rascunho para testar via a tarefa depois, ou pule esta etapa.",
+    "testSuccess": "Teste concluído com sucesso",
+    "testFailed": "Teste falhou",
+    "securityHttp": "Aviso: a URL de destino usa HTTP simples (não HTTPS).",
+    "securityTlsOff": "Aviso: o perfil de endpoint selecionado está com verificação TLS desativada.",
+    "selectedAuth": "Autenticação selecionada",
     "nextOccurrences": "Próximas 3 ocorrências",
     "noOccurrences": "Nenhuma ocorrência futura para este agendamento.",
     "previewError": "Não foi possível pré-visualizar as ocorrências"
@@ -43,6 +54,7 @@
     "url": "URL ou caminho",
     "body": "Corpo",
     "contentType": "Tipo de conteúdo",
+    "headers": "Cabeçalhos",
     "timezone": "Fuso horário",
     "time": "Horário",
     "at": "Executar em",
@@ -101,5 +113,11 @@
     "error": "Não foi possível executar essa ação"
   },
   "empty": "Nenhuma tarefa ainda. Crie uma para agendar sua primeira requisição HTTP.",
-  "loadError": "Não foi possível carregar as tarefas"
+  "loadError": "Não foi possível carregar as tarefas",
+  "filters": {
+    "searchPlaceholder": "Buscar por nome…",
+    "anyStatus": "Qualquer status",
+    "anyRunState": "Qualquer estado da última execução",
+    "resultCount": "{count} tarefas"
+  }
 }

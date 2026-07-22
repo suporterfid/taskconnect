@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 
 import api, { ApiError } from '@/services/api'
 import type { Environment, Tenant } from '@/services/types'
+import { i18n } from '@/i18n'
 
 const TENANT_KEY = 'taskconnect.tenant'
 const ENV_KEY = 'taskconnect.environment'
@@ -77,7 +78,7 @@ export const useTenantStore = defineStore('tenant', () => {
       }
     } catch (err) {
       error.value =
-        err instanceof ApiError ? err.message : 'Failed to load tenants'
+        err instanceof ApiError ? err.message : i18n.global.t('common.errors.loadTenantsFailed')
     } finally {
       loading.value = false
     }
@@ -97,7 +98,7 @@ export const useTenantStore = defineStore('tenant', () => {
       environments.value = []
       currentEnvironmentId.value = null
       error.value =
-        err instanceof ApiError ? err.message : 'Failed to load environments'
+        err instanceof ApiError ? err.message : i18n.global.t('common.errors.loadEnvironmentsFailed')
     } finally {
       loading.value = false
     }
