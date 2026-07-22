@@ -66,6 +66,7 @@ Implement **in order R1→R9**. Do not start R(n+1) until R(n) acceptance tests 
 | R13 | **Done** (#31) | Per-workspace DLQ email/webhook alerts; `docs/architecture/dlq-alerting.md` |
 | R15 | **Done** (#33) | DB-backed submit rate limits; `docs/architecture/submit-rate-limiting.md` |
 | R14 | **Done** (#32) | Operator UI: task governance fields, DLQ page, pipelines pages + REST |
+| R16 | **Done** (part of #34) | Top-level `run_at` + optional five-field `cron`; `docs/architecture/delayed-schedules.md` |
 
 ## Open questions (defaults applied)
 

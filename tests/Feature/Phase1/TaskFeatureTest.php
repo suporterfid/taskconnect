@@ -159,6 +159,60 @@ class TaskFeatureTest extends TestCase
             ->assertJsonCount(2, 'data.updated');
     }
 
+    public function test_create_task_with_top_level_run_at_synthesizes_once_schedule(): void
+    {
+        [$admin, $tenant, $environment] = $this->createTenantAdmin();
+
+        $create = $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks'),
+            [
+                'name' => 'Delayed Reminder',
+                'method' => 'POST',
+                'url' => 'https://example.com/remind',
+                'run_at' => '2026-08-01T15:30:00Z',
+                'timezone' => 'UTC',
+            ],
+        );
+
+        $create->assertCreated()
+            ->assertJsonPath('data.name', 'Delayed Reminder')
+            ->assertJsonPath('data.schedule.kind', 'once')
+            ->assertJsonPath('data.schedule.at', '2026-08-01T15:30:00Z')
+            ->assertJsonPath('data.run_at', '2026-08-01T15:30:00Z');
+    }
+
+    public function test_create_task_with_cron_schedule(): void
+    {
+        [$admin, $tenant, $environment] = $this->createTenantAdmin();
+
+        $create = $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks'),
+            [
+                'name' => 'Cron Hook',
+                'method' => 'GET',
+                'url' => 'https://example.com/cron',
+                'schedule' => [
+                    'kind' => 'cron',
+                    'timezone' => 'UTC',
+                    'cron_expression' => '0 9 * * 1-5',
+                ],
+            ],
+        );
+
+        $create->assertCreated()
+            ->assertJsonPath('data.schedule.kind', 'cron')
+            ->assertJsonPath('data.schedule.cron_expression', '0 9 * * 1-5')
+            ->assertJsonPath('data.schedule_human.kind', 'cron')
+            ->assertJsonPath('data.run_at', null);
+
+        $taskId = $create->json('data.id');
+        $activate = $this->actingAs($admin)->postJson(
+            $this->environmentRoute($tenant, $environment, '/tasks/'.$taskId.'/activate'),
+        );
+        $activate->assertOk();
+        $this->assertNotNull($activate->json('data.next_run_at'));
+    }
+
     /**
      * @return array<string, mixed>
      */

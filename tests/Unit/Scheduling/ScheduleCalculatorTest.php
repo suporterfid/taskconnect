@@ -140,6 +140,53 @@ class ScheduleCalculatorTest extends TestCase
         $this->assertSame('2026-07-20T09:00:00+00:00', $next?->format('c'));
     }
 
+    public function test_cron_finds_next_expression_match_in_timezone(): void
+    {
+        $config = ScheduleConfig::fromArray([
+            'kind' => 'cron',
+            'timezone' => 'UTC',
+            'cron_expression' => '30 14 * * *',
+        ]);
+
+        $next = $this->calculator->nextRunAt(
+            $config,
+            new DateTimeImmutable('2026-07-18T10:00:00Z', new DateTimeZone('UTC')),
+        );
+
+        $this->assertSame('2026-07-18T14:30:00+00:00', $next?->format('c'));
+    }
+
+    public function test_delayed_once_helper_builds_once_schedule(): void
+    {
+        $config = ScheduleConfig::delayedOnce('2026-07-20T15:00:00Z');
+
+        $this->assertSame(
+            '2026-07-20T15:00:00+00:00',
+            $this->calculator->nextRunAt($config)?->format('c'),
+        );
+    }
+
+    public function test_preview_next_returns_multiple_cron_occurrences(): void
+    {
+        $config = ScheduleConfig::fromArray([
+            'kind' => 'cron',
+            'timezone' => 'UTC',
+            'cron_expression' => '0 * * * *',
+        ]);
+
+        $occurrences = $this->calculator->previewNext(
+            $config,
+            3,
+            new DateTimeImmutable('2026-07-18T10:15:00Z', new DateTimeZone('UTC')),
+        );
+
+        $this->assertSame([
+            '2026-07-18T11:00:00+00:00',
+            '2026-07-18T12:00:00+00:00',
+            '2026-07-18T13:00:00+00:00',
+        ], array_map(fn (DateTimeImmutable $dt) => $dt->format('c'), $occurrences));
+    }
+
     public function test_preview_returns_next_n_occurrences(): void
     {
         $config = ScheduleConfig::fromArray([

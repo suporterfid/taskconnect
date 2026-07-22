@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Domain\Scheduling\ScheduleDescription;
+use App\Domain\Scheduling\ScheduleKind;
 use App\Infrastructure\Persistence\Eloquent\Task;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -14,6 +15,7 @@ class TaskResource extends JsonResource
     {
         $schedule = $this->schedule;
         $scheduleHuman = null;
+        $runAt = null;
 
         if ($schedule !== null) {
             $scheduleHuman = ScheduleDescription::fromConfig($schedule->toScheduleConfig());
@@ -21,6 +23,11 @@ class TaskResource extends JsonResource
                 'kind' => $scheduleHuman->kind->value,
                 'parts' => $scheduleHuman->parts,
             ];
+
+            if ($schedule->schedule_kind === ScheduleKind::Once) {
+                $config = is_array($schedule->schedule_config_json) ? $schedule->schedule_config_json : [];
+                $runAt = isset($config['at']) && is_string($config['at']) ? $config['at'] : null;
+            }
         }
 
         return [
@@ -45,6 +52,8 @@ class TaskResource extends JsonResource
             'content_type' => $this->content_type,
             'timezone' => $this->timezone,
             'retry_policy' => $this->retry_policy_json,
+            /** Delayed one-shot instant when schedule kind is once (R16); null for recurring kinds. */
+            'run_at' => $runAt,
             'next_run_at' => $this->next_run_at?->utc()->format('Y-m-d\TH:i:s\Z'),
             'last_run_at' => $this->last_run_at?->utc()->format('Y-m-d\TH:i:s\Z'),
             'last_run_state' => $this->last_run_state,

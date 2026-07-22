@@ -65,6 +65,13 @@ final readonly class ScheduleDescription
                     'timezone' => $config->timezone,
                 ],
             ),
+            ScheduleKind::Cron => new self(
+                kind: $config->kind,
+                parts: [
+                    'cron_expression' => $config->cronExpression ?? '',
+                    'timezone' => $config->timezone,
+                ],
+            ),
         };
     }
 }
