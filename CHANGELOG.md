@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Spec adherence audit plan: `docs/superpowers/plans/2026-07-22-spec-adherence-gaps.md` (epic #67; gaps #62–#66)
 - Chore: close accidental GitHub test issues #14, #15, #52 (`docs/architecture/closed-test-issues.md`)
 - Cross-repo GrandpaSSOn handoff: accept `workspace/<id>` aud forms; document broker follow-up at grandpasson#55 (`docs/architecture/grandpasson-cross-repo.md`) (closes #26)
 - v1 Extension P0 epic closeout: R1–R9 complete; see `docs/architecture/p0-epic-closeout.md` (closes #16)
