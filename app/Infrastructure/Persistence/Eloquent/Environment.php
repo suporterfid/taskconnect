@@ -22,6 +22,7 @@ class Environment extends Model
         'dead_run_email_enabled',
         'dead_run_webhook_enabled',
         'dead_run_webhook_url',
+        'submit_rate_limit_per_minute',
         'archived_at',
     ];
 
@@ -30,6 +31,7 @@ class Environment extends Model
         return [
             'dead_run_email_enabled' => 'boolean',
             'dead_run_webhook_enabled' => 'boolean',
+            'submit_rate_limit_per_minute' => 'integer',
             'archived_at' => 'datetime',
         ];
     }

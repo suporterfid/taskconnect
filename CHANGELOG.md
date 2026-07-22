@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- v1 Extension R15: DB-backed submission rate limits per workspace (`rate_limit_buckets`, `Retry-After` on 429); see `docs/architecture/submit-rate-limiting.md`
 - v1 Extension R13: per-workspace DLQ email/webhook alerts (`notifications.*` on environments); audited `dlq.alert.*`; see `docs/architecture/dlq-alerting.md`
 - v1 Extension R12: weighted round-robin claim fairness across workspaces (`SCHEDULER_FAIRNESS_WORKSPACE_WEIGHT`); see `docs/architecture/fairness.md`
 - v1 Extension R11: `coalesce_key` + `SCHEDULER_COALESCE_WINDOW_SECONDS` collapses bursty workspace enqueues (incl. pipeline `publish.build`); see `docs/architecture/coalesce.md`

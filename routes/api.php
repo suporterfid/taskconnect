@@ -79,12 +79,12 @@ Route::prefix('v1')->group(function (): void {
 
             Route::get('tenants/{tenantId}/environments/{environmentId}/pipelines', [PipelineInstanceController::class, 'templates']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/pipelines/{templateName}/instances', [PipelineInstanceController::class, 'store'])
-                ->middleware('idempotency');
+                ->middleware(['submit.throttle', 'idempotency']);
             Route::get('tenants/{tenantId}/environments/{environmentId}/pipelines/{templateName}/instances/{instanceId}', [PipelineInstanceController::class, 'show']);
 
             Route::get('tenants/{tenantId}/environments/{environmentId}/tasks', [TaskController::class, 'index']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks', [TaskController::class, 'store'])
-                ->middleware('idempotency');
+                ->middleware(['submit.throttle', 'idempotency']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/bulk-pause', [TaskController::class, 'bulkPause']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/bulk-resume', [TaskController::class, 'bulkResume']);
             Route::get('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}', [TaskController::class, 'show']);
@@ -94,8 +94,9 @@ Route::prefix('v1')->group(function (): void {
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}/pause', [TaskController::class, 'pause']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}/resume', [TaskController::class, 'resume']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}/run-now', [TaskController::class, 'runNow'])
-                ->middleware('idempotency');
-            Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}/test', [TaskController::class, 'test']);
+                ->middleware(['submit.throttle', 'idempotency']);
+            Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}/test', [TaskController::class, 'test'])
+                ->middleware('submit.throttle');
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}/duplicate', [TaskController::class, 'duplicate']);
 
 
