@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- v1 Extension R9: `validate-release.sh` fails on `.env` / private keys / credential-like literals; documents GrandpaSSOn placeholders; see `docs/architecture/secret-hygiene.md`
 - v1 Extension R7: named egress profiles (`internal` / `public-crawl` / `api`) enforced before DNS-pinned connect; see `docs/architecture/egress-profiles.md`
 - v1 Extension R6: DLQ CLI `tasks:dlq:list|show|replay` over `run_state=dead`; `RETENTION_DEAD_RUNS_DAYS` (default 30); see `docs/architecture/dlq.md`
 - v1 Extension R5: `scheduler:execute-due` / `retry-due` enforce wall-clock budget via chunked claim-execute (`SCHEDULER_TARGET_DURATION_SECONDS`, `SCHEDULER_BUDGET_SAFETY_MARGIN_SECONDS`, `SCHEDULER_CLAIM_CHUNK`)
