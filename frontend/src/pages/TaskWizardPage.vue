@@ -15,6 +15,10 @@ import type {
   Task,
 } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
+import {
+  formatSuccessStatusRanges,
+  parseSuccessStatusRanges,
+} from '@/utils/successStatusRanges'
 
 const props = defineProps<{ id?: string }>()
 const { t } = useI18n()
@@ -58,6 +62,7 @@ const form = reactive({
   day: 1,
   max_attempts: 6,
   retry_strategy: 'standard_exponential',
+  success_status_ranges: '',
 })
 
 const isEdit = computed(() => Boolean(props.id))
@@ -167,6 +172,9 @@ function applyTask(task: Task): void {
   form.max_attempts = task.retry_policy?.max_attempts ?? 6
   form.retry_strategy =
     task.retry_policy?.strategy ?? 'standard_exponential'
+  form.success_status_ranges = formatSuccessStatusRanges(
+    task.retry_policy?.success_status_ranges,
+  )
   scheduleHuman.value = task.schedule_human ?? null
 
   const schedule = task.schedule
@@ -225,6 +233,14 @@ async function onSubmit(activate: boolean): Promise<void> {
   error.value = null
 
   try {
+    let successRanges: Array<[number, number]> | null = null
+    try {
+      successRanges = parseSuccessStatusRanges(form.success_status_ranges)
+    } catch {
+      error.value = t('tasks.fields.successStatusRangesInvalid')
+      return
+    }
+
     const payload = {
       name: form.name,
       description: form.description || null,
@@ -238,6 +254,9 @@ async function onSubmit(activate: boolean): Promise<void> {
       retry_policy: {
         max_attempts: Number(form.max_attempts),
         strategy: form.retry_strategy,
+        ...(successRanges
+          ? { success_status_ranges: successRanges }
+          : { success_status_ranges: null }),
       },
     }
 
@@ -522,6 +541,19 @@ async function onSubmit(activate: boolean): Promise<void> {
               />
             </label>
           </div>
+
+          <label class="block text-sm font-medium">
+            {{ $t('tasks.fields.successStatusRanges') }}
+            <input
+              v-model="form.success_status_ranges"
+              type="text"
+              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-950"
+              :placeholder="$t('tasks.fields.successStatusRangesPlaceholder')"
+            />
+            <span class="mt-1 block text-xs text-gray-500">
+              {{ $t('tasks.fields.successStatusRangesHint') }}
+            </span>
+          </label>
         </div>
 
         <div v-else class="space-y-2 text-sm">
@@ -545,6 +577,10 @@ async function onSubmit(activate: boolean): Promise<void> {
           <p>
             <strong>{{ $t('tasks.fields.schedule') }}:</strong>
             {{ reviewSchedule }}
+          </p>
+          <p>
+            <strong>{{ $t('tasks.fields.successStatusRanges') }}:</strong>
+            {{ form.success_status_ranges || $t('tasks.fields.successStatusRangesDefault') }}
           </p>
         </div>
 

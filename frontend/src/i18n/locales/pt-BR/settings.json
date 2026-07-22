@@ -16,6 +16,16 @@
     "save": "Salvar fuso horário"
   },
   "saveError": "Não foi possível salvar as preferências",
+  "outboundAllowHosts": {
+    "title": "Lista de hosts de saída",
+    "hint": "Opcional. Quando definida, as chamadas HTTP agendadas só podem atingir esses hostnames (além das proteções SSRF). Deixe vazio para permitir qualquer host público.",
+    "label": "Hosts permitidos (um por linha)",
+    "placeholder": "api.exemplo.com\nhooks.parceiro.test",
+    "save": "Salvar lista",
+    "saved": "Lista de hosts de saída salva",
+    "saveError": "Não foi possível salvar a lista de hosts de saída",
+    "needsTenant": "Selecione um tenant antes de editar a lista de hosts de saída."
+  },
   "audit": {
     "title": "Logs de auditoria",
     "subtitle": "Atividade recente do tenant",

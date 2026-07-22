@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Operator UI for tenant outbound host allowlist (Settings) and task success status ranges (create/edit wizard)
+- Playwright smoke journey: login → forgot-password; optional authenticated dashboard when `E2E_EMAIL` / `E2E_PASSWORD` are set
+- Frontend helpers/tests for parsing success status range strings
 - Tenant `outbound_allow_hosts` for SSRF host allowlisting (API + delivery path)
 - Per-task `success_status_ranges` on retry policy
 - API `Idempotency-Key` middleware for task create and run-now

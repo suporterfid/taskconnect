@@ -54,6 +54,8 @@ export interface Tenant {
   id: string
   name: string
   slug: string
+  outbound_allow_hosts?: string[]
+  archived_at?: string | null
 }
 
 export interface Environment {
@@ -106,6 +108,9 @@ export interface ScheduleConfig {
 export interface RetryPolicy {
   max_attempts?: number
   strategy?: string
+  success_status_ranges?: Array<[number, number]> | number[][]
+  max_retry_window_seconds?: number | null
+  honor_retry_after?: boolean
 }
 
 export interface Task {

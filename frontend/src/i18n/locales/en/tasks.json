@@ -44,7 +44,12 @@
     "endpointProfileNone": "None (direct URL)",
     "endpointProfileHint": "Optional. When set, URL/path is relative to the profile base URL.",
     "maxAttempts": "Max attempts",
-    "retryStrategy": "Retry strategy"
+    "retryStrategy": "Retry strategy",
+    "successStatusRanges": "Success status ranges",
+    "successStatusRangesHint": "Comma-separated HTTP statuses or ranges treated as success (default 200-299).",
+    "successStatusRangesPlaceholder": "200-299",
+    "successStatusRangesDefault": "200-299 (default)",
+    "successStatusRangesInvalid": "Use statuses or ranges like 200-299,204"
   },
   "scheduleKinds": {
     "once": "One-time",
