@@ -32,13 +32,24 @@ class AuditLogger
         return AuditLog::query()->create([
             'tenant_id' => $tenantId,
             'environment_id' => $environmentId,
-            'actor_user_id' => $actor?->getAuthIdentifier(),
+            'actor_user_id' => $this->resolveActorUserId($actor),
             'action' => $action,
             'resource_type' => $resourceType,
             'resource_id' => $resourceId,
             'request_id' => $requestId,
             'summary_json' => $this->redact($summary),
         ]);
+    }
+
+    private function resolveActorUserId(?Authenticatable $actor): ?int
+    {
+        if ($actor === null) {
+            return null;
+        }
+
+        $id = $actor->getAuthIdentifier();
+
+        return is_int($id) || (is_string($id) && ctype_digit($id)) ? (int) $id : null;
     }
 
     public function logFromRequest(

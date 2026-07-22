@@ -166,6 +166,7 @@ class HttpDeliveryServiceTest extends TestCase
             redactor: new RequestSnapshotRedactor,
             secretService: app(SecretService::class),
             taskTypeCatalog: app(TaskTypeCatalog::class),
+            callbackAuthHeaderBuilder: app(\App\Application\GrandpaSson\CallbackAuthHeaderBuilder::class),
         );
 
         return [$service, $transport];

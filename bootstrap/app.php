@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'request.id' => \App\Http\Middleware\AssignRequestId::class,
             'tenant.context' => \App\Http\Middleware\ResolveTenantEnvironment::class,
             'auth.api_or_sanctum' => \App\Http\Middleware\AuthenticateApiKeyOrSanctum::class,
+            'grandpasson.workspace' => \App\Http\Middleware\EnforceGrandpaSsonWorkspaceAud::class,
             'idempotency' => \App\Http\Middleware\EnforceIdempotencyKey::class,
         ]);
 

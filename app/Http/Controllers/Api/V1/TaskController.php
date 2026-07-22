@@ -113,7 +113,7 @@ class TaskController extends Controller
             'content_type' => $validated['content_type'] ?? null,
             'timezone' => $validated['schedule']['timezone'],
             'retry_policy_json' => $this->mergeRetryPolicyDefaults($validated['retry_policy'] ?? null, $governance['max_attempts']),
-        ], $schedule, $request->user()?->id);
+        ], $schedule, $this->actorUserId($request));
 
         $this->audit($request, $tenant, 'task.created', $task->public_id);
 
@@ -198,7 +198,7 @@ class TaskController extends Controller
             }
         }
 
-        $task = $this->lifecycle->update($task, $attributes, $schedule, $request->user()?->id);
+        $task = $this->lifecycle->update($task, $attributes, $schedule, $this->actorUserId($request));
         $this->audit($request, $tenant, 'task.updated', $task->public_id);
 
         return response()->json(['data' => new TaskResource($task)]);
@@ -301,7 +301,7 @@ class TaskController extends Controller
         $task = $this->resolveTask($request);
         $this->authorize('create', [Task::class, $tenant]);
 
-        $copy = $this->lifecycle->duplicate($task, $request->user()?->id);
+        $copy = $this->lifecycle->duplicate($task, $this->actorUserId($request));
         $this->audit($request, $tenant, 'task.duplicated', $copy->public_id, ['source_task_id' => $task->public_id]);
 
         return response()->json(['data' => new TaskResource($copy)], 201);
@@ -512,6 +512,18 @@ class TaskController extends Controller
         $environment = $request->attributes->get('environment');
 
         return $environment;
+    }
+
+    private function actorUserId(Request $request): ?int
+    {
+        $user = $request->user();
+        if ($user === null) {
+            return null;
+        }
+
+        $id = $user->getAuthIdentifier();
+
+        return is_int($id) || (is_string($id) && ctype_digit($id)) ? (int) $id : null;
     }
 
     /**

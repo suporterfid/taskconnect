@@ -3,6 +3,7 @@
 namespace App\Application\Execution;
 
 use App\Application\Secrets\SecretService;
+use App\Application\GrandpaSson\CallbackAuthHeaderBuilder;
 use App\Domain\EndpointProfiles\AuthMode;
 use App\Domain\Execution\Outbound\EgressProfile;
 use App\Domain\Execution\Outbound\OutboundPolicy;
@@ -26,6 +27,7 @@ final class HttpDeliveryService
         private readonly RequestSnapshotRedactor $redactor,
         private readonly SecretService $secretService,
         private readonly TaskTypeCatalog $taskTypeCatalog,
+        private readonly CallbackAuthHeaderBuilder $callbackAuthHeaderBuilder,
     ) {
     }
 
@@ -51,6 +53,7 @@ final class HttpDeliveryService
             $headers = array_merge(
                 $this->outboundPolicy->sanitizeHeaders($resolved['headers']),
                 $this->executionHeaders($run, $attempt),
+                $this->callbackAuthHeaderBuilder->build($run, $attempt, $task, $resolved['body']),
             );
 
             $this->persistRequestSnapshot($attempt, $resolved['url'], $headers, $resolved['body']);

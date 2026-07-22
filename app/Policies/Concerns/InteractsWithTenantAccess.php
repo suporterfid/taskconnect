@@ -3,6 +3,7 @@
 namespace App\Policies\Concerns;
 
 use App\Auth\ApiKeyActor;
+use App\Auth\GrandpaSsonActor;
 use App\Domain\Shared\Enums\TenantRole;
 use App\Infrastructure\Persistence\Eloquent\ApiKey;
 use App\Infrastructure\Persistence\Eloquent\Tenant;
@@ -149,9 +150,30 @@ trait InteractsWithTenantAccess
         return $this->canWriteProfiles($user, $tenant);
     }
 
+    protected function actorCanWriteTasks(Tenant $tenant): bool
+    {
+        $user = request()->user();
+
+        if ($user instanceof GrandpaSsonActor) {
+            return $user->introspection->hasScope((string) config('grandpasson.write_scope', 'tasks:write'));
+        }
+
+        if ($user instanceof User && $this->canWriteTasks($user, $tenant)) {
+            return true;
+        }
+
+        return $this->apiKeyHasPermission('*')
+            || $this->apiKeyHasPermission('tasks:write');
+    }
+
     protected function actorCanReadTasks(Tenant $tenant): bool
     {
         $user = request()->user();
+
+        if ($user instanceof GrandpaSsonActor) {
+            return $user->introspection->hasScope((string) config('grandpasson.write_scope', 'tasks:write'))
+                || $user->introspection->hasScope('tasks:read');
+        }
 
         if ($user instanceof User && $this->hasTenantAccess($user, $tenant)) {
             return true;
@@ -161,18 +183,6 @@ trait InteractsWithTenantAccess
             || $this->apiKeyHasPermission('tasks:read')
             || $this->apiKeyHasPermission('tasks:write')
             || $this->apiKeyHasPermission('tasks:operate');
-    }
-
-    protected function actorCanWriteTasks(Tenant $tenant): bool
-    {
-        $user = request()->user();
-
-        if ($user instanceof User && $this->canWriteTasks($user, $tenant)) {
-            return true;
-        }
-
-        return $this->apiKeyHasPermission('*')
-            || $this->apiKeyHasPermission('tasks:write');
     }
 
     protected function actorCanOperateTasks(Tenant $tenant): bool

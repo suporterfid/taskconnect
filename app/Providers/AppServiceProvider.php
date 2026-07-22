@@ -4,7 +4,14 @@ namespace App\Providers;
 
 use App\Application\Execution\HttpDeliveryService;
 use App\Application\Execution\RequestSnapshotRedactor;
+use App\Application\GrandpaSson\CachedTokenClient;
+use App\Application\GrandpaSson\CallbackAuthHeaderBuilder;
+use App\Application\GrandpaSson\HttpIntrospectionClient;
+use App\Application\GrandpaSson\HttpTokenClient;
+use App\Application\GrandpaSson\IntrospectionClientInterface;
+use App\Application\GrandpaSson\TokenClientInterface;
 use App\Application\Notifications\FailureNotifier;
+use App\Domain\Auth\CallbackHmac;
 use App\Application\Scheduling\AttemptExecutor;
 use App\Application\Scheduling\DueTaskClaimer;
 use App\Application\Scheduling\HeartbeatWriter;
@@ -50,6 +57,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(GuzzlePinnedHttpTransport::class);
         $this->app->singleton(PinnedHttpTransport::class, GuzzlePinnedHttpTransport::class);
         $this->app->singleton(RequestSnapshotRedactor::class);
+        $this->app->singleton(CallbackHmac::class);
+        $this->app->singleton(TokenClientInterface::class, function ($app): TokenClientInterface {
+            return new CachedTokenClient($app->make(HttpTokenClient::class));
+        });
+        $this->app->singleton(HttpTokenClient::class);
+        $this->app->singleton(IntrospectionClientInterface::class, HttpIntrospectionClient::class);
+        $this->app->singleton(CallbackAuthHeaderBuilder::class);
         $this->app->singleton(HttpDeliveryService::class);
         $this->app->singleton(ScheduleCalculator::class);
         $this->app->singleton(TaskTypeCatalog::class);
