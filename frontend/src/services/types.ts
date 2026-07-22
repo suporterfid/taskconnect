@@ -344,7 +344,21 @@ export interface PlatformHealth {
   database: 'ok' | 'error' | string
   scheduler_last_seen_at?: string | null
   retry_executor_last_seen_at?: string | null
+  maintenance_last_seen_at?: string | null
+  scheduler_stale?: boolean
+  retry_executor_stale?: boolean
   stale_claims: number
   pending_runs: number
   version: string
+  retention?: RetentionSettings | null
+}
+
+/** Platform retention defaults from GET /platform/retention (wrapped in `data`). */
+export interface RetentionSettings {
+  payload_snapshots_days: number
+  attempt_metadata_days: number
+  run_summary_days: number
+  audit_logs_days: number
+  api_idempotency_hours: number
+  system_heartbeat_days: number
 }

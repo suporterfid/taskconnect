@@ -48,6 +48,7 @@
   "navMain": "Main",
   "errors": {
     "requestFailed": "Request failed",
+    "tooManyRequests": "Too many requests. Please wait a moment and try again.",
     "loginFailed": "Login failed",
     "loadTenantsFailed": "Failed to load tenants",
     "loadEnvironmentsFailed": "Failed to load environments"

@@ -45,6 +45,10 @@
     "retry": "Tentar novamente",
     "error": "Não foi possível executar essa ação"
   },
+  "list": {
+    "cancelConfirm": "Cancelar esta execução? Ela será interrompida e não continuará.",
+    "retryConfirm": "Tentar esta execução novamente agora? Uma nova tentativa pendente será criada."
+  },
   "status": {
     "pending": "Pendente",
     "running": "Em execução",

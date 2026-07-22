@@ -138,8 +138,28 @@
       "version": "Versão",
       "scheduler": "Agendador visto pela última vez",
       "retryExecutor": "Executor de retry visto pela última vez",
+      "maintenance": "Manutenção vista pela última vez",
+      "schedulerStale": "Agendador obsoleto",
+      "retryExecutorStale": "Executor de retry obsoleto",
+      "staleYes": "Sim",
+      "staleNo": "Não",
       "staleClaims": "Claims expirados",
-      "pendingRuns": "Execuções pendentes / em andamento"
+      "pendingRuns": "Execuções pendentes / em andamento",
+      "retention": "Padrões de retenção"
+    }
+  },
+  "retention": {
+    "title": "Retenção",
+    "subtitle": "Padrões da plataforma para quanto tempo dados de execução e auditoria são mantidos. Somente leitura.",
+    "loadError": "Não foi possível carregar as configurações de retenção",
+    "hint": "Estes valores vêm da configuração do servidor (RETENTION_*). Substituições por tenant ainda não estão disponíveis.",
+    "fields": {
+      "payloadSnapshotsDays": "Snapshots de payload (dias)",
+      "attemptMetadataDays": "Metadados de tentativa (dias)",
+      "runSummaryDays": "Resumos de execução (dias)",
+      "auditLogsDays": "Logs de auditoria (dias)",
+      "apiIdempotencyHours": "Chaves de idempotência da API (horas)",
+      "systemHeartbeatDays": "Heartbeats do sistema (dias)"
     }
   },
   "saved": "Configurações salvas"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 
@@ -7,13 +7,17 @@ import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
+import { ApiError } from '@/services/api'
 import api from '@/services/api'
-import type { TaskRun } from '@/services/types'
+import type { RunState, TaskRun } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
 
-const { locale } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 const tenant = useTenantStore()
+
+const actionError = ref<string | null>(null)
+const actionLoading = ref<string | null>(null)
 
 const taskIdFilter = computed(() => {
   const raw = route.query.task_id
@@ -66,6 +70,48 @@ function formatDate(value?: string | null): string {
 function displayTime(run: TaskRun): string {
   return formatDate(run.started_at || run.created_at)
 }
+
+function canCancel(state: RunState | string): boolean {
+  return state === 'pending' || state === 'running' || state === 'retry_wait'
+}
+
+function canRetry(state: RunState | string): boolean {
+  return state === 'dead' || state === 'retry_wait'
+}
+
+async function onCancel(run: TaskRun): Promise<void> {
+  if (!confirm(t('runs.list.cancelConfirm'))) {
+    return
+  }
+  actionLoading.value = `cancel:${run.id}`
+  actionError.value = null
+  try {
+    await api.post(tenant.tenantPath(`/task-runs/${run.id}/cancel`))
+    await reload()
+  } catch (err) {
+    actionError.value =
+      err instanceof ApiError ? err.message : t('runs.actions.error')
+  } finally {
+    actionLoading.value = null
+  }
+}
+
+async function onRetry(run: TaskRun): Promise<void> {
+  if (!confirm(t('runs.list.retryConfirm'))) {
+    return
+  }
+  actionLoading.value = `retry:${run.id}`
+  actionError.value = null
+  try {
+    await api.post(tenant.tenantPath(`/task-runs/${run.id}/retry`))
+    await reload()
+  } catch (err) {
+    actionError.value =
+      err instanceof ApiError ? err.message : t('runs.actions.error')
+  } finally {
+    actionLoading.value = null
+  }
+}
 </script>
 
 <template>
@@ -96,6 +142,14 @@ function displayTime(run: TaskRun): string {
       <RouterLink to="/runs" class="text-violet-600 hover:underline">
         {{ $t('runs.clearFilter') }}
       </RouterLink>
+    </p>
+
+    <p
+      v-if="actionError"
+      class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
+      role="alert"
+    >
+      {{ actionError }}
     </p>
 
     <LoadingState v-if="loading" />
@@ -156,12 +210,32 @@ function displayTime(run: TaskRun): string {
               {{ displayTime(run) }}
             </td>
             <td class="px-4 py-3 text-right text-sm">
-              <RouterLink
-                :to="`/runs/${run.id}`"
-                class="text-violet-600 hover:underline"
-              >
-                {{ $t('runs.view') }}
-              </RouterLink>
+              <div class="flex flex-wrap items-center justify-end gap-3">
+                <button
+                  v-if="canCancel(run.run_state)"
+                  type="button"
+                  class="text-gray-700 hover:underline disabled:opacity-60"
+                  :disabled="actionLoading !== null"
+                  @click="onCancel(run)"
+                >
+                  {{ $t('runs.actions.cancel') }}
+                </button>
+                <button
+                  v-if="canRetry(run.run_state)"
+                  type="button"
+                  class="text-violet-600 hover:underline disabled:opacity-60"
+                  :disabled="actionLoading !== null"
+                  @click="onRetry(run)"
+                >
+                  {{ $t('runs.actions.retry') }}
+                </button>
+                <RouterLink
+                  :to="`/runs/${run.id}`"
+                  class="text-violet-600 hover:underline"
+                >
+                  {{ $t('runs.view') }}
+                </RouterLink>
+              </div>
             </td>
           </tr>
         </tbody>

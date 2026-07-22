@@ -83,6 +83,10 @@ async function onSubmit(): Promise<void> {
     return
   }
 
+  if (rotatingId.value && !confirm(t('secrets.rotateConfirm'))) {
+    return
+  }
+
   submitting.value = true
   formError.value = null
 
@@ -250,6 +254,9 @@ function dismissPlaintext(): void {
         }}</span>
         <p class="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-600 dark:border-gray-700">
           {{ form.name }}
+        </p>
+        <p class="mt-2 text-xs text-gray-500">
+          {{ $t('secrets.rotateHint') }}
         </p>
       </div>
 

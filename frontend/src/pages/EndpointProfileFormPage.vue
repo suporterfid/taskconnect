@@ -371,7 +371,7 @@ onMounted(async () => {
           <input
             v-model="form.auth_header_name"
             class="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm"
-            placeholder="Authorization"
+            :placeholder="$t('endpointProfiles.fields.authHeaderNamePlaceholder')"
           />
         </label>
 
@@ -382,7 +382,7 @@ onMounted(async () => {
           <input
             v-model="form.auth_query_param"
             class="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm"
-            placeholder="access_token"
+            :placeholder="$t('endpointProfiles.fields.authQueryParamPlaceholder')"
           />
         </label>
 

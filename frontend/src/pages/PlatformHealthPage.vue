@@ -8,7 +8,7 @@ import { useAsyncData } from '@/composables/useAsyncData'
 import api from '@/services/api'
 import type { PlatformHealth } from '@/services/types'
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 
 const { data, loading, error, reload } = useAsyncData(async () => {
   // PlatformHealthController returns a flat JSON object (not wrapped in `data`).
@@ -28,6 +28,16 @@ function formatDate(value?: string | null): string {
   } catch {
     return value
   }
+}
+
+function staleLabel(stale?: boolean): string {
+  if (stale === true) {
+    return t('settings.platformHealth.fields.staleYes')
+  }
+  if (stale === false) {
+    return t('settings.platformHealth.fields.staleNo')
+  }
+  return '—'
 }
 </script>
 
@@ -86,6 +96,36 @@ function formatDate(value?: string | null): string {
         </div>
         <div>
           <dt class="text-sm text-gray-500">
+            {{ $t('settings.platformHealth.fields.maintenance') }}
+          </dt>
+          <dd class="mt-1 text-sm">
+            {{ formatDate(data.maintenance_last_seen_at) }}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-gray-500">
+            {{ $t('settings.platformHealth.fields.schedulerStale') }}
+          </dt>
+          <dd
+            class="mt-1 text-sm font-medium"
+            :class="data.scheduler_stale ? 'text-amber-700 dark:text-amber-400' : ''"
+          >
+            {{ staleLabel(data.scheduler_stale) }}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-gray-500">
+            {{ $t('settings.platformHealth.fields.retryExecutorStale') }}
+          </dt>
+          <dd
+            class="mt-1 text-sm font-medium"
+            :class="data.retry_executor_stale ? 'text-amber-700 dark:text-amber-400' : ''"
+          >
+            {{ staleLabel(data.retry_executor_stale) }}
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-gray-500">
             {{ $t('settings.platformHealth.fields.staleClaims') }}
           </dt>
           <dd class="mt-1 text-sm font-medium">{{ data.stale_claims }}</dd>
@@ -97,6 +137,62 @@ function formatDate(value?: string | null): string {
           <dd class="mt-1 text-sm font-medium">{{ data.pending_runs }}</dd>
         </div>
       </dl>
+
+      <section v-if="data.retention" class="mt-6">
+        <h2 class="mb-3 text-lg font-medium">
+          {{ $t('settings.platformHealth.fields.retention') }}
+        </h2>
+        <dl class="grid gap-4 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 sm:grid-cols-2">
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.payloadSnapshotsDays') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ data.retention.payload_snapshots_days }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.attemptMetadataDays') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ data.retention.attempt_metadata_days }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.runSummaryDays') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ data.retention.run_summary_days }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.auditLogsDays') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ data.retention.audit_logs_days }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.apiIdempotencyHours') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ data.retention.api_idempotency_hours }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-sm text-gray-500">
+              {{ $t('settings.retention.fields.systemHeartbeatDays') }}
+            </dt>
+            <dd class="mt-1 text-sm font-medium">
+              {{ data.retention.system_heartbeat_days }}
+            </dd>
+          </div>
+        </dl>
+      </section>
     </template>
   </div>
 </template>

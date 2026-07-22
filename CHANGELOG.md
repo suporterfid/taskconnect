@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Wizard query-params editor + task detail display
+- Run list cancel/retry actions
+- Platform health: maintenance heartbeat, stale execute/retry degrade, retention summary
+- Read-only retention defaults API/UI (`GET /platform/retention`) + deployment docs
+- Secret rotate confirmation; API key permission labels; 429 i18n mapping
 - Bulk task pause/resume API + multi-select task list actions
 - Task list `schedule_kind` filter
 - User preference `failure_emails_enabled` (Settings → Notifications) honored by FailureNotifier

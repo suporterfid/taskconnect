@@ -45,6 +45,10 @@
     "retry": "Retry now",
     "error": "Unable to perform that action"
   },
+  "list": {
+    "cancelConfirm": "Cancel this run? It will stop and will not continue.",
+    "retryConfirm": "Retry this run now? A new pending attempt will be created."
+  },
   "status": {
     "pending": "Pending",
     "running": "Running",

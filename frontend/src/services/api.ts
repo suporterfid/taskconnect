@@ -60,13 +60,18 @@ export function parseErrorEnvelope(error: AxiosError): ApiError {
 
   if (isRecord(data) && isRecord(data.error)) {
     const body = data.error as unknown as ApiErrorBody
+    const code = typeof body.code === 'string' ? body.code : undefined
+    const tooManyRequests =
+      status === 429 || code === 'too_many_requests'
     return new ApiError(
-      typeof body.message === 'string' && body.message
-        ? body.message
-        : i18n.global.t('common.errors.requestFailed'),
+      tooManyRequests
+        ? i18n.global.t('common.errors.tooManyRequests')
+        : typeof body.message === 'string' && body.message
+          ? body.message
+          : i18n.global.t('common.errors.requestFailed'),
       status,
       {
-        code: typeof body.code === 'string' ? body.code : undefined,
+        code,
         errors: asStringRecord(body.details),
         requestId:
           typeof body.request_id === 'string'
@@ -78,12 +83,27 @@ export function parseErrorEnvelope(error: AxiosError): ApiError {
 
   // Legacy / unexpected flat shapes
   if (isRecord(data) && typeof data.message === 'string') {
-    return new ApiError(data.message, status, {
-      code: typeof data.code === 'string' ? data.code : undefined,
-      errors: asStringRecord(data.errors ?? data.details),
-      requestId:
-        (typeof data.request_id === 'string' ? data.request_id : undefined) ??
-        headerRequestId,
+    const code = typeof data.code === 'string' ? data.code : undefined
+    const tooManyRequests =
+      status === 429 || code === 'too_many_requests'
+    return new ApiError(
+      tooManyRequests
+        ? i18n.global.t('common.errors.tooManyRequests')
+        : data.message,
+      status,
+      {
+        code,
+        errors: asStringRecord(data.errors ?? data.details),
+        requestId:
+          (typeof data.request_id === 'string' ? data.request_id : undefined) ??
+          headerRequestId,
+      },
+    )
+  }
+
+  if (status === 429) {
+    return new ApiError(i18n.global.t('common.errors.tooManyRequests'), status, {
+      requestId: headerRequestId,
     })
   }
 
