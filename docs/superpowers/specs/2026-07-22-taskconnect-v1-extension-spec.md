@@ -5,6 +5,7 @@
 - **Status:** Draft for implementation
 - **Audience:** Cursor coding agents working in `suporterfid/taskconnect`
 - **Relationship to base spec:** This document is **additive** to `docs/http-task-scheduler-spec.md` (the product/protocol authority). Where this document and the base spec conflict on existing v0 behavior, **the base spec wins**. This document only adds new capabilities and constrains how they are built.
+- **API contract mapping:** §6.1 JSON and flattened `/api/tasks` paths are illustrative. The shipped v0-compatible shapes and field aliases are documented in `docs/architecture/api-contract-v1.md` (do not break clients by renaming without a versioned migration).
 - **Companion spec:** `grandpasson-spec-v1-extension.md`. TaskConnect authenticates via GrandpaSSOn and depends on scopes defined there (`tasks:callback`, and a new `tasks:write` — see §8 and §12/Q1).
 - **Primary consumer:** the Obsidian-like notes/knowledge app, which registers jobs (document conversion, website crawl, indexing/embedding, publish builds, note-driven reminders) and receives TaskConnect's callbacks.
 
