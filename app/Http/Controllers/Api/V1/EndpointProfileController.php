@@ -74,7 +74,11 @@ class EndpointProfileController extends Controller
             resourceType: 'endpoint_profile',
             resourceId: $profile->public_id,
             tenantId: $tenant->id,
-            summary: ['name' => $profile->name, 'base_url' => $profile->base_url],
+            summary: [
+                'name' => $profile->name,
+                'base_url' => $profile->base_url,
+                'verify_tls' => $profile->verify_tls,
+            ],
         );
 
         return response()->json([

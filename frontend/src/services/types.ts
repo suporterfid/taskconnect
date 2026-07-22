@@ -23,6 +23,7 @@ export interface PaginatedResponse<T> {
 export interface UserPreferences {
   locale?: string
   timezone?: string
+  failure_emails_enabled?: boolean
 }
 
 export interface AuditLogActor {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
@@ -26,6 +26,7 @@ const loading = ref(Boolean(props.id))
 const submitting = ref(false)
 const error = ref<string | null>(null)
 const secrets = ref<SecretSummary[]>([])
+const tlsConfirm = ref(false)
 
 const methods: HttpMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 const authModes: AuthMode[] = [
@@ -69,6 +70,18 @@ const showAuthHeader = computed(
     form.auth_mode === 'basic',
 )
 const showAuthQuery = computed(() => form.auth_mode === 'query_token')
+const canSubmit = computed(
+  () => form.verify_tls || tlsConfirm.value,
+)
+
+watch(
+  () => form.verify_tls,
+  (enabled) => {
+    if (enabled) {
+      tlsConfirm.value = false
+    }
+  },
+)
 
 function addHeader(): void {
   form.headers.push({ key: '', value: '' })
@@ -108,6 +121,7 @@ function hydrate(profile: EndpointProfile): void {
   form.verify_tls = profile.verify_tls
   form.allowed_path_prefix = profile.allowed_path_prefix ?? ''
   form.enabled = profile.enabled
+  tlsConfirm.value = false
 }
 
 function buildPayload(): EndpointProfilePayload {
@@ -156,6 +170,10 @@ async function loadProfile(): Promise<void> {
 }
 
 async function onSubmit(): Promise<void> {
+  if (!canSubmit.value) {
+    return
+  }
+
   submitting.value = true
   error.value = null
 
@@ -435,6 +453,25 @@ onMounted(async () => {
         </label>
       </div>
 
+      <div
+        v-if="!form.verify_tls"
+        class="space-y-3 rounded-md border border-amber-300 bg-amber-50 p-4 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100"
+        role="alert"
+      >
+        <p class="text-sm">
+          {{ $t('endpointProfiles.tlsWarning') }}
+        </p>
+        <label class="inline-flex items-start gap-2 text-sm">
+          <input
+            v-model="tlsConfirm"
+            type="checkbox"
+            class="mt-0.5 rounded"
+            required
+          />
+          <span>{{ $t('endpointProfiles.tlsConfirm') }}</span>
+        </label>
+      </div>
+
       <div class="flex justify-end gap-3 border-t border-gray-100 pt-4">
         <RouterLink
           :to="isEdit && id ? `/endpoint-profiles/${id}` : '/endpoint-profiles'"
@@ -444,7 +481,7 @@ onMounted(async () => {
         </RouterLink>
         <button
           type="submit"
-          :disabled="submitting"
+          :disabled="submitting || !canSubmit"
           class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
         >
           {{

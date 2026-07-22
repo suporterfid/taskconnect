@@ -19,6 +19,8 @@
   "archiveError": "Unable to archive endpoint profile",
   "testError": "Connection test failed",
   "needsTenant": "Select a tenant and environment before managing endpoint profiles.",
+  "tlsWarning": "TLS certificate verification is disabled. Connections may be vulnerable to man-in-the-middle attacks. Only use this for trusted internal endpoints.",
+  "tlsConfirm": "I understand TLS verification is disabled",
   "fields": {
     "name": "Name",
     "description": "Description",

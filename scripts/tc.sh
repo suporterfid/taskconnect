@@ -160,6 +160,7 @@ cmd_release() {
   mkdir -p dist
   docker build -f docker/release/Dockerfile --target export --output "type=local,dest=./dist" .
   echo "Release artifact written to dist/"
+  bash "$ROOT_DIR/scripts/validate-release.sh" "$ROOT_DIR/dist"
 }
 
 cmd_deploy() {

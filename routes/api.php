@@ -77,6 +77,8 @@ Route::prefix('v1')->group(function (): void {
             Route::get('tenants/{tenantId}/environments/{environmentId}/tasks', [TaskController::class, 'index']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks', [TaskController::class, 'store'])
                 ->middleware('idempotency');
+            Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/bulk-pause', [TaskController::class, 'bulkPause']);
+            Route::post('tenants/{tenantId}/environments/{environmentId}/tasks/bulk-resume', [TaskController::class, 'bulkResume']);
             Route::get('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}', [TaskController::class, 'show']);
             Route::patch('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}', [TaskController::class, 'update']);
             Route::delete('tenants/{tenantId}/environments/{environmentId}/tasks/{taskId}', [TaskController::class, 'destroy']);

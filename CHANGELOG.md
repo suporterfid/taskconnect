@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Bulk task pause/resume API + multi-select task list actions
+- Task list `schedule_kind` filter
+- User preference `failure_emails_enabled` (Settings → Notifications) honored by FailureNotifier
+- Endpoint profile TLS-off warning/confirm in the SPA; audit summaries include `verify_tls`
+- `scripts/validate-release.sh` run after `tc release`
 - Task wizard expansion: headers editor, separate Retry/Test steps, sync profile test, review security warnings
 - Task list search, status/last-run filters, and sortable columns (`q`, `definition_status`, `last_run_state`, `sort`, `order`)
 - Login-page axe-core a11y smoke (Vitest) and global `:focus-visible` outline

@@ -118,6 +118,16 @@
     "searchPlaceholder": "Search by name…",
     "anyStatus": "Any status",
     "anyRunState": "Any last run state",
+    "scheduleKind": "Schedule type",
+    "anyScheduleKind": "Any schedule type",
     "resultCount": "{count} tasks"
+  },
+  "bulk": {
+    "selectAll": "Select all tasks",
+    "selectRow": "Select {name}",
+    "selected": "{count} selected",
+    "pause": "Pause selected",
+    "resume": "Resume selected",
+    "error": "Unable to update selected tasks"
   }
 }

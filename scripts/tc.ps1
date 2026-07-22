@@ -206,6 +206,11 @@ function Invoke-Release {
         throw "Release build failed with exit code $LASTEXITCODE"
     }
     Write-Output 'Release artifact written to dist/'
+    $dist = (Resolve-Path (Join-Path $PSScriptRoot '..\dist')).Path
+    bash "$PSScriptRoot/validate-release.sh" $dist
+    if ($LASTEXITCODE -ne 0) {
+        throw "Release validation failed with exit code $LASTEXITCODE"
+    }
 }
 
 function Invoke-Deploy {

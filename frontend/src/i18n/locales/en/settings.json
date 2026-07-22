@@ -15,6 +15,13 @@
     "label": "Timezone",
     "save": "Save timezone"
   },
+  "notifications": {
+    "title": "Notifications",
+    "hint": "Choose which email alerts you receive for this account.",
+    "failureEmails": "Email me when a task run fails permanently",
+    "failureEmailsHint": "Sends a message when a run reaches a dead state after retries are exhausted.",
+    "save": "Save notification preferences"
+  },
   "saveError": "Unable to save preferences",
   "outboundAllowHosts": {
     "title": "Outbound host allowlist",
