@@ -19,6 +19,11 @@ class EnvironmentResource extends JsonResource
             'workspace_id' => $this->public_id,
             'name' => $this->name,
             'slug' => $this->slug,
+            'notifications' => [
+                'dead_run_email_enabled' => (bool) ($this->dead_run_email_enabled ?? true),
+                'dead_run_webhook_enabled' => (bool) ($this->dead_run_webhook_enabled ?? false),
+                'dead_run_webhook_url' => $this->dead_run_webhook_url,
+            ],
             'archived_at' => $this->archived_at?->utc()->toIso8601String(),
             'created_at' => $this->created_at?->utc()->toIso8601String(),
             'updated_at' => $this->updated_at?->utc()->toIso8601String(),

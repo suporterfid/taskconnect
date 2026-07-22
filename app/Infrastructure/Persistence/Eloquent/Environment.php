@@ -19,12 +19,17 @@ class Environment extends Model
         'tenant_id',
         'name',
         'slug',
+        'dead_run_email_enabled',
+        'dead_run_webhook_enabled',
+        'dead_run_webhook_url',
         'archived_at',
     ];
 
     protected function casts(): array
     {
         return [
+            'dead_run_email_enabled' => 'boolean',
+            'dead_run_webhook_enabled' => 'boolean',
             'archived_at' => 'datetime',
         ];
     }

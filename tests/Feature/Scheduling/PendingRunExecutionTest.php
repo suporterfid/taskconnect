@@ -123,7 +123,7 @@ class PendingRunExecutionTest extends TestCase
         $this->bindFailingTransport();
 
         $run = $this->app->make(TaskLifecycleService::class)->queueManualRun($task);
-        $claimed = $this->app->make(PendingRunClaimer::class)->claim(10);
+$claimed = $this->app->make(PendingRunClaimer::class)->claim(10);
         $this->assertCount(1, $claimed);
 
         $this->app->make(AttemptExecutor::class)->execute($claimed[0]->attempt);
@@ -134,6 +134,85 @@ class PendingRunExecutionTest extends TestCase
         Mail::assertSent(TaskRunFailedMail::class, function (TaskRunFailedMail $mail) use ($run): bool {
             return $mail->run->is($run);
         });
+    }
+
+    public function test_workspace_can_disable_dead_run_email_alerts(): void
+    {
+        Mail::fake();
+
+        $task = $this->createActiveTaskDueAt('2026-07-18T12:30:00Z');
+        $task->retry_policy_json = (new RetryPolicy(maxAttempts: 1, delaySeconds: []))->toArray();
+        $task->save();
+
+        $environment = $task->environment;
+        $environment->dead_run_email_enabled = false;
+        $environment->save();
+
+        $this->bindFailingTransport();
+
+        $run = $this->app->make(TaskLifecycleService::class)->queueManualRun($task);
+        $claimed = $this->app->make(PendingRunClaimer::class)->claim(10);
+        $this->app->make(AttemptExecutor::class)->execute($claimed[0]->attempt);
+
+        $run->refresh();
+        $this->assertSame(RunState::Dead, $run->run_state);
+        Mail::assertNothingSent();
+    }
+
+    public function test_dead_run_webhook_fires_when_enabled(): void
+    {
+        Mail::fake();
+
+        $task = $this->createActiveTaskDueAt('2026-07-18T12:30:00Z');
+        $task->retry_policy_json = (new RetryPolicy(maxAttempts: 1, delaySeconds: []))->toArray();
+        $task->save();
+
+        $environment = $task->environment;
+        $environment->dead_run_webhook_enabled = true;
+        $environment->dead_run_webhook_url = 'http://receiver:8080/dlq-hook';
+        $environment->save();
+
+        $transport = new MockPinnedHttpTransport(
+            new PinnedHttpResponse(
+                statusCode: 500,
+                headers: [],
+                bodyTruncated: 'fail',
+                bodySha256: hash('sha256', 'fail'),
+                bodyTruncatedFlag: false,
+                finalUrl: 'http://receiver:8080/hook',
+                redirectCount: 0,
+            ),
+            new PinnedHttpResponse(
+                statusCode: 204,
+                headers: [],
+                bodyTruncated: '',
+                bodySha256: hash('sha256', ''),
+                bodyTruncatedFlag: false,
+                finalUrl: 'http://receiver:8080/dlq-hook',
+                redirectCount: 0,
+            ),
+        );
+        $this->app->forgetInstance(HttpDeliveryService::class);
+        $this->app->forgetInstance(AttemptExecutor::class);
+        $this->app->forgetInstance(\App\Application\Notifications\DeadRunWebhookSender::class);
+        $this->app->forgetInstance(\App\Application\Notifications\FailureNotifier::class);
+        $this->app->instance(PinnedHttpTransport::class, $transport);
+
+        $run = $this->app->make(TaskLifecycleService::class)->queueManualRun($task);
+        $claimed = $this->app->make(PendingRunClaimer::class)->claim(10);
+        $this->app->make(AttemptExecutor::class)->execute($claimed[0]->attempt);
+
+        $run->refresh();
+        $this->assertSame(RunState::Dead, $run->run_state);
+        $this->assertGreaterThanOrEqual(2, count($transport->requests));
+        $webhook = $transport->requests[1] ?? $transport->requests[0];
+        $this->assertSame('POST', $webhook->method);
+        $this->assertStringContainsString('/dlq-hook', $webhook->endpoint->url);
+
+        $this->assertDatabaseHas('audit_logs', [
+            'action' => 'dlq.alert.webhook_sent',
+            'resource_id' => $run->public_id,
+        ]);
     }
 
     public function test_pending_claimer_does_not_double_claim(): void
