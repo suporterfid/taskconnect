@@ -24,6 +24,17 @@ final readonly class IntrospectionResult
 
     public function audienceIncludes(string $workspacePublicId): bool
     {
-        return in_array($workspacePublicId, $this->audiences, true);
+        foreach ($this->audiences as $audience) {
+            if ($audience === $workspacePublicId) {
+                return true;
+            }
+
+            // GrandpaSSOn docs often use workspace/<id>; accept that form too.
+            if ($audience === 'workspace/'.$workspacePublicId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

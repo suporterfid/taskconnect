@@ -4,7 +4,7 @@ Canonical defaults from the v1 Extension spec. Product overrides should update t
 
 | # | Default | Status | Where enforced |
 |---|---------|--------|----------------|
-| **Q1** | Add `tasks:write` to GrandpaSSOn; dual-mode inbound during migration | Applied | `config/grandpasson.php` (`write_scope`, inbound/outbound flags default **off**); inbound introspection in `AuthenticateApiKeyOrSanctum` / policies; cross-repo follow-up [#26](https://github.com/suporterfid/taskconnect/issues/26) |
+| **Q1** | Add `tasks:write` to GrandpaSSOn; dual-mode inbound during migration | Applied | `config/grandpasson.php` (`write_scope`, inbound/outbound flags default **off**); inbound introspection in `AuthenticateApiKeyOrSanctum` / policies; broker follow-up [grandpasson#55](https://github.com/suporterfid/grandpasson/issues/55) (closes TaskConnect [#26](https://github.com/suporterfid/taskconnect/issues/26)) |
 | **Q2** | Formalize delayed `run_at`; recurring = structured kinds (+ optional cron) | Applied | `docs/architecture/delayed-schedules.md`; top-level `run_at` → once schedule; `ScheduleKind::Cron` |
 | **Q3** | Prefer notes-app crawl; ship `public-crawl` profile | Applied | Profile in `config/outbound.php` / egress resolver; only `site.crawl` type defaults to it — not used by convert/reminder/publish (`docs/architecture/egress-profiles.md`) |
 | **Q4** | Global 4; convert 2; crawl 1; index 2; reminder 4 | Applied | `config/task_types.php` + `.env.example` `TASK_TYPE_*` |

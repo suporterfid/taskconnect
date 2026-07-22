@@ -92,4 +92,37 @@ class GrandpaSsonInboundAuthTest extends TestCase
 
         $response->assertCreated();
     }
+
+    public function test_token_with_workspace_prefixed_aud_can_create_task(): void
+    {
+        config([
+            'grandpasson.inbound_enabled' => true,
+            'grandpasson.write_scope' => 'tasks:write',
+        ]);
+
+        $tenant = Tenant::factory()->create();
+        $environment = Environment::factory()->create(['tenant_id' => $tenant->id]);
+
+        $fake = (new FakeGrandpaSsonIntrospectionClient)->withToken('opaque-prefixed', new IntrospectionResult(
+            active: true,
+            scopes: ['tasks:write'],
+            audiences: ['workspace/'.$environment->public_id],
+        ));
+        $this->app->instance(IntrospectionClientInterface::class, $fake);
+
+        $response = $this->withHeader('Authorization', 'Bearer opaque-prefixed')
+            ->withHeader('Idempotency-Key', 'idem-gss-3')
+            ->postJson("/api/v1/tenants/{$tenant->public_id}/environments/{$environment->public_id}/tasks", [
+                'name' => 'from-gss-prefixed',
+                'method' => 'POST',
+                'url_or_path' => 'http://receiver/hook',
+                'schedule' => [
+                    'kind' => 'every_n_minutes',
+                    'timezone' => 'UTC',
+                    'interval_minutes' => 15,
+                ],
+            ]);
+
+        $response->assertCreated();
+    }
 }

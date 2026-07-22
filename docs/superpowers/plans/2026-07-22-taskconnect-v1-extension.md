@@ -99,7 +99,7 @@ Canonical tracking (created 2026-07-22):
 | [#23](https://github.com/suporterfid/taskconnect/issues/23) | P0/R7 Egress profiles |
 | [#24](https://github.com/suporterfid/taskconnect/issues/24) | P0/R8 GrandpaSSOn auth |
 | [#25](https://github.com/suporterfid/taskconnect/issues/25) | P0/R9 Secret / release hygiene |
-| [#26](https://github.com/suporterfid/taskconnect/issues/26) | Cross-repo GrandpaSSOn `tasks:write` |
+| [#26](https://github.com/suporterfid/taskconnect/issues/26) | Cross-repo GrandpaSSOn `tasks:write` — **closed** (handed to [grandpasson#55](https://github.com/suporterfid/grandpasson/issues/55)) |
 | [#27](https://github.com/suporterfid/taskconnect/issues/27) | Epic: P1 (after P0 review) — **closed** (R10–R15 done) |
 | [#28](https://github.com/suporterfid/taskconnect/issues/28)–[#33](https://github.com/suporterfid/taskconnect/issues/33) | P1 R10–R15 |
 | [#34](https://github.com/suporterfid/taskconnect/issues/34) | Epic: P2 R16–R18 — **closed** (R16–R18 done) |
