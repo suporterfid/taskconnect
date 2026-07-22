@@ -32,10 +32,28 @@ return [
     'coalesce_window_seconds' => (int) env('SCHEDULER_COALESCE_WINDOW_SECONDS', 60),
 
     /**
-     * Per-workspace picks per fairness round when interleaving due work (R12).
-     * Weight 1 = classic round-robin across workspaces.
+     * Per-workspace quantum per fairness round (R12/R17).
+     * Weight 1 = classic one-pick (or one cost unit) per workspace per round.
      */
     'fairness_workspace_weight' => (int) env('SCHEDULER_FAIRNESS_WORKSPACE_WEIGHT', 1),
+
+    /**
+     * Fairness algorithm (R17).
+     * - rr: each claimed item costs 1 (R12 weighted round-robin)
+     * - wfq: deficit round-robin; cost = max(1, task.weight)
+     */
+    'fairness_mode' => env('SCHEDULER_FAIRNESS_MODE', 'wfq'),
+
+    /**
+     * Claim-time priority preemption (R17). When set, tasks with priority >= this
+     * value may take up to priority_preemption_slots picks before normal fairness.
+     * Null/empty disables preemption. Does not cancel in-flight deliveries.
+     */
+    'priority_preemption_min' => ($preempt = env('SCHEDULER_PRIORITY_PREEMPTION_MIN')) === null || $preempt === ''
+        ? null
+        : (int) $preempt,
+
+    'priority_preemption_slots' => (int) env('SCHEDULER_PRIORITY_PREEMPTION_SLOTS', 1),
 
     /**
      * Submission API rate limit (R15). Fixed window per workspace; stored in MySQL
