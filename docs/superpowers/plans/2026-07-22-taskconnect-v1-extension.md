@@ -11,13 +11,12 @@ v0 schedules tenant/environment HTTP tasks with MySQL claim leases + cron. The k
 
 ## Scope boundary
 
-| In (this plan) | Out until §11 review |
-|----------------|----------------------|
-| P0 R1–R9 in order | P1 R10–R15 (pipelines, coalesce, fairness, DLQ alerts, UI, submit rate limits) |
-| Docs + issues + migrations that keep v0 green | P2 R16–R18 |
-| Environment ↔ Workspace mapping decision | In-process convert/crawl/embed (N1) |
+| In (this plan) | Out until later phases |
+|----------------|-------------------------|
+| P0 R1–R9; P1 R10+ as issues land | Remaining P1/P2 until mirrored by issues |
+| Docs + issues + migrations that keep v0 green | In-process convert/crawl/embed (N1) |
 
-**Stop line (§11):** When R1–R9 have tests green and `tc release` clean, **stop and request review** before P1.
+**Original stop line (§11):** R1–R9 complete — **done**. P1 proceeds via GitHub issues (#28+).
 
 ## Architecture decisions
 
@@ -61,6 +60,7 @@ Implement **in order R1→R9**. Do not start R(n+1) until R(n) acceptance tests 
 | R7 | **Done** (#23) | Named egress profiles on DNS-pinned SSRF; `docs/architecture/egress-profiles.md` |
 | R8 | **Done** (#24) | GrandpaSSOn outbound bearer+HMAC + inbound introspection (flags off by default); `docs/architecture/grandpasson-auth.md` |
 | R9 | **Done** (#25) | Release zip secret scan + `.env.example` v1 placeholders; `docs/architecture/secret-hygiene.md` |
+| R10 | **Done** (#28) | Pipeline templates + instance API + settlement; `docs/architecture/pipelines.md` |
 
 ## Open questions (defaults applied)
 

@@ -45,7 +45,10 @@ abstract class TestCase extends BaseTestCase
     {
         $path = parse_url($uri, PHP_URL_PATH) ?? $uri;
 
-        return (bool) preg_match('#/tasks(?:/[^/]+/run-now)?$#', $path);
+        return (bool) preg_match(
+            '#/(?:tasks(?:/[^/]+/run-now)?|pipelines/[^/]+/instances)$#',
+            $path,
+        );
     }
 
     /**
