@@ -3,6 +3,7 @@
 namespace App\Application\Audit;
 
 use App\Infrastructure\Persistence\Eloquent\AuditLog;
+use App\Infrastructure\Persistence\Eloquent\Environment;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,12 +24,14 @@ class AuditLogger
         string $resourceType,
         ?string $resourceId = null,
         ?int $tenantId = null,
+        ?int $environmentId = null,
         ?array $summary = null,
         ?Authenticatable $actor = null,
         ?string $requestId = null,
     ): AuditLog {
         return AuditLog::query()->create([
             'tenant_id' => $tenantId,
+            'environment_id' => $environmentId,
             'actor_user_id' => $actor?->getAuthIdentifier(),
             'action' => $action,
             'resource_type' => $resourceType,
@@ -44,13 +47,19 @@ class AuditLogger
         string $resourceType,
         ?string $resourceId = null,
         ?int $tenantId = null,
+        ?int $environmentId = null,
         ?array $summary = null,
     ): AuditLog {
+        $environment = $request->attributes->get('environment');
+        $resolvedEnvironmentId = $environmentId
+            ?? ($environment instanceof Environment ? $environment->id : null);
+
         return $this->log(
             action: $action,
             resourceType: $resourceType,
             resourceId: $resourceId,
             tenantId: $tenantId,
+            environmentId: $resolvedEnvironmentId,
             summary: $summary,
             actor: Auth::user(),
             requestId: $request->attributes->get('request_id'),

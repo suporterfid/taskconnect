@@ -15,6 +15,8 @@ class EndpointProfileResource extends JsonResource
     {
         return [
             'id' => $this->public_id,
+            /** Environment public id — v1 Extension workspace alias (R1). */
+            'workspace_id' => $this->environment?->public_id,
             'name' => $this->name,
             'description' => $this->description,
             'base_url' => $this->base_url,

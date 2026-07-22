@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- v1 Extension R1: `workspace_id` API alias for Environment; audit logs store `environment_id` with `?workspace_id=` filter (`docs/architecture/workspace.md`)
 ## [1.2.0] — 2026-07-22
 
 ### Added

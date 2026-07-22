@@ -34,7 +34,7 @@ class TaskRunController extends Controller
             ->where('task_runs.environment_id', $environment->id)
             ->orderByDesc('task_runs.created_at')
             ->orderByDesc('task_runs.id')
-            ->with('task');
+            ->with(['task', 'environment']);
 
         if (is_string($taskPublicId) && $taskPublicId !== '') {
             $query->whereHas('task', function ($builder) use ($taskPublicId): void {
@@ -124,7 +124,7 @@ class TaskRunController extends Controller
 
         $this->runLifecycle->manualRetry($run);
 
-        return response()->json(['data' => new TaskRunResource($run->fresh(['task', 'attempts']))], 202);
+        return response()->json(['data' => new TaskRunResource($run->fresh(['task', 'attempts', 'environment']))], 202);
     }
 
     private function resolveRun(Request $request): TaskRun
@@ -136,7 +136,7 @@ class TaskRunController extends Controller
             ->where('public_id', $request->route('runId'))
             ->where('tenant_id', $tenant->id)
             ->where('environment_id', $environment->id)
-            ->with(['task', 'attempts'])
+            ->with(['task', 'attempts', 'environment'])
             ->firstOrFail();
 
         $this->authorize('view', [$run, $tenant]);

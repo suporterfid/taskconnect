@@ -31,6 +31,7 @@ class SecretController extends Controller
         $this->authorize('viewAny', [Secret::class, $tenant]);
 
         $secrets = Secret::query()
+            ->with('environment')
             ->where('tenant_id', $tenant->id)
             ->where('environment_id', $environment->id)
             ->notArchived()
@@ -157,6 +158,7 @@ class SecretController extends Controller
     private function findSecret(int $tenantId, int $environmentId, string $secretId): Secret
     {
         return Secret::query()
+            ->with('environment')
             ->where('public_id', $secretId)
             ->where('tenant_id', $tenantId)
             ->where('environment_id', $environmentId)

@@ -53,6 +53,11 @@ class TaskRun extends Model
         return $this->belongsTo(Task::class);
     }
 
+    public function environment(): BelongsTo
+    {
+        return $this->belongsTo(Environment::class);
+    }
+
     public function attempts(): HasMany
     {
         return $this->hasMany(TaskRunAttempt::class)->orderBy('attempt_number');

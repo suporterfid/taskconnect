@@ -15,6 +15,8 @@ class EnvironmentResource extends JsonResource
     {
         return [
             'id' => $this->public_id,
+            /** Same as id — Environment is the v1 Extension workspace (R1). */
+            'workspace_id' => $this->public_id,
             'name' => $this->name,
             'slug' => $this->slug,
             'archived_at' => $this->archived_at?->utc()->toIso8601String(),

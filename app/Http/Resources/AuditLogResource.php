@@ -17,6 +17,8 @@ class AuditLogResource extends JsonResource
             'resource_type' => $this->resource_type,
             'resource_id' => $this->resource_id,
             'request_id' => $this->request_id,
+            /** Environment public id — v1 Extension workspace alias (R1). */
+            'workspace_id' => $this->environment?->public_id,
             'summary' => $this->summary_json,
             'actor' => $this->whenLoaded('actor', fn () => $this->actor === null ? null : [
                 'id' => $this->actor->public_id,

@@ -46,7 +46,7 @@ class TaskController extends Controller
             ->where('tasks.tenant_id', $tenant->id)
             ->where('tasks.environment_id', $environment->id)
             ->whereNull('tasks.archived_at')
-            ->with(['schedule', 'endpointProfile']);
+            ->with(['schedule', 'endpointProfile', 'environment']);
 
         if (! empty($validated['q'])) {
             $term = '%'.$validated['q'].'%';
@@ -307,6 +307,8 @@ class TaskController extends Controller
             ],
             'retry_policy.success_status_ranges.*.*' => ['integer', 'min:100', 'max:599'],
             'definition_status' => ['nullable', Rule::in(array_column(TaskDefinitionStatus::cases(), 'value'))],
+            // Optional body echo of workspace (environment public id); must match route context.
+            'workspace_id' => ['sometimes', 'nullable', 'string', Rule::in([$environment->public_id])],
         ]);
     }
 
@@ -396,7 +398,7 @@ class TaskController extends Controller
             ->where('public_id', $request->route('taskId'))
             ->where('tenant_id', $tenant->id)
             ->where('environment_id', $environment->id)
-            ->with(['schedule', 'endpointProfile'])
+            ->with(['schedule', 'endpointProfile', 'environment'])
             ->firstOrFail();
 
         $this->authorize('view', [$task, $tenant]);
