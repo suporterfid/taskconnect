@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Application\Audit\AuditLogger;
+use App\Application\Tasks\CoalesceService;
 use App\Application\Tasks\TaskLifecycleService;
 use App\Application\Tenancy\EnvironmentGuard;
 use App\Domain\Execution\Enums\TaskDefinitionStatus;
@@ -28,6 +29,7 @@ class TaskController extends Controller
         private readonly AuditLogger $auditLogger,
         private readonly EnvironmentGuard $environmentGuard,
         private readonly TaskTypeCatalog $taskTypeCatalog,
+        private readonly CoalesceService $coalesce,
     ) {}
 
     public function index(Request $request, string $tenantId, string $environmentId): JsonResponse
@@ -93,6 +95,19 @@ class TaskController extends Controller
         $schedule = ScheduleConfig::fromArray($validated['schedule']);
         $governance = $this->resolveGovernanceAttributes($validated);
 
+        $coalesceKey = isset($validated['coalesce_key']) && is_string($validated['coalesce_key'])
+            ? trim($validated['coalesce_key'])
+            : '';
+        if ($coalesceKey !== '') {
+            $existing = $this->coalesce->findWithinWindow($tenant, $environment, $coalesceKey);
+            if ($existing !== null) {
+                return response()->json([
+                    'data' => new TaskResource($existing->load(['schedule', 'endpointProfile', 'environment'])),
+                    'meta' => ['coalesced' => true],
+                ]);
+            }
+        }
+
         $task = $this->lifecycle->create([
             'tenant_id' => $tenant->id,
             'environment_id' => $environment->id,
@@ -105,6 +120,7 @@ class TaskController extends Controller
             'weight' => $governance['weight'],
             'timeout_ms' => $governance['timeout_ms'],
             'egress_profile' => $governance['egress_profile'],
+            'coalesce_key' => $coalesceKey !== '' ? mb_substr($coalesceKey, 0, 255) : null,
             'method' => strtoupper($validated['method']),
             'url_or_path' => $validated['url_or_path'] ?? $validated['path'] ?? $validated['url'],
             'headers_json' => $validated['headers'] ?? [],
@@ -117,7 +133,7 @@ class TaskController extends Controller
 
         $this->audit($request, $tenant, 'task.created', $task->public_id);
 
-        return response()->json(['data' => new TaskResource($task)], 201);
+        return response()->json(['data' => new TaskResource($task), 'meta' => ['coalesced' => false]], 201);
     }
 
     public function show(Request $request, string $tenantId, string $environmentId, string $taskId): JsonResponse
@@ -365,6 +381,7 @@ class TaskController extends Controller
             'weight' => ['sometimes', 'integer', 'min:1', 'max:100'],
             'timeout_ms' => ['sometimes', 'integer', 'min:1', 'max:300000'],
             'egress_profile' => ['sometimes', 'nullable', 'string', 'max:64'],
+            'coalesce_key' => ['sometimes', 'nullable', 'string', 'max:255'],
         ]);
     }
 

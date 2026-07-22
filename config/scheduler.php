@@ -18,4 +18,10 @@ return [
 
     'failure_emails_enabled' => (bool) env('SCHEDULER_FAILURE_EMAILS_ENABLED', true),
 
+    /**
+     * Coalesce / debounce window (R11). Submits with the same coalesce_key in a
+     * workspace within this many seconds reuse the first effective task.
+     */
+    'coalesce_window_seconds' => (int) env('SCHEDULER_COALESCE_WINDOW_SECONDS', 60),
+
 ];

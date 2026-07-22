@@ -10,7 +10,7 @@ Named DAG templates chain task types with `on_success` / `on_failure` edges and 
 document.convert  --on_success-->  kb.index  --on_success-->  publish.build
 ```
 
-(`publish.build` coalescing is R11; this release still materializes one publish node per successful index.)
+(`publish.build` coalescing is R11 — default key `pipeline:{template}:publish.build` within the coalesce window; see `docs/architecture/coalesce.md`.)
 
 ## API (workspace-scoped)
 

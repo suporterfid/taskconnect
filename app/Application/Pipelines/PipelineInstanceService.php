@@ -2,6 +2,7 @@
 
 namespace App\Application\Pipelines;
 
+use App\Application\Tasks\CoalesceService;
 use App\Domain\Execution\Enums\AttemptState;
 use App\Domain\Execution\Enums\RunState;
 use App\Domain\Execution\Enums\TaskDefinitionStatus;
@@ -30,6 +31,7 @@ final class PipelineInstanceService
         private readonly TaskTypeCatalog $taskTypes,
         private readonly IdempotencyKeyGenerator $idempotencyKeyGenerator,
         private readonly OccurrenceKeyGenerator $occurrenceKeyGenerator,
+        private readonly CoalesceService $coalesce,
     ) {
     }
 
@@ -114,6 +116,16 @@ final class PipelineInstanceService
             ));
         }
 
+        $coalesceKey = $this->resolveCoalesceKey($instance, $node, $delivery);
+        if ($coalesceKey !== null) {
+            $tenant = Tenant::query()->findOrFail($instance->tenant_id);
+            $environment = Environment::query()->findOrFail($instance->environment_id);
+            $existing = $this->coalesce->findWithinWindow($tenant, $environment, $coalesceKey);
+            if ($existing !== null) {
+                return $this->attachExistingTaskToNode($instance, $node, $existing);
+            }
+        }
+
         $body = $delivery['body'] ?? $delivery['body_template'] ?? null;
         $bodyTemplate = null;
         if ($body !== null) {
@@ -136,6 +148,7 @@ final class PipelineInstanceService
             'egress_profile' => array_key_exists('egress_profile', $delivery)
                 ? (string) $delivery['egress_profile']
                 : $governance['egress_profile'],
+            'coalesce_key' => $coalesceKey,
             'method' => $method,
             'url_or_path' => $url,
             'headers_json' => is_array($delivery['headers'] ?? null) ? $delivery['headers'] : [],
@@ -179,6 +192,74 @@ final class PipelineInstanceService
         $node->task_id = $task->id;
         $node->task_run_id = $run->id;
         $node->status = PipelineNodeStatus::Ready;
+        $node->save();
+
+        return $run->fresh(['attempts', 'task']);
+    }
+
+    /**
+     * @param  array<string, mixed>  $delivery
+     */
+    private function resolveCoalesceKey(
+        PipelineInstance $instance,
+        PipelineInstanceNode $node,
+        array $delivery,
+    ): ?string {
+        if (isset($delivery['coalesce_key']) && is_string($delivery['coalesce_key']) && trim($delivery['coalesce_key']) !== '') {
+            return mb_substr(trim($delivery['coalesce_key']), 0, 255);
+        }
+
+        if ($node->task_type === 'publish.build') {
+            return $this->coalesce->defaultPipelinePublishKey($instance->template_name);
+        }
+
+        return null;
+    }
+
+    private function attachExistingTaskToNode(
+        PipelineInstance $instance,
+        PipelineInstanceNode $node,
+        Task $existing,
+    ): TaskRun {
+        $run = TaskRun::query()
+            ->where('task_id', $existing->id)
+            ->orderByDesc('id')
+            ->first();
+
+        if ($run === null) {
+            $idempotencyKey = $this->idempotencyKeyGenerator->forManualRun(
+                sprintf('pipe:%s:%s:coalesce', $instance->public_id, $node->node_key),
+            );
+            $occurrenceKey = $this->occurrenceKeyGenerator->forManual($idempotencyKey);
+            $run = TaskRun::query()->create([
+                'tenant_id' => $instance->tenant_id,
+                'environment_id' => $instance->environment_id,
+                'task_id' => $existing->id,
+                'pipeline_instance_id' => $instance->id,
+                'pipeline_node_id' => $node->id,
+                'trigger_type' => TriggerType::Manual,
+                'scheduled_for' => null,
+                'occurrence_key' => $occurrenceKey,
+                'idempotency_key' => $idempotencyKey,
+                'run_state' => RunState::Pending,
+                'attempt_count' => 1,
+            ]);
+            TaskRunAttempt::query()->create([
+                'tenant_id' => $instance->tenant_id,
+                'environment_id' => $instance->environment_id,
+                'task_run_id' => $run->id,
+                'attempt_number' => 1,
+                'attempt_state' => AttemptState::Pending,
+            ]);
+        }
+
+        $node->task_id = $existing->id;
+        $node->task_run_id = $run->id;
+        $node->status = match ($run->run_state) {
+            RunState::Succeeded => PipelineNodeStatus::Succeeded,
+            RunState::Dead, RunState::Blocked, RunState::Cancelled => PipelineNodeStatus::Failed,
+            default => PipelineNodeStatus::Ready,
+        };
         $node->save();
 
         return $run->fresh(['attempts', 'task']);

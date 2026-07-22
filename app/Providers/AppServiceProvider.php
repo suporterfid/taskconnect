@@ -22,6 +22,7 @@ use App\Application\Scheduling\RetryClaimer;
 use App\Application\Scheduling\SchedulerCycleRunner;
 use App\Application\Scheduling\StaleClaimRecovery;
 use App\Application\Tenancy\EnvironmentGuard;
+use App\Application\Tasks\CoalesceService;
 use App\Application\Tasks\RunLifecycleService;
 use App\Application\Tasks\TaskLifecycleService;
 use App\Application\Tasks\TaskScheduleService;
@@ -91,6 +92,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(EnvironmentGuard::class);
         $this->app->singleton(TaskScheduleService::class);
         $this->app->singleton(TaskLifecycleService::class);
+        $this->app->singleton(CoalesceService::class);
         $this->app->singleton(RunLifecycleService::class);
     }
 

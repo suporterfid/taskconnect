@@ -73,6 +73,7 @@ class PipelineInstanceController extends Controller
             'nodes.*.body_template' => ['sometimes', 'nullable', 'string'],
             'nodes.*.content_type' => ['sometimes', 'nullable', 'string', 'max:255'],
             'nodes.*.egress_profile' => ['sometimes', 'nullable', 'string', 'max:64'],
+            'nodes.*.coalesce_key' => ['sometimes', 'nullable', 'string', 'max:255'],
         ]);
 
         try {
