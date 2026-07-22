@@ -128,6 +128,27 @@ class WorkspaceScopingTest extends TestCase
             ->assertJsonCount(0, 'data');
     }
 
+    public function test_environment_create_audit_includes_workspace_id(): void
+    {
+        [$admin, $tenant] = $this->createTenantAdmin();
+
+        $created = $this->actingAs($admin)->postJson(
+            $this->tenantRoute($tenant, '/environments'),
+            ['name' => 'QA Lab', 'slug' => 'qa-lab'],
+        )->assertCreated();
+
+        $workspaceId = $created->json('data.workspace_id');
+        $this->assertNotEmpty($workspaceId);
+        $this->assertSame($created->json('data.id'), $workspaceId);
+
+        $this->actingAs($admin)->getJson(
+            $this->tenantRoute($tenant, '/audit-logs?workspace_id='.$workspaceId),
+        )
+            ->assertOk()
+            ->assertJsonPath('data.0.action', 'environment.created')
+            ->assertJsonPath('data.0.workspace_id', $workspaceId);
+    }
+
     public function test_environment_resource_exposes_workspace_id_alias(): void
     {
         [$admin, $tenant, $environment] = $this->createTenantAdmin();

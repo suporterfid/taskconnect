@@ -58,6 +58,7 @@ class EnvironmentController extends Controller
             resourceType: 'environment',
             resourceId: $environment->public_id,
             tenantId: $tenant->id,
+            environmentId: $environment->id,
             summary: ['name' => $environment->name, 'slug' => $environment->slug],
         );
 
