@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] — 2026-07-23
+
 ### Added
 
+- v1 Extension spec residuals (epic #76, post-#67): callbacks always send `X-TC-Task-Id` / `X-TC-Workspace` regardless of the GrandpaSSOn outbound flag (#77); opt-in `?aliases=spec-v1` on the task resource mirrors `target_url` / `payload` without touching v0 field names (#78); Playwright `dlq-pipelines.spec.ts` auto-seeds a dead run + pipeline instance via a test-only, `APP_ENV`-gated fixture endpoint so authenticated DLQ/pipelines journeys run instead of skipping (#79)
 - Spec adherence audit plan: `docs/superpowers/plans/2026-07-22-spec-adherence-gaps.md` (epic #67; gaps #62–#66)
 - Chore: close accidental GitHub test issues #14, #15, #52 (`docs/architecture/closed-test-issues.md`)
 - Cross-repo GrandpaSSOn handoff: accept `workspace/<id>` aud forms; document broker follow-up at grandpasson#55 (`docs/architecture/grandpasson-cross-repo.md`) (closes #26)
@@ -33,6 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - v1 Extension R3: outbound deliveries send canonical `Idempotency-Key` (stable per run) plus deprecated `X-Task-Idempotency-Key` alias; see `docs/architecture/callback-contract.md`
 - v1 Extension R2: required workspace-scoped `Idempotency-Key` on task create / run-now; 200 on create replay; `IDEMPOTENCY_ENQUEUE_TTL_HOURS`
 - v1 Extension R1: `workspace_id` API alias for Environment; audit logs store `environment_id` with `?workspace_id=` filter (`docs/architecture/workspace.md`)
+
+### Changed
+
+- Application version default bumped to **1.3.0** (`APP_VERSION` / platform health)
+
 ## [1.2.0] — 2026-07-22
 
 ### Added
