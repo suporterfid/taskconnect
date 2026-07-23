@@ -30,7 +30,7 @@ class TaskResource extends JsonResource
             }
         }
 
-        return [
+        $data = [
             'id' => $this->public_id,
             /** Environment public id — v1 Extension workspace alias (R1). */
             'workspace_id' => $this->environment?->public_id,
@@ -62,5 +62,44 @@ class TaskResource extends JsonResource
             'created_at' => $this->created_at?->utc()->format('Y-m-d\TH:i:s\Z'),
             'updated_at' => $this->updated_at?->utc()->format('Y-m-d\TH:i:s\Z'),
         ];
+
+        if ($this->wantsSpecV1Aliases($request)) {
+            $data['target_url'] = $this->url_or_path;
+            $data['payload'] = $this->specV1Payload();
+        }
+
+        return $data;
+    }
+
+    /**
+     * Opt-in §6.1 sketch-literal field names (v1 Extension spec residual, issue #78).
+     * Never enabled by default — v0 field names above remain canonical.
+     */
+    private function wantsSpecV1Aliases(Request $request): bool
+    {
+        return $request->query('aliases') === 'spec-v1';
+    }
+
+    /**
+     * `payload` mirrors `body`: JSON-decoded when `content_type` is a JSON type and the
+     * body parses, otherwise the raw string. Null body stays null.
+     */
+    private function specV1Payload(): mixed
+    {
+        $body = $this->body_template;
+
+        if ($body === null) {
+            return null;
+        }
+
+        if ($this->content_type !== null && str_contains($this->content_type, 'json')) {
+            $decoded = json_decode($body, true);
+
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $decoded;
+            }
+        }
+
+        return $body;
     }
 }
