@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'grandpasson.workspace' => \App\Http\Middleware\EnforceGrandpaSsonWorkspaceAud::class,
             'idempotency' => \App\Http\Middleware\EnforceIdempotencyKey::class,
             'submit.throttle' => \App\Http\Middleware\EnforceSubmitRateLimit::class,
+            'e2e.testing.only' => \App\Http\Middleware\EnsureTestingEnvironment::class,
         ]);
 
     })
