@@ -42,14 +42,9 @@ final class CallbackAuthHeaderBuilder
         $body = $rawBody ?? '';
         $signature = $this->hmac->sign($hmacSecret, $timestamp, $nonce, $body);
 
-        $workspaceId = $task->relationLoaded('environment')
-            ? $task->environment?->public_id
-            : $task->environment()->value('public_id');
-
         return [
             'Authorization' => 'Bearer '.$token->accessToken,
-            'X-TC-Task-Id' => $task->public_id,
-            'X-TC-Workspace' => (string) ($workspaceId ?? ''),
+            // X-TC-Task-Id / X-TC-Workspace are always sent by HttpDeliveryService::executionHeaders().
             'X-TC-Timestamp' => $timestamp,
             'X-TC-Nonce' => $nonce,
             'X-TC-Signature' => $signature,
