@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\V1\SchedulePreviewController;
 use App\Http\Controllers\Api\V1\SecretController;
 use App\Http\Controllers\Api\V1\TaskController;
 use App\Http\Controllers\Api\V1\TaskRunController;
+use App\Http\Controllers\Api\V1\Testing\E2eFixtureController;
 use App\Http\Controllers\Api\V1\TenantController;
 use App\Http\Controllers\Api\V1\UserPreferencesController;
 use Illuminate\Support\Facades\Route;
@@ -89,6 +90,10 @@ Route::prefix('v1')->group(function (): void {
             Route::get('tenants/{tenantId}/environments/{environmentId}/dlq', [DlqController::class, 'index']);
             Route::get('tenants/{tenantId}/environments/{environmentId}/dlq/{runId}', [DlqController::class, 'show']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/dlq/{runId}/replay', [DlqController::class, 'replay']);
+
+            // Playwright E2E fixture seeding only (issue #79) — 404s outside local/testing.
+            Route::post('tenants/{tenantId}/environments/{environmentId}/e2e/dlq-fixture', [E2eFixtureController::class, 'seedDeadRun'])
+                ->middleware('e2e.testing.only');
 
             Route::get('tenants/{tenantId}/environments/{environmentId}/tasks', [TaskController::class, 'index']);
             Route::post('tenants/{tenantId}/environments/{environmentId}/tasks', [TaskController::class, 'store'])

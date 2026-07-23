@@ -1,6 +1,7 @@
 # Playwright operator E2E (DLQ + pipelines)
 
-Unauthenticated smoke always runs. Authenticated journeys need credentials **and** workspace fixtures.
+Unauthenticated smoke always runs. Authenticated journeys need credentials; fixtures (a dead
+run + a pipeline instance) are now **auto-seeded** (issue #79) — no manual setup required.
 
 ## Run
 
@@ -26,31 +27,32 @@ E2E_EMAIL='admin@example.com' E2E_PASSWORD='ChangeMeNow!' bash ./scripts/tc.sh e
 
 Without `E2E_*`, authenticated tests **skip**; unauthenticated specs still pass.
 
-## Seed fixtures
+## Auto-seeded fixtures
 
-Authenticated DLQ/pipelines specs **skip** their deep steps when the workspace has no dead runs or pipeline instances. Seed against the same user/tenant the SPA selects after login:
+`frontend/e2e/helpers/seed.ts` runs once per `dlq-pipelines.spec.ts` suite (`test.beforeAll`)
+when `E2E_*` is set. It logs in as the E2E operator via the API (Sanctum cookie + CSRF, same
+flow as the SPA), discovers that operator's first tenant/environment (mirroring
+`frontend/src/stores/tenant.ts`'s own selection), then:
 
-### Dead letter row
+1. **Dead letter row** — calls a **test-only** seed endpoint,
+   `POST …/environments/{env}/e2e/dlq-fixture`, which directly creates a task + a `dead`
+   `TaskRun` + a terminal `TaskRunAttempt` (bypassing the scheduler — there's no HTTP-only way
+   to drive a real cron tick from Playwright). Gated by the `e2e.testing.only` middleware to
+   `APP_ENV=local` or `testing`; 404s otherwise, so it never ships reachable on a real deploy.
+2. **Pipeline instance** — calls the real, public
+   `POST …/environments/{env}/pipelines/convert-index-publish/instances` endpoint with a
+   `nodes` map covering every template node (see `docs/architecture/pipelines.md`).
 
-1. Create an active task whose delivery fails permanently (e.g. `max_attempts: 1` and a 4xx target, or block via egress).
-2. Queue a manual run and execute the scheduler tick until the run is `dead`:
+If seeding fails (e.g. the target isn't running with `APP_ENV=local`/`testing`), the suite
+fails loudly with a diagnostic error rather than silently skipping — authenticated journeys
+are expected to **run**, not skip, whenever credentials are configured.
+
+To seed manually instead (e.g. exploring the UI by hand), hit the same two endpoints with a
+browser dev-tools session or `curl` with the operator's cookies, or use the CLI:
 
 ```bash
-bash ./scripts/tc.sh artisan scheduler:execute-due
-# or claim+execute via your usual cron path
+bash ./scripts/tc.sh artisan tasks:dlq:list   # confirms existing dead runs
 ```
-
-3. Confirm `GET …/environments/{env}/dlq` lists the run.
-
-### Pipeline instance
-
-```bash
-# After login as the E2E user, or via API key with Idempotency-Key:
-# POST /api/v1/tenants/{ten}/environments/{env}/pipelines/{template}/instances
-# with a `nodes` map covering every template node (see docs/architecture/pipelines.md).
-```
-
-The SPA **Pipelines** page should show at least one instance id link.
 
 ## Specs
 
