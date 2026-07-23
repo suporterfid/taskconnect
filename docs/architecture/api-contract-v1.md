@@ -40,9 +40,16 @@ All mutating submission endpoints require `Idempotency-Key` where documented (R2
 
 See `docs/architecture/callback-contract.md` and GrandpaSSOn docs. Shipped delivery headers use `Idempotency-Key`, `X-Task-Run-Id`, `X-Task-Attempt` (plus optional GrandpaSSOn bearer / `X-TC-*` HMAC when R8 flags are enabled). Spec names like `X-TC-Task-Id` / `X-TC-Workspace` are not required aliases today.
 
-## Optional future aliases (non-breaking)
+## Opt-in §6.1 aliases (issue #78)
 
-If clients need sketch-literal JSON names, prefer an **opt-in** response flag or Accept profile that mirrors fields (e.g. `target_url` = `url_or_path`) without removing v0 names. Not enabled by default.
+Any endpoint returning `TaskResource` accepts `?aliases=spec-v1` to additively mirror sketch-literal field names alongside the v0 names above. **Off by default** — omitting the query param (or any other value) returns the unchanged v0 shape.
+
+| Alias field | Mirrors | Semantics |
+|-------------|---------|-----------|
+| `target_url` | `url_or_path` | Verbatim copy. |
+| `payload` | `body` (+ `content_type`) | `null` when `body` is `null`. JSON-decoded when `content_type` contains `json` and the body parses; otherwise the raw string (including when `content_type` is non-JSON, or JSON-typed but not valid JSON). |
+
+Both v0 field names (`url_or_path`, `body`) remain present and canonical; the aliases are additive only, never a replacement.
 
 ## Related docs
 
