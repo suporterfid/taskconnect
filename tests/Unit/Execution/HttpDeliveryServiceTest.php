@@ -67,6 +67,46 @@ class HttpDeliveryServiceTest extends TestCase
         $this->assertSame('[REDACTED]', $attempt->request_headers_redacted_json['Authorization']);
     }
 
+    public function test_delivery_always_includes_tc_task_id_and_workspace_headers_when_grandpasson_outbound_disabled(): void
+    {
+        config(['grandpasson.outbound_enabled' => false]);
+
+        [$service, $transport] = $this->makeService();
+
+        $task = Task::factory()->create([
+            'url_or_path' => 'http://receiver:8080/hook',
+        ]);
+        $task->load('environment');
+
+        $run = TaskRun::query()->create([
+            'tenant_id' => $task->tenant_id,
+            'environment_id' => $task->environment_id,
+            'task_id' => $task->id,
+            'trigger_type' => 'scheduled',
+            'occurrence_key' => '2026-07-23T12:00:00Z',
+            'idempotency_key' => 'idem-tc-headers',
+            'run_state' => 'pending',
+            'attempt_count' => 1,
+        ]);
+
+        $attempt = TaskRunAttempt::query()->create([
+            'tenant_id' => $task->tenant_id,
+            'environment_id' => $task->environment_id,
+            'task_run_id' => $run->id,
+            'attempt_number' => 1,
+            'attempt_state' => 'pending',
+        ]);
+
+        $result = $service->deliver($attempt);
+
+        $this->assertFalse($result->blocked);
+        $headers = $transport->requests[0]->headers;
+        $this->assertSame('idem-tc-headers', $headers['Idempotency-Key']);
+        $this->assertSame($task->public_id, $headers['X-TC-Task-Id']);
+        $this->assertSame($task->environment->public_id, $headers['X-TC-Workspace']);
+        $this->assertArrayNotHasKey('X-TC-Signature', $headers);
+    }
+
     public function test_retry_attempts_reuse_the_same_idempotency_key(): void
     {
         [$service, $transport] = $this->makeService();

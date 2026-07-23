@@ -36,7 +36,7 @@ final class HttpDeliveryService
     public function deliver(TaskRunAttempt $attempt): DeliveryResult
     {
         $run = $attempt->run()->firstOrFail();
-        $task = $run->task()->with(['endpointProfile.secret', 'tenant'])->firstOrFail();
+        $task = $run->task()->with(['endpointProfile.secret', 'tenant', 'environment'])->firstOrFail();
 
         try {
             $resolved = $this->resolveRequest($task);
@@ -83,7 +83,7 @@ final class HttpDeliveryService
 
             $headers = array_merge(
                 $this->outboundPolicy->sanitizeHeaders($resolved['headers']),
-                $this->executionHeaders($run, $attempt),
+                $this->executionHeaders($run, $attempt, $task),
                 $this->callbackAuthHeaderBuilder->build($run, $attempt, $task, $resolved['body']),
             );
 
@@ -250,9 +250,12 @@ final class HttpDeliveryService
     /**
      * @return array<string, string>
      */
-    private function executionHeaders(TaskRun $run, TaskRunAttempt $attempt): array
+    private function executionHeaders(TaskRun $run, TaskRunAttempt $attempt, Task $task): array
     {
         $idempotencyKey = (string) $run->idempotency_key;
+        $workspaceId = $task->relationLoaded('environment')
+            ? $task->environment?->public_id
+            : $task->environment()->value('public_id');
 
         return [
             // v1 Extension R3 — stable per run; constant across retries of this run.
@@ -261,6 +264,9 @@ final class HttpDeliveryService
             'X-Task-Idempotency-Key' => $idempotencyKey,
             'X-Task-Run-Id' => $run->public_id,
             'X-Task-Attempt' => (string) $attempt->attempt_number,
+            // v1 Extension §6.3 — emitted on every delivery, independent of the GrandpaSSOn outbound flag.
+            'X-TC-Task-Id' => $task->public_id,
+            'X-TC-Workspace' => (string) ($workspaceId ?? ''),
         ];
     }
 

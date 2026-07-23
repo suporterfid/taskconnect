@@ -12,6 +12,8 @@ Every outbound delivery includes:
 | `X-Task-Idempotency-Key` | Same value | **Deprecated compatibility alias** — prefer `Idempotency-Key` |
 | `X-Task-Run-Id` | Run public id | Diagnostic |
 | `X-Task-Attempt` | Attempt number (1-based) | Diagnostic; changes per retry |
+| `X-TC-Task-Id` | Task public id | v1 Extension §6.3 — always sent, independent of GrandpaSSOn outbound auth |
+| `X-TC-Workspace` | Environment public id | v1 Extension §6.3 — always sent, independent of GrandpaSSOn outbound auth |
 
 ### Receiver rules
 
@@ -27,6 +29,8 @@ Idempotency-Key: run:42:2026-07-22T12:00:00Z
 X-Task-Idempotency-Key: run:42:2026-07-22T12:00:00Z
 X-Task-Run-Id: run_01ABC…
 X-Task-Attempt: 2
+X-TC-Task-Id: tsk_01ABC…
+X-TC-Workspace: env_01ABC…
 ```
 
 Attempt `2` carries the **same** `Idempotency-Key` as attempt `1` for that run.
