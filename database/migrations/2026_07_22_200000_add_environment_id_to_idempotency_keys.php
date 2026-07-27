@@ -36,22 +36,32 @@ return new class extends Migration
             DB::table('idempotency_keys')->whereNull('environment_id')->delete();
         }
 
-        Schema::table('idempotency_keys', function (Blueprint $table) {
-            try {
+        try {
+            Schema::table('idempotency_keys', function (Blueprint $table) {
                 $table->dropUnique(['tenant_id', 'key', 'route']);
-            } catch (\Throwable) {
-                // Index name may differ across drivers / prior runs.
-            }
+            });
+        } catch (\Throwable) {
+            // MariaDB / MySQL index may already be dropped or named differently with prefix.
+        }
 
-            try {
+        try {
+            Schema::table('idempotency_keys', function (Blueprint $table) {
+                $table->dropUnique('idempotency_keys_tenant_id_key_route_unique');
+            });
+        } catch (\Throwable) {
+            // Ignore
+        }
+
+        try {
+            Schema::table('idempotency_keys', function (Blueprint $table) {
                 $table->unique(
                     ['tenant_id', 'environment_id', 'key', 'route'],
                     'idempotency_keys_tenant_env_key_route_unique',
                 );
-            } catch (\Throwable) {
-                // Already present.
-            }
-        });
+            });
+        } catch (\Throwable) {
+            // Already present.
+        }
     }
 
     public function down(): void
