@@ -30,9 +30,13 @@
     --color-action-hover: var(--color-purple-800);
     --color-focus: var(--color-purple-500);
 
-    /* Provisional pending #90's full status palette — see frontend/src/style.css. */
-    --color-danger: var(--color-red-600);
-    --color-danger-strong: var(--color-red-700);
+    /* Status tones — measured contrast ratios recorded in frontend/src/style.css. */
+    --color-success: #4ade80;
+    --color-warning: #fbbf24;
+    --color-danger: #f87171;
+    --color-danger-strong: #dc2626;
+    --color-danger-strong-hover: #b91c1c;
+    --color-info: #7dd3fc;
 
     --spacing: 0.25rem;
     --container-reading: 45rem;

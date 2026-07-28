@@ -27,7 +27,10 @@ const variantClasses: Record<NonNullable<typeof props.variant>, string> = {
   primary: 'bg-action text-white hover:bg-action-hover',
   secondary: 'border border-border bg-transparent text-text hover:border-border-strong',
   tertiary: 'bg-transparent text-action hover:text-action-hover hover:underline',
-  danger: 'bg-danger text-white hover:bg-danger-strong',
+  // Deliberately bg-danger-strong, not bg-danger: white text on the
+  // foreground-optimized `danger` red is only 2.77:1 (fails); on
+  // `danger-strong` it's 4.83:1. See the token comment in style.css.
+  danger: 'bg-danger-strong text-white hover:bg-danger-strong-hover',
 }
 
 const sizeClasses: Record<NonNullable<typeof props.size>, string> = {
