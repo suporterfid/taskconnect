@@ -1,5 +1,15 @@
 import type { FunctionalComponent } from 'vue'
-import { Archive, Ban, CircleCheck, CirclePause, CircleX, Info, Loader, TriangleAlert } from 'lucide-vue-next'
+import {
+  Archive,
+  Ban,
+  Circle,
+  CircleCheck,
+  CirclePause,
+  CircleX,
+  Info,
+  Loader,
+  TriangleAlert,
+} from 'lucide-vue-next'
 
 /**
  * One name per concept, centralized so status → icon stays in sync with
@@ -17,6 +27,7 @@ export type SemanticIcon =
   | 'paused'
   | 'archived'
   | 'dead'
+  | 'neutral'
 
 export const semanticIcons: Record<SemanticIcon, FunctionalComponent> = {
   success: CircleCheck,
@@ -27,4 +38,5 @@ export const semanticIcons: Record<SemanticIcon, FunctionalComponent> = {
   paused: CirclePause,
   archived: Archive,
   dead: Ban,
+  neutral: Circle,
 }

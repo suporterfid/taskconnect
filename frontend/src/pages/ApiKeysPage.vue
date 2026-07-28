@@ -5,11 +5,15 @@ import { useI18n } from 'vue-i18n'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseBadge from '@/components/ui/BaseBadge.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { ApiKey, ApiKeyPayload } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
+import { toneForApiKeyStatus } from '@/utils/statusTone'
 
 const PERMISSION_OPTIONS = [
   { value: '*', labelKey: 'settings.apiKeys.permissions.full' },
@@ -95,16 +99,6 @@ function keyStatus(key: ApiKey): 'active' | 'expired' | 'revoked' {
     return 'expired'
   }
   return 'active'
-}
-
-function statusBadgeClass(status: 'active' | 'expired' | 'revoked'): string {
-  if (status === 'revoked') {
-    return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
-  }
-  if (status === 'expired') {
-    return 'bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200'
-  }
-  return 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300'
 }
 
 function formatDate(value?: string | null): string {
@@ -334,49 +328,33 @@ function dismissPlaintext(): void {
       </button>
     </div>
 
-    <div
-      v-if="revealedPlaintext"
-      class="mb-6 space-y-3 rounded-lg border border-amber-300 bg-amber-50 p-6 dark:border-amber-800 dark:bg-amber-950"
-    >
-      <h2 class="text-lg font-semibold text-amber-950 dark:text-amber-100">
-        {{ $t('settings.apiKeys.plaintextTitle') }}
-      </h2>
-      <p class="text-sm text-amber-900 dark:text-amber-200">
-        {{ $t('settings.apiKeys.plaintextWarning') }}
-      </p>
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <code
-          class="flex-1 break-all rounded-md border border-amber-200 bg-white px-3 py-2 font-mono text-sm dark:border-amber-900 dark:bg-gray-950"
-        >
-          {{ revealedPlaintext }}
-        </code>
-        <button
-          type="button"
-          class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
-          @click="copyPlaintext"
-        >
-          {{
-            copied
-              ? $t('settings.apiKeys.plaintextCopied')
-              : $t('settings.apiKeys.plaintextCopy')
-          }}
+    <BaseAlert v-if="revealedPlaintext" tone="warning" class="mb-6">
+      <div class="space-y-3">
+        <h2 class="font-semibold text-text">
+          {{ $t('settings.apiKeys.plaintextTitle') }}
+        </h2>
+        <p>{{ $t('settings.apiKeys.plaintextWarning') }}</p>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <code class="flex-1 break-all rounded-md border border-border bg-surface px-3 py-2 font-mono text-text">
+            {{ revealedPlaintext }}
+          </code>
+          <BaseButton @click="copyPlaintext">
+            {{
+              copied
+                ? $t('settings.apiKeys.plaintextCopied')
+                : $t('settings.apiKeys.plaintextCopy')
+            }}
+          </BaseButton>
+        </div>
+        <button type="button" class="link text-sm text-muted" @click="dismissPlaintext">
+          {{ $t('settings.apiKeys.plaintextDismiss') }}
         </button>
       </div>
-      <button
-        type="button"
-        class="text-sm text-amber-900 underline hover:no-underline dark:text-amber-100"
-        @click="dismissPlaintext"
-      >
-        {{ $t('settings.apiKeys.plaintextDismiss') }}
-      </button>
-    </div>
+    </BaseAlert>
 
-    <p
-      v-if="formError && !showForm"
-      class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
-    >
+    <BaseAlert v-if="formError && !showForm" tone="danger" class="mb-4">
       {{ formError }}
-    </p>
+    </BaseAlert>
 
     <form
       v-if="showForm"
@@ -386,12 +364,9 @@ function dismissPlaintext(): void {
       <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
         {{ formTitle }}
       </h2>
-      <p
-        v-if="formError"
-        class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
-      >
+      <BaseAlert v-if="formError" tone="danger">
         {{ formError }}
-      </p>
+      </BaseAlert>
 
       <div class="grid gap-4 sm:grid-cols-2">
         <label class="block sm:col-span-2">
@@ -581,12 +556,11 @@ function dismissPlaintext(): void {
               }}
             </td>
             <td class="px-4 py-3 text-sm">
-              <span
-                class="rounded px-2 py-0.5 text-xs font-medium"
-                :class="statusBadgeClass(keyStatus(key))"
-              >
-                {{ $t(`settings.apiKeys.status.${keyStatus(key)}`) }}
-              </span>
+              <BaseBadge
+                :label="$t(`settings.apiKeys.status.${keyStatus(key)}`)"
+                :tone="toneForApiKeyStatus(keyStatus(key)).tone"
+                :icon="toneForApiKeyStatus(keyStatus(key)).icon"
+              />
             </td>
             <td class="space-x-3 px-4 py-3 text-right text-sm">
               <template v-if="keyStatus(key) !== 'revoked'">
@@ -599,7 +573,7 @@ function dismissPlaintext(): void {
                 </button>
                 <button
                   type="button"
-                  class="text-red-600 hover:underline disabled:opacity-60"
+                  class="text-danger hover:underline disabled:opacity-60"
                   :disabled="revokingId === key.id"
                   @click="onRevoke(key)"
                 >

@@ -6,12 +6,15 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseBadge from '@/components/ui/BaseBadge.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { ScheduleKind, Task, TaskDefinitionStatus } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
 import { formatScheduleHuman } from '@/utils/scheduleHuman'
+import { toneForTaskStatus } from '@/utils/statusTone'
 
 const { locale, t } = useI18n()
 const route = useRoute()
@@ -211,18 +214,6 @@ function scheduleLabel(task: Task): string {
   return formatScheduleHuman(task.schedule_human, t) || '—'
 }
 
-function statusClass(status: string): string {
-  if (status === 'active') {
-    return 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300'
-  }
-  if (status === 'paused') {
-    return 'bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-200'
-  }
-  if (status === 'archived' || status === 'completed') {
-    return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
-  }
-  return 'bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300'
-}
 </script>
 
 <template>
@@ -345,9 +336,9 @@ function statusClass(status: string): string {
         </button>
       </div>
 
-      <p v-if="actionError" class="mb-3 text-sm text-red-600" role="alert">
+      <BaseAlert v-if="actionError" tone="danger" class="mb-3">
         {{ actionError }}
-      </p>
+      </BaseAlert>
 
       <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
@@ -417,12 +408,11 @@ function statusClass(status: string): string {
                 </RouterLink>
               </td>
               <td class="px-4 py-3 text-sm">
-                <span
-                  class="rounded px-2 py-0.5 text-xs font-medium"
-                  :class="statusClass(task.definition_status)"
-                >
-                  {{ $t(`tasks.status.${task.definition_status}`) }}
-                </span>
+                <BaseBadge
+                  :label="$t(`tasks.status.${task.definition_status}`)"
+                  :tone="toneForTaskStatus(task.definition_status).tone"
+                  :icon="toneForTaskStatus(task.definition_status).icon"
+                />
               </td>
               <td class="px-4 py-3 font-mono text-xs text-gray-600">
                 {{ task.task_type || '—' }}
