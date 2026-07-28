@@ -84,12 +84,10 @@ the actual contrast check — via `page.addScriptTag` + `window.axe.run()`. It c
   authenticated app's skip link (`#88`) is the first tab stop and jumps to `#main-content`;
   the sidebar nav is fully tabbable with visible focus at every stop.
 
-One finding is deliberately excluded from the "no serious/critical violations" assertion: the
-`text-action` link color (`--color-action`, `#814dde`) measures below 4.5:1 on both `canvas`
-and `surface` — a real, tracked gap (**#118**) that needs a maintainer decision on a new
-text-safe token before ~22 files can be repointed. The exclusion is narrow (that exact color
-pair only) so a *different* contrast regression can't hide behind it; `frontend/src/style.contrast.spec.ts`
-tracks the same gap as two `it.fails` cases referencing #118.
+**#118** (`--color-action` measuring below 4.5:1 for `text-action` link text on both `canvas`
+and `surface`) is fixed: a separate `--color-action-text` token (`#9561f2`, 5.27:1 on canvas,
+4.56:1 on surface) now backs every link and `BaseButton`'s `tertiary` variant, verified by
+this sweep and by `frontend/src/style.contrast.spec.ts`.
 
 ```bash
 # Same command as above — a11y.spec.ts runs alongside the other specs

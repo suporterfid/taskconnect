@@ -83,6 +83,17 @@
   --color-focus: var(--color-purple-500);
 
   /*
+   * `--color-action` (`#814dde`) is right for icons/borders and as a *background*
+   * with white text (BaseButton primary), but as small/normal-size *foreground*
+   * text on the app's dark backgrounds it measures 4.05:1 on canvas and 3.50:1 on
+   * surface — both below the 4.5:1 normal-text minimum. `--color-action-text` is a
+   * lightened shade of the same hue, for text-only uses (`text-action-text`: link
+   * text, the `BaseButton` tertiary variant) — 5.27:1 on canvas, 4.56:1 on surface.
+   * See #118.
+   */
+  --color-action-text: #9561f2;
+
+  /*
    * Status tones (§3.2 — deliberately not fixed by the shared spec).
    * Measured (not eyeballed), WCAG relative-luminance contrast ratio,
    * against BOTH canvas #000000 and surface #1A0A3E — a badge may sit

@@ -138,7 +138,7 @@ async function onArchive(): Promise<void> {
 <template>
   <div>
     <div class="mb-4">
-      <RouterLink to="/tasks" class="link text-sm text-action">
+      <RouterLink to="/tasks" class="link text-sm text-action-text">
         ← {{ $t('common.back') }}
       </RouterLink>
     </div>

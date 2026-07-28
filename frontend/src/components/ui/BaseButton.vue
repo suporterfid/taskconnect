@@ -26,7 +26,7 @@ const isDisabled = computed(() => props.disabled || props.loading)
 const variantClasses: Record<NonNullable<typeof props.variant>, string> = {
   primary: 'bg-action text-white hover:bg-action-hover',
   secondary: 'border border-border bg-transparent text-text hover:border-border-strong',
-  tertiary: 'bg-transparent text-action hover:text-action-hover hover:underline',
+  tertiary: 'bg-transparent text-action-text hover:text-action-hover hover:underline',
   // Deliberately bg-danger-strong, not bg-danger: white text on the
   // foreground-optimized `danger` red is only 2.77:1 (fails); on
   // `danger-strong` it's 4.83:1. See the token comment in style.css.

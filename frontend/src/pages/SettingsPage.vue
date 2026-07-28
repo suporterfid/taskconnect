@@ -393,7 +393,7 @@ function formatWhen(value?: string | null): string {
             <h2 class="text-lg font-medium text-text">{{ $t('settings.audit.title') }}</h2>
             <p class="mt-1 text-sm text-muted">{{ $t('settings.audit.subtitle') }}</p>
           </div>
-          <RouterLink v-if="canLoadAudit" to="/audit-logs" class="link text-sm text-action">
+          <RouterLink v-if="canLoadAudit" to="/audit-logs" class="link text-sm text-action-text">
             {{ $t('settings.audit.viewAll') }}
           </RouterLink>
         </div>

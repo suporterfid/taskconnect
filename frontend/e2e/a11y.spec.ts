@@ -27,31 +27,10 @@ async function runAxe(page: Page) {
   }) as Promise<{ violations: Array<{ id: string; impact: string | null; nodes: unknown[] }> }>
 }
 
-type AxeNode = { any?: Array<{ data?: { fgColor?: string; bgColor?: string } }> }
-type AxeViolation = { id: string; impact: string | null; nodes: AxeNode[] }
-
-// #118 (surfaced by this sweep + src/style.contrast.spec.ts): --color-action
-// (#814dde, the `text-action` link color) fails 4.5:1 against both canvas (#000000)
-// and surface (#1a0a3e). Fixing it means introducing and measuring a new
-// text-only token and repointing ~22 files — a brand-color decision for a
-// maintainer, out of scope for "verify and document". Every other node/rule must
-// still be clean; this narrowly excludes only that exact, tracked color pair so a
-// *different* contrast regression can't hide behind it.
-const KNOWN_TRACKED_VIOLATIONS = new Set(['#814dde|#000000', '#814dde|#1a0a3e'])
-
-function isKnownTrackedColorContrast(violation: AxeViolation): boolean {
-  if (violation.id !== 'color-contrast') {
-    return false
-  }
-  return violation.nodes.every((node) =>
-    (node.any ?? []).every((check) => KNOWN_TRACKED_VIOLATIONS.has(`${check.data?.fgColor}|${check.data?.bgColor}`)),
-  )
-}
+type AxeViolation = { id: string; impact: string | null; nodes: unknown[] }
 
 function assertNoSeriousViolations(results: { violations: AxeViolation[] }): void {
-  const serious = results.violations
-    .filter((v) => ['serious', 'critical'].includes(v.impact ?? ''))
-    .filter((v) => !isKnownTrackedColorContrast(v))
+  const serious = results.violations.filter((v) => ['serious', 'critical'].includes(v.impact ?? ''))
   expect(serious, JSON.stringify(serious, null, 2)).toEqual([])
 }
 
@@ -135,9 +114,7 @@ for (const locale of LOCALES) {
     for (const { name, path: pagePath } of pagesToCheck) {
       await page.goto(pagePath, { waitUntil: 'networkidle' })
       const results = await runAxe(page)
-      const serious = results.violations
-        .filter((v) => ['serious', 'critical'].includes(v.impact ?? ''))
-        .filter((v) => !isKnownTrackedColorContrast(v))
+      const serious = results.violations.filter((v) => ['serious', 'critical'].includes(v.impact ?? ''))
       if (serious.length > 0) {
         failuresByPage[name] = serious
       }

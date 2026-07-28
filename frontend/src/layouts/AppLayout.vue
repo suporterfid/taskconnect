@@ -116,7 +116,7 @@ function onLocaleChange(event: Event): void {
     >
       <div class="flex items-center justify-between gap-2 border-b border-border px-4 py-5">
         <div>
-          <RouterLink to="/dashboard" class="text-lg font-semibold text-action">
+          <RouterLink to="/dashboard" class="text-lg font-semibold text-action-text">
             {{ $t('common.appName') }}
           </RouterLink>
           <p v-if="auth.user" class="mt-1 truncate text-sm text-muted">

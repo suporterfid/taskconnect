@@ -326,7 +326,7 @@ function dismissPlaintext(): void {
               {{ formatDate(secret.updated_at) }}
             </td>
             <td class="space-x-3 px-4 py-3 text-right text-sm">
-              <button type="button" class="link text-action" @click="openRotate(secret)">
+              <button type="button" class="link text-action-text" @click="openRotate(secret)">
                 {{ $t('secrets.rotate') }}
               </button>
               <button

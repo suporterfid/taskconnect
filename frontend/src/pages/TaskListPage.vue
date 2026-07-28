@@ -368,7 +368,7 @@ function scheduleLabel(task: Task): string {
                 />
               </td>
               <td class="px-4 py-3 text-sm font-medium">
-                <RouterLink :to="`/tasks/${task.id}`" class="link text-action">
+                <RouterLink :to="`/tasks/${task.id}`" class="link text-action-text">
                   {{ task.name }}
                 </RouterLink>
               </td>
@@ -404,12 +404,12 @@ function scheduleLabel(task: Task): string {
                 <span v-else class="text-sm text-muted">—</span>
               </td>
               <td class="space-x-3 px-4 py-3 text-right text-sm">
-                <RouterLink :to="`/tasks/${task.id}`" class="link text-action">
+                <RouterLink :to="`/tasks/${task.id}`" class="link text-action-text">
                   {{ $t('tasks.view') }}
                 </RouterLink>
                 <button
                   type="button"
-                  class="link text-action disabled:opacity-60"
+                  class="link text-action-text disabled:opacity-60"
                   :disabled="duplicatingId === task.id"
                   @click="onDuplicate(task)"
                 >

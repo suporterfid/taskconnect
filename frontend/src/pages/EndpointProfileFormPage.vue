@@ -230,7 +230,7 @@ onMounted(async () => {
     <div class="mb-4">
       <RouterLink
         :to="isEdit && id ? `/endpoint-profiles/${id}` : '/endpoint-profiles'"
-        class="link text-sm text-action"
+        class="link text-sm text-action-text"
       >
         ← {{ $t('common.back') }}
       </RouterLink>

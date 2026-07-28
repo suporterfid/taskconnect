@@ -119,14 +119,14 @@ function onFilter(): void {
               <td class="px-4 py-3 font-mono text-xs text-text">
                 <RouterLink
                   :to="`/runs/${run.id}`"
-                  class="link text-action"
+                  class="link text-action-text"
                   data-testid="dlq-run-link"
                 >
                   {{ run.id }}
                 </RouterLink>
               </td>
               <td class="px-4 py-3 text-sm">
-                <RouterLink v-if="run.task_id" :to="`/tasks/${run.task_id}`" class="link text-action">
+                <RouterLink v-if="run.task_id" :to="`/tasks/${run.task_id}`" class="link text-action-text">
                   {{ run.task_name || run.task_id }}
                 </RouterLink>
                 <span v-else class="text-muted">—</span>
@@ -137,12 +137,12 @@ function onFilter(): void {
                 {{ run.final_error_code || run.final_http_status || '—' }}
               </td>
               <td class="space-x-3 px-4 py-3 text-right text-sm">
-                <RouterLink :to="`/runs/${run.id}`" class="link text-action" data-testid="dlq-inspect">
+                <RouterLink :to="`/runs/${run.id}`" class="link text-action-text" data-testid="dlq-inspect">
                   {{ $t('dlq.actions.inspect') }}
                 </RouterLink>
                 <button
                   type="button"
-                  class="link text-action disabled:opacity-60"
+                  class="link text-action-text disabled:opacity-60"
                   data-testid="dlq-replay"
                   :disabled="actionLoading === run.id"
                   @click="onReplay(run)"

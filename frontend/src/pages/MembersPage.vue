@@ -308,7 +308,7 @@ async function onRemove(member: Member): Promise<void> {
               />
             </td>
             <td class="space-x-3 px-4 py-3 text-right text-sm">
-              <button type="button" class="link text-action" @click="openEdit(member)">
+              <button type="button" class="link text-action-text" @click="openEdit(member)">
                 {{ $t('common.edit') }}
               </button>
               <button

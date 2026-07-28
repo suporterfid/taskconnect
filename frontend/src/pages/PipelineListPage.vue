@@ -99,7 +99,7 @@ function statusLabel(status: string): string {
                 <td class="px-4 py-3 font-mono text-xs text-text">
                   <RouterLink
                     :to="`/pipelines/${instance.template_name}/instances/${instance.id}`"
-                    class="link text-action"
+                    class="link text-action-text"
                     data-testid="pipeline-instance-link"
                   >
                     {{ instance.id }}

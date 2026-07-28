@@ -103,6 +103,8 @@ const pairs: Array<{ label: string; fg: string; bg: string; min: number }> = [
     bg: '--color-action',
     min: NORMAL_TEXT_MIN,
   },
+  { label: 'action text (links, BaseButton tertiary) on canvas', fg: '--color-action-text', bg: '--color-canvas', min: NORMAL_TEXT_MIN },
+  { label: 'action text (links, BaseButton tertiary) on surface', fg: '--color-action-text', bg: '--color-surface', min: NORMAL_TEXT_MIN },
   {
     label: 'white text on BaseButton danger fill',
     fg: '--color-neutral-0',
@@ -123,19 +125,5 @@ describe('§3.4 token contrast table', () => {
   it.each(pairs)('$label meets $min:1', ({ fg, bg, min }) => {
     const ratio = contrastRatio(fg, bg)
     expect(ratio).toBeGreaterThanOrEqual(min)
-  })
-
-  // Known, tracked gap — see #118. `--color-action` (the `text-action` link color) was
-  // never previously contrast-checked (login.a11y.spec.ts disables axe's color-contrast
-  // rule for jsdom) and measures below 4.5:1 for normal text on both backgrounds it's
-  // used against. Fixing it means introducing and measuring a new text-only token and
-  // repointing ~22 files, which is a brand-color decision for a maintainer to sign off
-  // on — out of scope for "verify and document" (#98). `it.fails` keeps this visible
-  // (a silent `.skip` would not) instead of quietly passing or breaking the suite.
-  it.fails('#118: action links on canvas currently fail 4.5:1 (measures 4.05:1)', () => {
-    expect(contrastRatio('--color-action', '--color-canvas')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
-  })
-  it.fails('#118: action links on surface currently fail 4.5:1 (measures 3.50:1)', () => {
-    expect(contrastRatio('--color-action', '--color-surface')).toBeGreaterThanOrEqual(NORMAL_TEXT_MIN)
   })
 })

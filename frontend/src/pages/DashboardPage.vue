@@ -170,7 +170,7 @@ function formatDate(value?: string | null): string {
       <section class="mt-8">
         <div class="mb-3 flex items-center justify-between gap-3">
           <h2>{{ $t('dashboard.recent.title') }}</h2>
-          <RouterLink to="/runs" class="link text-sm text-action">
+          <RouterLink to="/runs" class="link text-sm text-action-text">
             {{ $t('dashboard.recent.viewAll') }}
           </RouterLink>
         </div>
@@ -182,7 +182,7 @@ function formatDate(value?: string | null): string {
             class="flex items-center justify-between gap-3 bg-surface px-4 py-3"
           >
             <div class="min-w-0">
-              <RouterLink :to="`/runs/${run.id}`" class="link text-sm font-medium text-action">
+              <RouterLink :to="`/runs/${run.id}`" class="link text-sm font-medium text-action-text">
                 {{ run.task_name || run.task_id || run.id }}
               </RouterLink>
               <div class="mt-0.5">
@@ -209,7 +209,7 @@ function formatDate(value?: string | null): string {
             :key="task.id"
             class="flex items-center justify-between bg-surface px-4 py-3"
           >
-            <RouterLink :to="`/tasks/${task.id}`" class="link text-sm font-medium text-action">
+            <RouterLink :to="`/tasks/${task.id}`" class="link text-sm font-medium text-action-text">
               {{ task.name }}
             </RouterLink>
             <span class="text-sm tabular-nums text-muted">

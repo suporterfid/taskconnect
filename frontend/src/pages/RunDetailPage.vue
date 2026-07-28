@@ -134,7 +134,7 @@ async function onRetry(): Promise<void> {
 <template>
   <div>
     <div class="mb-4">
-      <RouterLink to="/runs" class="link text-sm text-action">
+      <RouterLink to="/runs" class="link text-sm text-action-text">
         ← {{ $t('common.back') }}
       </RouterLink>
     </div>
@@ -167,7 +167,7 @@ async function onRetry(): Promise<void> {
         <div>
           <dt class="text-sm text-muted">{{ $t('runs.fields.task') }}</dt>
           <dd class="mt-1 text-sm">
-            <RouterLink v-if="data.run.task_id" :to="`/tasks/${data.run.task_id}`" class="link text-action">
+            <RouterLink v-if="data.run.task_id" :to="`/tasks/${data.run.task_id}`" class="link text-action-text">
               {{ data.run.task_id }}
             </RouterLink>
             <span v-else class="text-muted">—</span>
