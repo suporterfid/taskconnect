@@ -61,3 +61,37 @@ bash ./scripts/tc.sh artisan tasks:dlq:list   # confirms existing dead runs
 | `frontend/e2e/smoke.spec.ts` | Login smoke; optional dashboard/tasks/dlq/pipelines headings |
 | `frontend/e2e/operator-extension.spec.ts` | Unauthenticated `/dlq` `/pipelines` → login |
 | `frontend/e2e/dlq-pipelines.spec.ts` | Authenticated inspect + replay; pipeline instance detail |
+| `frontend/e2e/a11y.spec.ts` | WCAG 2.2 AA sweep — see below |
+
+## WCAG 2.2 AA sweep (`a11y.spec.ts`, #98)
+
+`jsdom` can't compute real color contrast (see `frontend/src/pages/login.a11y.spec.ts`'s
+disabled `color-contrast` rule), so this spec injects `axe-core` into a real Chromium page —
+the actual contrast check — via `page.addScriptTag` + `window.axe.run()`. It covers, in both
+`en` and `pt-BR`:
+
+- **Unauthenticated** (always runs): `/login`, `/forgot-password`, `/reset-password`.
+- **Authenticated** (needs `E2E_*`): dashboard, tasks, runs, DLQ, pipelines, settings, API
+  keys, plus a task detail and run detail page seeded via
+  `frontend/e2e/helpers/seed.ts#seedTaskAndRunFixtures`. Every page for a locale is checked
+  inside **one test with one login**, not one test per page — the auth routes are throttled
+  (`throttle:10,1`, `routes/api.php`) and a test-per-page pattern with a fresh login each time
+  exceeds that in a single run.
+- **200% zoom** (640×360 @ 2x device scale) and **360px narrow viewport**: asserts no
+  horizontal page scroll. Wide data tables may scroll within their own container (#92); the
+  page body must not.
+- **Keyboard navigation**: tab order reaches the login form's fields with visible focus; the
+  authenticated app's skip link (`#88`) is the first tab stop and jumps to `#main-content`;
+  the sidebar nav is fully tabbable with visible focus at every stop.
+
+One finding is deliberately excluded from the "no serious/critical violations" assertion: the
+`text-action` link color (`--color-action`, `#814dde`) measures below 4.5:1 on both `canvas`
+and `surface` — a real, tracked gap (**#118**) that needs a maintainer decision on a new
+text-safe token before ~22 files can be repointed. The exclusion is narrow (that exact color
+pair only) so a *different* contrast regression can't hide behind it; `frontend/src/style.contrast.spec.ts`
+tracks the same gap as two `it.fails` cases referencing #118.
+
+```bash
+# Same command as above — a11y.spec.ts runs alongside the other specs
+bash ./scripts/tc.sh e2e
+```

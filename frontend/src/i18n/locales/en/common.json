@@ -49,6 +49,10 @@
     "select": "Select environment"
   },
   "navMain": "Main",
+  "navToggle": {
+    "open": "Open navigation",
+    "close": "Close navigation"
+  },
   "errors": {
     "requestFailed": "Request failed",
     "tooManyRequests": "Too many requests. Please wait a moment and try again.",

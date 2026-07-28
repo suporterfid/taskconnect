@@ -49,6 +49,10 @@
     "select": "Selecionar ambiente"
   },
   "navMain": "Principal",
+  "navToggle": {
+    "open": "Abrir navegação",
+    "close": "Fechar navegação"
+  },
   "errors": {
     "requestFailed": "Falha na requisição",
     "tooManyRequests": "Muitas requisições. Aguarde um momento e tente novamente.",

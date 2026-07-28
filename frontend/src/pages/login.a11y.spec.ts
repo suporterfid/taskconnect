@@ -33,7 +33,11 @@ describe('a11y smoke', () => {
 
     const results = await axe.run(wrapper.element, {
       rules: {
-        // jsdom lacks full color contrast computation reliability
+        // jsdom can't compute real color contrast — frontend/e2e/a11y.spec.ts (#98)
+        // runs the same axe ruleset in a real Chromium page with this rule enabled,
+        // which is the actual contrast check for this app. Kept disabled here rather
+        // than removed so this spec still documents *why* it's not the source of truth
+        // for that one rule.
         'color-contrast': { enabled: false },
       },
     })
