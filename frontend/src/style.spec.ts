@@ -11,11 +11,10 @@ const rawPaletteUtility =
 // This inventory is intentional technical debt. Migration issues remove entries; new
 // raw-palette utilities must never be added. Keeping counts per token also prevents a
 // legacy utility from being silently exchanged for a different raw palette value.
-const legacyAllowlist: Record<string, Record<string, number>> = {
-  'src/pages/ApiKeysPage.vue': { 'bg-gray-50': 2, 'bg-gray-900': 2, 'bg-gray-950': 1, 'bg-violet-600': 2, 'bg-violet-700': 2, 'border-gray-200': 3, 'border-gray-300': 6, 'border-gray-700': 1, 'border-gray-800': 2, 'divide-gray-200': 2, 'divide-gray-800': 2, 'text-gray-100': 1, 'text-gray-500': 12, 'text-gray-600': 6, 'text-gray-700': 7, 'text-gray-900': 1, 'text-violet-600': 2 },
-  'src/pages/SecretsPage.vue': { 'bg-gray-50': 2, 'bg-gray-900': 2, 'bg-gray-950': 2, 'bg-violet-600': 3, 'bg-violet-700': 3, 'border-gray-200': 3, 'border-gray-300': 5, 'border-gray-700': 1, 'border-gray-800': 2, 'divide-gray-200': 2, 'divide-gray-800': 2, 'text-gray-100': 1, 'text-gray-500': 9, 'text-gray-600': 4, 'text-gray-700': 4, 'text-gray-900': 1, 'text-violet-600': 2 },
-  'src/pages/SettingsPage.vue': { 'bg-gray-50': 1, 'bg-gray-800': 3, 'bg-gray-900': 5, 'bg-gray-950': 1, 'bg-violet-600': 3, 'bg-violet-700': 3, 'border-gray-200': 6, 'border-gray-300': 6, 'border-gray-700': 3, 'border-gray-800': 6, 'divide-gray-200': 2, 'divide-gray-800': 2, 'text-gray-300': 4, 'text-gray-400': 2, 'text-gray-500': 21, 'text-gray-600': 2, 'text-gray-700': 4, 'text-violet-600': 1 },
-}
+//
+// The migration is complete: every page has moved to semantic tokens, so this
+// allowlist is empty and the guard now runs unconditionally.
+const legacyAllowlist: Record<string, Record<string, number>> = {}
 
 function vueFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {

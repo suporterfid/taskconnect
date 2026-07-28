@@ -5,6 +5,14 @@ import { useI18n } from 'vue-i18n'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseTextarea from '@/components/ui/BaseTextarea.vue'
+import CodeBlock from '@/components/ui/CodeBlock.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import FormField from '@/components/ui/FormField.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
@@ -173,132 +181,100 @@ function dismissPlaintext(): void {
         :title="$t('secrets.title')"
         :subtitle="$t('secrets.subtitle')"
       />
-      <button
-        type="button"
-        class="shrink-0 rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
-        @click="openCreate"
-      >
+      <BaseButton class="shrink-0" @click="openCreate">
         {{ $t('secrets.create') }}
-      </button>
+      </BaseButton>
     </div>
 
-    <div
-      v-if="revealedPlaintext"
-      class="mb-6 space-y-3 rounded-lg border border-amber-300 bg-amber-50 p-6 dark:border-amber-800 dark:bg-amber-950"
-    >
-      <h2 class="text-lg font-semibold text-amber-950 dark:text-amber-100">
+    <BaseAlert v-if="revealedPlaintext" tone="warning" role="alert" class="mb-6 space-y-3">
+      <h2 class="text-lg font-semibold">
         {{ $t('secrets.plaintextTitle') }}
       </h2>
-      <p class="text-sm text-amber-900 dark:text-amber-200">
+      <p class="text-sm">
         {{ $t('secrets.plaintextWarning') }}
       </p>
-      <p v-if="revealedName" class="text-sm font-medium text-amber-950 dark:text-amber-100">
+      <p v-if="revealedName" class="text-sm font-medium">
         {{ revealedName }}
       </p>
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <code
-          class="flex-1 break-all rounded-md border border-amber-200 bg-white px-3 py-2 font-mono text-sm dark:border-amber-900 dark:bg-gray-950"
-        >
-          {{ revealedPlaintext }}
-        </code>
-        <button
-          type="button"
-          class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
-          @click="copyPlaintext"
-        >
+        <CodeBlock class="flex-1">{{ revealedPlaintext }}</CodeBlock>
+        <BaseButton @click="copyPlaintext">
           {{
             copied
               ? $t('secrets.plaintextCopied')
               : $t('secrets.plaintextCopy')
           }}
-        </button>
+        </BaseButton>
       </div>
-      <button
-        type="button"
-        class="text-sm text-amber-900 underline hover:no-underline dark:text-amber-100"
-        @click="dismissPlaintext"
-      >
+      <button type="button" class="link text-sm" @click="dismissPlaintext">
         {{ $t('secrets.plaintextDismiss') }}
       </button>
-    </div>
+    </BaseAlert>
 
-    <p
-      v-if="formError && !showForm"
-      class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
-    >
+    <BaseAlert v-if="formError && !showForm" tone="danger" role="alert" class="mb-4">
       {{ formError }}
-    </p>
+    </BaseAlert>
 
-    <form
-      v-if="showForm"
-      class="mb-6 space-y-4 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
-      @submit.prevent="onSubmit"
-    >
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-        {{ formTitle }}
-      </h2>
-      <p
-        v-if="formError"
-        class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
-      >
-        {{ formError }}
-      </p>
+    <form v-if="showForm" class="mb-6" @submit.prevent="onSubmit">
+      <BaseCard class="space-y-4">
+        <h2 class="text-lg font-semibold text-text">
+          {{ formTitle }}
+        </h2>
+        <BaseAlert v-if="formError" tone="danger" role="alert">
+          {{ formError }}
+        </BaseAlert>
 
-      <label v-if="!rotatingId" class="block">
-        <span class="mb-1 block text-sm font-medium text-gray-700">{{
-          $t('secrets.fields.name')
-        }}</span>
-        <input
-          v-model="form.name"
+        <FormField v-if="!rotatingId" id="secret_name" :label="$t('secrets.fields.name')" required>
+          <template #default="{ describedBy, ariaInvalid }">
+            <BaseInput
+              id="secret_name"
+              v-model="form.name"
+              required
+              :described-by="describedBy"
+              :aria-invalid="ariaInvalid"
+            />
+          </template>
+        </FormField>
+        <div v-else>
+          <span class="mb-1 block text-sm font-medium text-text">{{
+            $t('secrets.fields.name')
+          }}</span>
+          <p class="rounded-md border border-border px-3 py-2 text-sm text-muted">
+            {{ form.name }}
+          </p>
+          <p class="mt-2 text-xs text-muted">
+            {{ $t('secrets.rotateHint') }}
+          </p>
+        </div>
+
+        <FormField
+          id="secret_value"
+          :label="rotatingId ? $t('secrets.fields.newValue') : $t('secrets.fields.value')"
+          :hint="$t('secrets.fields.valueHint')"
           required
-          class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-        />
-      </label>
-      <div v-else>
-        <span class="mb-1 block text-sm font-medium text-gray-700">{{
-          $t('secrets.fields.name')
-        }}</span>
-        <p class="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-600 dark:border-gray-700">
-          {{ form.name }}
-        </p>
-        <p class="mt-2 text-xs text-gray-500">
-          {{ $t('secrets.rotateHint') }}
-        </p>
-      </div>
-
-      <label class="block">
-        <span class="mb-1 block text-sm font-medium text-gray-700">{{
-          rotatingId
-            ? $t('secrets.fields.newValue')
-            : $t('secrets.fields.value')
-        }}</span>
-        <textarea
-          v-model="form.value"
-          required
-          rows="3"
-          class="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm"
-        />
-        <span class="mt-1 block text-xs text-gray-500">{{
-          $t('secrets.fields.valueHint')
-        }}</span>
-      </label>
-
-      <div class="flex justify-end gap-3">
-        <button
-          type="button"
-          class="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-          @click="cancelForm"
         >
-          {{ $t('common.cancel') }}
-        </button>
-        <button
-          type="submit"
-          :disabled="submitting"
-          class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
-        >
-          {{ submitting ? $t('common.loading') : $t('secrets.save') }}
-        </button>
-      </div>
+          <template #default="{ describedBy, ariaInvalid }">
+            <BaseTextarea
+              id="secret_value"
+              v-model="form.value"
+              required
+              :rows="3"
+              class="font-mono text-sm"
+              :described-by="describedBy"
+              :aria-invalid="ariaInvalid"
+            />
+          </template>
+        </FormField>
+
+        <div class="flex justify-end gap-3">
+          <BaseButton variant="secondary" @click="cancelForm">
+            {{ $t('common.cancel') }}
+          </BaseButton>
+          <BaseButton type="submit" :disabled="submitting">
+            {{ submitting ? $t('common.loading') : $t('secrets.save') }}
+          </BaseButton>
+        </div>
+      </BaseCard>
     </form>
 
     <LoadingState v-if="loading" />
@@ -307,71 +283,55 @@ function dismissPlaintext(): void {
       :message="error ?? $t('secrets.loadError')"
       @retry="reload"
     />
-    <div
+    <EmptyState
       v-else-if="!tenant.currentTenantId || !tenant.currentEnvironmentId"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
-      {{ $t('secrets.needsTenant') }}
-    </div>
-    <div
-      v-else-if="!data?.length"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
+      :message="$t('secrets.needsTenant')"
+    />
+    <EmptyState v-else-if="!data?.length" :message="$t('secrets.empty')">
       <p>{{ $t('secrets.empty') }}</p>
       <p class="mt-2 text-sm">{{ $t('secrets.emptyHint') }}</p>
-      <button
-        type="button"
-        class="mt-4 text-sm text-violet-600 hover:underline"
-        @click="openCreate"
-      >
+      <BaseButton variant="tertiary" class="mt-4" @click="openCreate">
         {{ $t('secrets.create') }}
-      </button>
-    </div>
-    <div
-      v-else
-      class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800"
-    >
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-        <thead class="bg-gray-50 dark:bg-gray-900">
+      </BaseButton>
+    </EmptyState>
+    <div v-else class="overflow-x-auto rounded-lg border border-border">
+      <table class="min-w-full divide-y divide-border">
+        <thead class="bg-surface">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('secrets.fields.name') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('secrets.fields.version') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('secrets.fields.usage') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('common.updatedAt') }}
             </th>
-            <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-right text-sm font-medium text-muted">
               {{ $t('common.actions') }}
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+        <tbody class="divide-y divide-border bg-surface">
           <tr v-for="secret in data" :key="secret.id">
-            <td class="px-4 py-3 font-medium">{{ secret.name }}</td>
-            <td class="px-4 py-3 text-sm text-gray-600">v{{ secret.version }}</td>
-            <td class="px-4 py-3 text-sm text-gray-600">
+            <td class="px-4 py-3 font-medium text-text">{{ secret.name }}</td>
+            <td class="px-4 py-3 text-sm tabular-nums text-muted">v{{ secret.version }}</td>
+            <td class="px-4 py-3 text-sm tabular-nums text-muted">
               {{ secret.usage_count ?? 0 }}
             </td>
-            <td class="px-4 py-3 text-sm text-gray-600">
+            <td class="px-4 py-3 text-sm tabular-nums text-muted">
               {{ formatDate(secret.updated_at) }}
             </td>
             <td class="space-x-3 px-4 py-3 text-right text-sm">
-              <button
-                type="button"
-                class="text-violet-600 hover:underline"
-                @click="openRotate(secret)"
-              >
+              <button type="button" class="link text-action" @click="openRotate(secret)">
                 {{ $t('secrets.rotate') }}
               </button>
               <button
                 type="button"
-                class="text-red-600 hover:underline disabled:opacity-60"
+                class="link text-danger disabled:opacity-60"
                 :disabled="deletingId === secret.id"
                 @click="onDelete(secret)"
               >
