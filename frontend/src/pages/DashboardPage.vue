@@ -6,10 +6,14 @@ import { RouterLink } from 'vue-router'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseBadge from '@/components/ui/BaseBadge.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import api from '@/services/api'
 import type { DashboardStats } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
+import { toneForRunState } from '@/utils/statusTone'
 
 const STALE_MS = 2 * 60 * 1000
 
@@ -120,7 +124,7 @@ function formatDate(value?: string | null): string {
       <template #actions>
         <RouterLink
           to="/tasks/new"
-          class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
+          class="rounded-md bg-action px-4 py-2 text-sm font-medium text-white hover:bg-action-hover"
         >
           {{ $t('dashboard.createTask') }}
         </RouterLink>
@@ -129,19 +133,10 @@ function formatDate(value?: string | null): string {
 
     <LoadingState v-if="loading" />
     <ErrorState v-else-if="error" :message="error" @retry="reload" />
-    <div
-      v-else-if="needsTenant"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
-      {{ $t('dashboard.needsTenant') }}
-    </div>
+    <EmptyState v-else-if="needsTenant" :message="$t('dashboard.needsTenant')" />
     <template v-else>
-      <div
-        v-if="schedulerStale"
-        class="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100"
-        role="status"
-      >
-        <p class="font-medium">{{ $t('dashboard.scheduler.staleTitle') }}</p>
+      <BaseAlert v-if="schedulerStale" tone="warning" role="status" class="mb-6">
+        <p class="font-medium text-text">{{ $t('dashboard.scheduler.staleTitle') }}</p>
         <p class="mt-1">
           {{
             $t('dashboard.scheduler.staleBody', {
@@ -149,27 +144,24 @@ function formatDate(value?: string | null): string {
             })
           }}
         </p>
-      </div>
-      <div
-        v-else
-        class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900 dark:border-green-900 dark:bg-green-950 dark:text-green-100"
-      >
+      </BaseAlert>
+      <BaseAlert v-else tone="success" role="status" class="mb-6">
         {{
           $t('dashboard.scheduler.ok', {
             lastSeen: formatDate(data?.scheduler_last_seen_at),
           })
         }}
-      </div>
+      </BaseAlert>
 
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <RouterLink
           v-for="stat in stats"
           :key="stat.label"
           :to="stat.to"
-          class="rounded-lg border border-gray-200 bg-white p-5 transition hover:border-violet-300 dark:border-gray-800 dark:bg-gray-900 dark:hover:border-violet-700"
+          class="rounded-lg border border-border bg-surface p-5 transition-colors duration-standard ease-standard hover:border-border-strong"
         >
-          <p class="text-sm text-gray-500">{{ stat.label }}</p>
-          <p class="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">
+          <p class="text-sm text-muted">{{ stat.label }}</p>
+          <p class="mt-2 text-3xl font-semibold tabular-nums text-text">
             {{ stat.value }}
           </p>
         </RouterLink>
@@ -177,38 +169,31 @@ function formatDate(value?: string | null): string {
 
       <section class="mt-8">
         <div class="mb-3 flex items-center justify-between gap-3">
-          <h2 class="text-lg font-medium">{{ $t('dashboard.recent.title') }}</h2>
-          <RouterLink to="/runs" class="text-sm text-violet-600 hover:underline">
+          <h2>{{ $t('dashboard.recent.title') }}</h2>
+          <RouterLink to="/runs" class="link text-sm text-action">
             {{ $t('dashboard.recent.viewAll') }}
           </RouterLink>
         </div>
-        <div
-          v-if="!data?.recent_run_items?.length"
-          class="rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500"
-        >
-          {{ $t('dashboard.recent.empty') }}
-        </div>
-        <ul
-          v-else
-          class="divide-y divide-gray-200 rounded-lg border border-gray-200 dark:divide-gray-800 dark:border-gray-800"
-        >
+        <EmptyState v-if="!data?.recent_run_items?.length" :message="$t('dashboard.recent.empty')" />
+        <ul v-else class="divide-y divide-border rounded-lg border border-border">
           <li
             v-for="run in data.recent_run_items"
             :key="run.id"
-            class="flex items-center justify-between gap-3 bg-white px-4 py-3 dark:bg-gray-900"
+            class="flex items-center justify-between gap-3 bg-surface px-4 py-3"
           >
             <div class="min-w-0">
-              <RouterLink
-                :to="`/runs/${run.id}`"
-                class="text-sm font-medium text-violet-600 hover:underline"
-              >
+              <RouterLink :to="`/runs/${run.id}`" class="link text-sm font-medium text-action">
                 {{ run.task_name || run.task_id || run.id }}
               </RouterLink>
-              <p class="truncate text-xs text-gray-500">
-                {{ $t(`runs.status.${run.run_state}`, run.run_state) }}
-              </p>
+              <div class="mt-0.5">
+                <BaseBadge
+                  :label="$t(`runs.status.${run.run_state}`, run.run_state)"
+                  :tone="toneForRunState(run.run_state).tone"
+                  :icon="toneForRunState(run.run_state).icon"
+                />
+              </div>
             </div>
-            <span class="shrink-0 text-sm text-gray-500">
+            <span class="shrink-0 text-sm tabular-nums text-muted">
               {{ formatDate(run.finished_at || run.created_at) }}
             </span>
           </li>
@@ -216,39 +201,25 @@ function formatDate(value?: string | null): string {
       </section>
 
       <section class="mt-8">
-        <h2 class="mb-3 text-lg font-medium">{{ $t('dashboard.upcoming.title') }}</h2>
-        <div
-          v-if="!data?.upcoming_tasks?.length"
-          class="rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500"
-        >
-          {{ $t('dashboard.upcoming.empty') }}
-        </div>
-        <ul
-          v-else
-          class="divide-y divide-gray-200 rounded-lg border border-gray-200 dark:divide-gray-800 dark:border-gray-800"
-        >
+        <h2 class="mb-3">{{ $t('dashboard.upcoming.title') }}</h2>
+        <EmptyState v-if="!data?.upcoming_tasks?.length" :message="$t('dashboard.upcoming.empty')" />
+        <ul v-else class="divide-y divide-border rounded-lg border border-border">
           <li
             v-for="task in data.upcoming_tasks"
             :key="task.id"
-            class="flex items-center justify-between bg-white px-4 py-3 dark:bg-gray-900"
+            class="flex items-center justify-between bg-surface px-4 py-3"
           >
-            <RouterLink
-              :to="`/tasks/${task.id}`"
-              class="text-sm font-medium text-violet-600 hover:underline"
-            >
+            <RouterLink :to="`/tasks/${task.id}`" class="link text-sm font-medium text-action">
               {{ task.name }}
             </RouterLink>
-            <span class="text-sm text-gray-500">
+            <span class="text-sm tabular-nums text-muted">
               {{ formatDate(task.next_run_at) }}
             </span>
           </li>
         </ul>
       </section>
 
-      <p
-        v-if="data?.oldest_due_at"
-        class="mt-4 text-sm text-gray-500"
-      >
+      <p v-if="data?.oldest_due_at" class="mt-4 text-sm text-muted">
         {{
           $t('dashboard.oldestDue', {
             at: formatDate(data.oldest_due_at),
@@ -256,10 +227,7 @@ function formatDate(value?: string | null): string {
         }}
       </p>
 
-      <p
-        v-if="stats.every((s) => s.value === 0)"
-        class="mt-8 text-center text-gray-500"
-      >
+      <p v-if="stats.every((s) => s.value === 0)" class="mt-8 text-center text-muted">
         {{ $t('dashboard.empty') }}
       </p>
     </template>

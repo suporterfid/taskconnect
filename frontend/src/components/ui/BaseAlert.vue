@@ -3,7 +3,16 @@ import AppIcon from '@/components/AppIcon.vue'
 import { semanticIcons } from '@/utils/icons'
 import type { Tone } from '@/utils/statusTone'
 
-withDefaults(defineProps<{ tone?: Tone }>(), { tone: 'info' })
+withDefaults(
+  defineProps<{
+    tone?: Tone
+    // 'alert' (assertive) is right for errors/warnings that interrupt; a
+    // success confirmation after a user action reads better as 'status'
+    // (polite) — it's still announced, just not treated as an interruption.
+    role?: 'alert' | 'status'
+  }>(),
+  { tone: 'info', role: 'alert' },
+)
 
 // Same tone -> icon pairing as the status system (#90), so an alert and a
 // badge for the same condition never disagree about which glyph means what.
@@ -25,7 +34,7 @@ const toneClasses: Record<Tone, string> = {
 </script>
 
 <template>
-  <div role="alert" class="flex items-start gap-2 rounded-lg border p-4 text-sm" :class="toneClasses[tone]">
+  <div :role="role" class="flex items-start gap-2 rounded-lg border p-4 text-sm" :class="toneClasses[tone]">
     <AppIcon :icon="semanticIcons[toneIcon[tone]]" :size="16" class="mt-0.5" />
     <div><slot /></div>
   </div>
