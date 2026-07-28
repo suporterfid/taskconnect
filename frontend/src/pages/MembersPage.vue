@@ -5,11 +5,20 @@ import { useI18n } from 'vue-i18n'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseBadge from '@/components/ui/BaseBadge.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import FormField from '@/components/ui/FormField.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { Member, MemberPayload, TenantRole } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
+import { semanticIcons } from '@/utils/icons'
 
 const { t } = useI18n()
 const tenant = useTenantStore()
@@ -52,6 +61,26 @@ function roleLabel(role: string): string {
   const key = `settings.members.roles.${role}`
   const label = t(key)
   return label === key ? role : label
+}
+
+function roleTone(role: string): 'info' | 'success' | 'neutral' {
+  if (role === 'tenant_admin') {
+    return 'info'
+  }
+  if (role === 'read_only_viewer') {
+    return 'neutral'
+  }
+  return 'success'
+}
+
+function roleIcon(role: string) {
+  if (role === 'tenant_admin') {
+    return semanticIcons.info
+  }
+  if (role === 'read_only_viewer') {
+    return semanticIcons.neutral
+  }
+  return semanticIcons.success
 }
 
 function openInvite(): void {
@@ -152,97 +181,87 @@ async function onRemove(member: Member): Promise<void> {
         :title="$t('settings.members.title')"
         :subtitle="$t('settings.members.subtitle')"
       />
-      <button
-        type="button"
-        class="shrink-0 rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
-        @click="openInvite"
-      >
+      <BaseButton class="shrink-0" @click="openInvite">
         {{ $t('settings.members.invite') }}
-      </button>
+      </BaseButton>
     </div>
 
-    <p
-      v-if="formError && !showForm"
-      class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
-    >
+    <BaseAlert v-if="formError && !showForm" tone="danger" role="alert" class="mb-4">
       {{ formError }}
-    </p>
+    </BaseAlert>
 
-    <form
-      v-if="showForm"
-      class="mb-6 space-y-4 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
-      @submit.prevent="onSubmit"
-    >
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-        {{ formTitle }}
-      </h2>
-      <p
-        v-if="formError"
-        class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
-      >
-        {{ formError }}
-      </p>
-      <div class="grid gap-4 sm:grid-cols-2">
-        <label v-if="!editingId" class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('settings.members.fields.email')
-          }}</span>
-          <input
-            v-model="form.email"
-            type="email"
+    <form v-if="showForm" class="mb-6" @submit.prevent="onSubmit">
+      <BaseCard class="space-y-4">
+        <h2 class="text-lg font-semibold text-text">
+          {{ formTitle }}
+        </h2>
+        <BaseAlert v-if="formError" tone="danger" role="alert">
+          {{ formError }}
+        </BaseAlert>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <FormField
+            v-if="!editingId"
+            id="member_email"
+            :label="$t('settings.members.fields.email')"
             required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          />
-        </label>
-        <label v-if="!editingId" class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('settings.members.fields.name')
-          }}</span>
-          <input
-            v-model="form.name"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          />
-          <span class="mt-1 block text-xs text-gray-500">{{
-            $t('settings.members.fields.nameHint')
-          }}</span>
-        </label>
-        <div v-if="editingId" class="sm:col-span-2">
-          <p class="font-medium text-gray-900 dark:text-gray-100">
-            {{ form.name }}
-          </p>
-          <p class="text-sm text-gray-500">{{ form.email }}</p>
-        </div>
-        <label class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('settings.members.fields.role')
-          }}</span>
-          <select
-            v-model="form.role"
-            required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
           >
-            <option v-for="role in ROLE_OPTIONS" :key="role" :value="role">
-              {{ roleLabel(role) }}
-            </option>
-          </select>
-        </label>
-      </div>
-      <div class="flex justify-end gap-3">
-        <button
-          type="button"
-          class="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-          @click="cancelForm"
-        >
-          {{ $t('common.cancel') }}
-        </button>
-        <button
-          type="submit"
-          :disabled="submitting"
-          class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
-        >
-          {{ submitting ? $t('common.loading') : $t('settings.members.save') }}
-        </button>
-      </div>
+            <template #default="{ describedBy, ariaInvalid }">
+              <BaseInput
+                id="member_email"
+                v-model="form.email"
+                type="email"
+                required
+                :described-by="describedBy"
+                :aria-invalid="ariaInvalid"
+              />
+            </template>
+          </FormField>
+          <FormField
+            v-if="!editingId"
+            id="member_name"
+            :label="$t('settings.members.fields.name')"
+            :hint="$t('settings.members.fields.nameHint')"
+          >
+            <template #default="{ describedBy, ariaInvalid }">
+              <BaseInput
+                id="member_name"
+                v-model="form.name"
+                :described-by="describedBy"
+                :aria-invalid="ariaInvalid"
+              />
+            </template>
+          </FormField>
+          <div v-if="editingId" class="sm:col-span-2">
+            <p class="font-medium text-text">
+              {{ form.name }}
+            </p>
+            <p class="text-sm text-muted">{{ form.email }}</p>
+          </div>
+          <FormField id="member_role" :label="$t('settings.members.fields.role')" required>
+            <template #default="{ describedBy, ariaInvalid }">
+              <BaseSelect
+                id="member_role"
+                v-model="form.role"
+                required
+                :described-by="describedBy"
+                :aria-invalid="ariaInvalid"
+              >
+                <option v-for="role in ROLE_OPTIONS" :key="role" :value="role">
+                  {{ roleLabel(role) }}
+                </option>
+              </BaseSelect>
+            </template>
+          </FormField>
+        </div>
+        <div class="flex justify-end gap-3">
+          <BaseButton variant="secondary" @click="cancelForm">
+            {{ $t('common.cancel') }}
+          </BaseButton>
+          <BaseButton type="submit" :disabled="submitting">
+            {{ submitting ? $t('common.loading') : $t('settings.members.save') }}
+          </BaseButton>
+        </div>
+      </BaseCard>
     </form>
 
     <LoadingState v-if="loading" />
@@ -251,76 +270,50 @@ async function onRemove(member: Member): Promise<void> {
       :message="error ?? $t('settings.members.loadError')"
       @retry="reload"
     />
-    <div
-      v-else-if="!tenant.currentTenantId"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
-      {{ $t('settings.members.needsTenant') }}
-    </div>
-    <div
-      v-else-if="!data?.length"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
+    <EmptyState v-else-if="!tenant.currentTenantId" :message="$t('settings.members.needsTenant')" />
+    <EmptyState v-else-if="!data?.length" :message="$t('settings.members.empty')">
       <p>{{ $t('settings.members.empty') }}</p>
       <p class="mt-2 text-sm">{{ $t('settings.members.emptyHint') }}</p>
-      <button
-        type="button"
-        class="mt-4 text-sm text-violet-600 hover:underline"
-        @click="openInvite"
-      >
+      <BaseButton variant="tertiary" class="mt-4" @click="openInvite">
         {{ $t('settings.members.invite') }}
-      </button>
-    </div>
-    <div
-      v-else
-      class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800"
-    >
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-        <thead class="bg-gray-50 dark:bg-gray-900">
+      </BaseButton>
+    </EmptyState>
+    <div v-else class="overflow-hidden rounded-lg border border-border">
+      <table class="min-w-full divide-y divide-border">
+        <thead class="bg-surface">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.members.fields.name') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.members.fields.email') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.members.fields.role') }}
             </th>
-            <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-right text-sm font-medium text-muted">
               {{ $t('common.actions') }}
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+        <tbody class="divide-y divide-border bg-surface">
           <tr v-for="member in data" :key="member.id">
-            <td class="px-4 py-3 font-medium">{{ member.name }}</td>
-            <td class="px-4 py-3 text-sm text-gray-600">{{ member.email }}</td>
+            <td class="px-4 py-3 font-medium text-text">{{ member.name }}</td>
+            <td class="px-4 py-3 text-sm text-muted">{{ member.email }}</td>
             <td class="px-4 py-3 text-sm">
-              <span
-                class="rounded px-2 py-0.5 text-xs font-medium"
-                :class="
-                  member.role === 'tenant_admin'
-                    ? 'bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300'
-                    : member.role === 'read_only_viewer'
-                      ? 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
-                      : 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300'
-                "
-              >
-                {{ roleLabel(member.role) }}
-              </span>
+              <BaseBadge
+                :label="roleLabel(member.role)"
+                :tone="roleTone(member.role)"
+                :icon="roleIcon(member.role)"
+              />
             </td>
             <td class="space-x-3 px-4 py-3 text-right text-sm">
-              <button
-                type="button"
-                class="text-violet-600 hover:underline"
-                @click="openEdit(member)"
-              >
+              <button type="button" class="link text-action" @click="openEdit(member)">
                 {{ $t('common.edit') }}
               </button>
               <button
                 type="button"
-                class="text-red-600 hover:underline disabled:opacity-60"
+                class="link text-danger disabled:opacity-60"
                 :disabled="removingId === member.id"
                 @click="onRemove(member)"
               >
