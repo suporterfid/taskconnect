@@ -94,6 +94,25 @@ class TaskAuthorizationTest extends TestCase
         )->assertOk();
     }
 
+    public function test_tenant_admin_has_full_permissions(): void
+    {
+        [$owner, $tenant, $environment] = $this->createTenantAdmin('Admin Tenant', TenantRole::TenantAdmin);
+        $task = $this->createActiveTask($tenant->id, $environment->id, $owner->id);
+        $run = $this->createPendingRun($task);
+        $deadRun = $this->createDeadRun($task);
+
+        $base = $this->environmentRoute($tenant, $environment, '/tasks/'.$task->public_id);
+
+        $this->actingAs($owner)->postJson($base.'/pause')->assertOk();
+        $this->actingAs($owner)->postJson($base.'/run-now')->assertStatus(202);
+        $this->actingAs($owner)->postJson(
+            $this->environmentRoute($tenant, $environment, '/task-runs/'.$run->public_id.'/cancel')
+        )->assertOk();
+        $this->actingAs($owner)->postJson(
+            $this->environmentRoute($tenant, $environment, '/task-runs/'.$deadRun->public_id.'/retry')
+        )->assertStatus(202);
+    }
+
     private function createActiveTask(int $tenantId, int $environmentId, int $userId): Task
     {
         $task = Task::factory()->create([
