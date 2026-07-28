@@ -5,11 +5,19 @@ import { useI18n } from 'vue-i18n'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseBadge from '@/components/ui/BaseBadge.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import FormField from '@/components/ui/FormField.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { Environment, EnvironmentPayload } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
+import { semanticIcons } from '@/utils/icons'
 
 const { t } = useI18n()
 const tenant = useTenantStore()
@@ -152,76 +160,60 @@ async function onArchive(env: Environment): Promise<void> {
         :title="$t('environments.title')"
         :subtitle="$t('environments.subtitle')"
       />
-      <button
-        type="button"
-        class="shrink-0 rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
-        @click="openCreate"
-      >
+      <BaseButton class="shrink-0" @click="openCreate">
         {{ $t('environments.create') }}
-      </button>
+      </BaseButton>
     </div>
 
-    <p
-      v-if="formError && !showForm"
-      class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
-    >
+    <BaseAlert v-if="formError && !showForm" tone="danger" role="alert" class="mb-4">
       {{ formError }}
-    </p>
+    </BaseAlert>
 
-    <form
-      v-if="showForm"
-      class="mb-6 space-y-4 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
-      @submit.prevent="onSubmit"
-    >
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-        {{ formTitle }}
-      </h2>
-      <p
-        v-if="formError"
-        class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
-      >
-        {{ formError }}
-      </p>
-      <div class="grid gap-4 sm:grid-cols-2">
-        <label class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('environments.fields.name')
-          }}</span>
-          <input
-            v-model="form.name"
-            required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          />
-        </label>
-        <label class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('environments.fields.slug')
-          }}</span>
-          <input
-            v-model="form.slug"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm"
-          />
-          <span class="mt-1 block text-xs text-gray-500">{{
-            $t('environments.fields.slugHint')
-          }}</span>
-        </label>
-      </div>
-      <div class="flex justify-end gap-3">
-        <button
-          type="button"
-          class="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-          @click="cancelForm"
-        >
-          {{ $t('common.cancel') }}
-        </button>
-        <button
-          type="submit"
-          :disabled="submitting"
-          class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
-        >
-          {{ submitting ? $t('common.loading') : $t('environments.save') }}
-        </button>
-      </div>
+    <form v-if="showForm" class="mb-6" @submit.prevent="onSubmit">
+      <BaseCard class="space-y-4">
+        <h2 class="text-lg font-semibold text-text">
+          {{ formTitle }}
+        </h2>
+        <BaseAlert v-if="formError" tone="danger" role="alert">
+          {{ formError }}
+        </BaseAlert>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <FormField id="env_name" :label="$t('environments.fields.name')" required>
+            <template #default="{ describedBy, ariaInvalid }">
+              <BaseInput
+                id="env_name"
+                v-model="form.name"
+                required
+                :described-by="describedBy"
+                :aria-invalid="ariaInvalid"
+              />
+            </template>
+          </FormField>
+          <FormField
+            id="env_slug"
+            :label="$t('environments.fields.slug')"
+            :hint="$t('environments.fields.slugHint')"
+          >
+            <template #default="{ describedBy, ariaInvalid }">
+              <BaseInput
+                id="env_slug"
+                v-model="form.slug"
+                class="font-mono text-sm"
+                :described-by="describedBy"
+                :aria-invalid="ariaInvalid"
+              />
+            </template>
+          </FormField>
+        </div>
+        <div class="flex justify-end gap-3">
+          <BaseButton variant="secondary" @click="cancelForm">
+            {{ $t('common.cancel') }}
+          </BaseButton>
+          <BaseButton type="submit" :disabled="submitting">
+            {{ submitting ? $t('common.loading') : $t('environments.save') }}
+          </BaseButton>
+        </div>
+      </BaseCard>
     </form>
 
     <LoadingState v-if="loading" />
@@ -230,81 +222,53 @@ async function onArchive(env: Environment): Promise<void> {
       :message="error ?? $t('environments.loadError')"
       @retry="reload"
     />
-    <div
-      v-else-if="!tenant.currentTenantId"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
-      {{ $t('environments.needsTenant') }}
-    </div>
-    <div
-      v-else-if="!data?.length"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
+    <EmptyState v-else-if="!tenant.currentTenantId" :message="$t('environments.needsTenant')" />
+    <EmptyState v-else-if="!data?.length" :message="$t('environments.empty')">
       <p>{{ $t('environments.empty') }}</p>
       <p class="mt-2 text-sm">{{ $t('environments.emptyHint') }}</p>
-      <button
-        type="button"
-        class="mt-4 text-sm text-violet-600 hover:underline"
-        @click="openCreate"
-      >
+      <BaseButton variant="tertiary" class="mt-4" @click="openCreate">
         {{ $t('environments.create') }}
-      </button>
-    </div>
-    <div
-      v-else
-      class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800"
-    >
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-        <thead class="bg-gray-50 dark:bg-gray-900">
+      </BaseButton>
+    </EmptyState>
+    <div v-else class="overflow-hidden rounded-lg border border-border">
+      <table class="min-w-full divide-y divide-border">
+        <thead class="bg-surface">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('environments.fields.name') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('environments.fields.slug') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('common.status') }}
             </th>
-            <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-right text-sm font-medium text-muted">
               {{ $t('common.actions') }}
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+        <tbody class="divide-y divide-border bg-surface">
           <tr v-for="env in data" :key="env.id">
-            <td class="px-4 py-3 font-medium">{{ env.name }}</td>
-            <td class="px-4 py-3 font-mono text-sm text-gray-600">
+            <td class="px-4 py-3 font-medium text-text">{{ env.name }}</td>
+            <td class="px-4 py-3 font-mono text-sm text-muted">
               {{ env.slug }}
             </td>
             <td class="px-4 py-3 text-sm">
-              <span
-                class="rounded px-2 py-0.5 text-xs font-medium"
-                :class="
-                  env.archived_at
-                    ? 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
-                    : 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300'
-                "
-              >
-                {{
-                  env.archived_at
-                    ? $t('environments.status.archived')
-                    : $t('environments.status.active')
-                }}
-              </span>
+              <BaseBadge
+                :label="env.archived_at ? $t('environments.status.archived') : $t('environments.status.active')"
+                :tone="env.archived_at ? 'neutral' : 'success'"
+                :icon="env.archived_at ? semanticIcons.archived : semanticIcons.success"
+              />
             </td>
             <td class="space-x-3 px-4 py-3 text-right text-sm">
               <template v-if="!env.archived_at">
-                <button
-                  type="button"
-                  class="text-violet-600 hover:underline"
-                  @click="openEdit(env)"
-                >
+                <button type="button" class="link text-action" @click="openEdit(env)">
                   {{ $t('common.edit') }}
                 </button>
                 <button
                   type="button"
-                  class="text-red-600 hover:underline disabled:opacity-60"
+                  class="link text-danger disabled:opacity-60"
                   :disabled="archivingId === env.id"
                   @click="onArchive(env)"
                 >

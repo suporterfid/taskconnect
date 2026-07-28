@@ -6,11 +6,19 @@ import { RouterLink, useRouter } from 'vue-router'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseBadge from '@/components/ui/BaseBadge.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseTextarea from '@/components/ui/BaseTextarea.vue'
+import CodeBlock from '@/components/ui/CodeBlock.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { EndpointProfile, EndpointTestResult } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
+import { semanticIcons } from '@/utils/icons'
 
 const props = defineProps<{ id: string }>()
 const { t } = useI18n()
@@ -85,10 +93,7 @@ async function onTest(): Promise<void> {
 <template>
   <div>
     <div class="mb-4">
-      <RouterLink
-        to="/endpoint-profiles"
-        class="text-sm text-violet-600 hover:underline"
-      >
+      <RouterLink to="/endpoint-profiles" class="link text-sm text-action">
         ← {{ $t('common.back') }}
       </RouterLink>
     </div>
@@ -108,97 +113,82 @@ async function onTest(): Promise<void> {
         <div class="flex flex-wrap gap-2">
           <RouterLink
             :to="`/endpoint-profiles/${data.id}/edit`"
-            class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
+            class="inline-flex items-center rounded-md bg-action px-4 py-2 text-sm font-medium text-white hover:bg-action-hover"
           >
             {{ $t('common.edit') }}
           </RouterLink>
-          <button
-            type="button"
-            :disabled="archiving"
-            class="rounded-md border border-red-300 px-4 py-2 text-sm text-red-700 hover:bg-red-50 disabled:opacity-60"
-            @click="onArchive"
-          >
+          <BaseButton variant="danger" :disabled="archiving" @click="onArchive">
             {{ $t('endpointProfiles.archive') }}
-          </button>
+          </BaseButton>
         </div>
       </div>
 
-      <p
-        v-if="actionError"
-        class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
-      >
+      <BaseAlert v-if="actionError" tone="danger" role="alert" class="mb-4">
         {{ actionError }}
-      </p>
+      </BaseAlert>
 
-      <dl
-        class="mb-6 grid gap-4 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 sm:grid-cols-2"
-      >
+      <BaseCard class="mb-6">
+        <dl class="grid gap-4 sm:grid-cols-2">
         <div class="sm:col-span-2">
-          <dt class="text-sm text-gray-500">
+          <dt class="text-sm text-muted">
             {{ $t('endpointProfiles.detail.baseUrl') }}
           </dt>
-          <dd class="mt-1 break-all font-mono text-sm">{{ data.base_url }}</dd>
+          <dd class="mt-1 break-all font-mono text-sm text-text">{{ data.base_url }}</dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">
+          <dt class="text-sm text-muted">
             {{ $t('endpointProfiles.fields.method') }}
           </dt>
-          <dd class="mt-1 font-mono text-sm">{{ data.method }}</dd>
+          <dd class="mt-1 font-mono text-sm text-text">{{ data.method }}</dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('common.status') }}</dt>
+          <dt class="text-sm text-muted">{{ $t('common.status') }}</dt>
           <dd class="mt-1 text-sm">
-            {{
-              data.enabled
-                ? $t('endpointProfiles.enabled')
-                : $t('endpointProfiles.disabled')
-            }}
+            <BaseBadge
+              :label="data.enabled ? $t('endpointProfiles.enabled') : $t('endpointProfiles.disabled')"
+              :tone="data.enabled ? 'success' : 'neutral'"
+              :icon="data.enabled ? semanticIcons.success : semanticIcons.neutral"
+            />
           </dd>
         </div>
         <div v-if="data.description" class="sm:col-span-2">
-          <dt class="text-sm text-gray-500">
+          <dt class="text-sm text-muted">
             {{ $t('common.description') }}
           </dt>
-          <dd class="mt-1 text-sm">{{ data.description }}</dd>
+          <dd class="mt-1 text-sm text-text">{{ data.description }}</dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">
+          <dt class="text-sm text-muted">
             {{ $t('endpointProfiles.detail.auth') }}
           </dt>
-          <dd class="mt-1 text-sm">
+          <dd class="mt-1 text-sm text-text">
             {{ $t(`endpointProfiles.authModes.${data.auth_mode}`) }}
-            <span
-              v-if="data.auth_header_name"
-              class="ml-1 font-mono text-gray-500"
-            >{{ data.auth_header_name }}</span>
-            <span
-              v-if="data.auth_query_param"
-              class="ml-1 font-mono text-gray-500"
-            >?{{ data.auth_query_param }}</span>
+            <span v-if="data.auth_header_name" class="ml-1 font-mono text-muted">{{ data.auth_header_name }}</span>
+            <span v-if="data.auth_query_param" class="ml-1 font-mono text-muted">?{{ data.auth_query_param }}</span>
           </dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">
+          <dt class="text-sm text-muted">
             {{ $t('endpointProfiles.detail.secret') }}
           </dt>
-          <dd class="mt-1 font-mono text-sm">
+          <dd class="mt-1 font-mono text-sm text-text">
             {{ data.secret_id || $t('endpointProfiles.detail.none') }}
           </dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">
+          <dt class="text-sm text-muted">
             {{ $t('endpointProfiles.detail.timeouts') }}
           </dt>
-          <dd class="mt-1 text-sm">
+          <dd class="mt-1 text-sm tabular-nums text-text">
             {{ data.connect_timeout }}s /
             {{ data.total_timeout }}s
           </dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">
+          <dt class="text-sm text-muted">
             {{ $t('endpointProfiles.detail.security') }}
           </dt>
-          <dd class="mt-1 text-sm">
+          <dd class="mt-1 text-sm text-text">
             TLS:
             {{
               data.verify_tls
@@ -214,122 +204,100 @@ async function onTest(): Promise<void> {
           </dd>
         </div>
         <div v-if="data.allowed_path_prefix" class="sm:col-span-2">
-          <dt class="text-sm text-gray-500">
+          <dt class="text-sm text-muted">
             {{ $t('endpointProfiles.fields.allowedPathPrefix') }}
           </dt>
-          <dd class="mt-1 font-mono text-sm">
+          <dd class="mt-1 font-mono text-sm text-text">
             {{ data.allowed_path_prefix }}
           </dd>
         </div>
         <div class="sm:col-span-2">
-          <dt class="text-sm text-gray-500">
+          <dt class="text-sm text-muted">
             {{ $t('endpointProfiles.detail.headers') }}
           </dt>
           <dd class="mt-1">
-            <p v-if="!headerEntries.length" class="text-sm text-gray-500">
+            <p v-if="!headerEntries.length" class="text-sm text-muted">
               {{ $t('endpointProfiles.detail.noHeaders') }}
             </p>
-            <ul v-else class="space-y-1 font-mono text-sm">
+            <ul v-else class="space-y-1 font-mono text-sm text-text">
               <li v-for="[key, value] in headerEntries" :key="key">
-                <span class="text-gray-500">{{ key }}:</span>
+                <span class="text-muted">{{ key }}:</span>
                 {{ value }}
               </li>
             </ul>
           </dd>
         </div>
-      </dl>
+        </dl>
+      </BaseCard>
 
-      <section
-        class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
-      >
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+      <BaseCard>
+        <h2 class="text-lg font-semibold text-text">
           {{ $t('endpointProfiles.test.title') }}
         </h2>
-        <p class="mt-1 text-sm text-gray-500">
+        <p class="mt-1 text-sm text-muted">
           {{ $t('endpointProfiles.test.subtitle') }}
         </p>
 
         <div class="mt-4 grid gap-4 sm:grid-cols-2">
           <label class="block sm:col-span-2">
-            <span class="mb-1 block text-sm font-medium text-gray-700">{{
+            <span class="mb-1 block text-sm font-medium text-text">{{
               $t('endpointProfiles.test.path')
             }}</span>
-            <input
+            <BaseInput
               v-model="testPath"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm"
+              class="font-mono text-sm"
               :placeholder="$t('endpointProfiles.test.pathPlaceholder')"
             />
           </label>
           <label class="block sm:col-span-2">
-            <span class="mb-1 block text-sm font-medium text-gray-700">{{
+            <span class="mb-1 block text-sm font-medium text-text">{{
               $t('endpointProfiles.test.body')
             }}</span>
-            <textarea
-              v-model="testBody"
-              rows="3"
-              class="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm"
-            />
+            <BaseTextarea v-model="testBody" :rows="3" class="font-mono text-sm" />
           </label>
         </div>
 
-        <button
-          type="button"
-          :disabled="testing"
-          class="mt-4 rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
-          @click="onTest"
-        >
+        <BaseButton class="mt-4" :disabled="testing" @click="onTest">
           {{
             testing
               ? $t('endpointProfiles.test.running')
               : $t('endpointProfiles.test.run')
           }}
-        </button>
+        </BaseButton>
 
-        <div
-          v-if="testResult"
-          class="mt-6 space-y-3 rounded-md border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950"
-        >
-          <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200">
+        <div v-if="testResult" class="mt-6 space-y-3 rounded-md border border-border bg-surface-emphasis p-4">
+          <h3 class="text-sm font-semibold text-text">
             {{ $t('endpointProfiles.test.result') }}
           </h3>
-          <p class="text-sm">
-            <span class="text-gray-500">{{ $t('endpointProfiles.test.status') }}:</span>
+          <p class="text-sm text-text">
+            <span class="text-muted">{{ $t('endpointProfiles.test.status') }}:</span>
             {{
               testResult.response_status ??
                 $t('endpointProfiles.test.noStatus')
             }}
           </p>
-          <p class="break-all font-mono text-sm">
-            <span class="text-gray-500">{{ $t('endpointProfiles.test.url') }}:</span>
+          <p class="break-all font-mono text-sm text-text">
+            <span class="text-muted">{{ $t('endpointProfiles.test.url') }}:</span>
             {{ testResult.request_url_redacted }}
           </p>
-          <p
-            v-if="testResult.transport_error_code"
-            class="text-sm text-red-700"
-          >
+          <BaseAlert v-if="testResult.transport_error_code" tone="danger" role="alert">
             <span class="font-medium">{{
               $t('endpointProfiles.test.transportError')
             }}:</span>
             {{ testResult.transport_error_code }}
-          </p>
+          </BaseAlert>
           <div v-if="testResult.request_headers_redacted">
-            <p class="text-sm text-gray-500">
-              {{ $t('endpointProfiles.test.responseHeaders') }}
-            </p>
-            <pre
-              class="mt-1 overflow-x-auto rounded bg-white p-2 font-mono text-xs dark:bg-gray-900"
-            >{{ JSON.stringify(testResult.request_headers_redacted, null, 2) }}</pre>
+            <CodeBlock :label="$t('endpointProfiles.test.responseHeaders')">{{
+              JSON.stringify(testResult.request_headers_redacted, null, 2)
+            }}</CodeBlock>
           </div>
           <div v-if="testResult.response_body_truncated">
-            <p class="text-sm text-gray-500">
-              {{ $t('endpointProfiles.test.responseBody') }}
-            </p>
-            <pre
-              class="mt-1 max-h-64 overflow-auto rounded bg-white p-2 font-mono text-xs dark:bg-gray-900"
-            >{{ testResult.response_body_truncated }}</pre>
+            <CodeBlock :label="$t('endpointProfiles.test.responseBody')">{{
+              testResult.response_body_truncated
+            }}</CodeBlock>
           </div>
         </div>
-      </section>
+      </BaseCard>
     </template>
   </div>
 </template>
