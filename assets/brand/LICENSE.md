@@ -35,3 +35,12 @@ fork, a competing product, or an unrelated service).
 See `docs/visual-identity-spec.md` §8 ("Project marks") and §12
 ("Repository asset guidance") for the broader design system these assets
 sit inside.
+
+## Other asset licenses
+
+- **In-app icon family** (`frontend/src/components/AppIcon.vue`,
+  `frontend/src/utils/icons.ts`): [lucide-vue-next](https://lucide.dev),
+  ISC license (`frontend/node_modules/lucide-vue-next/LICENSE` once
+  installed) — a permissive license comparable to MIT/BSD-2-Clause. Icons
+  are imported per-glyph and tree-shaken by Vite, not vendored as files in
+  this repo. See #96.
