@@ -263,7 +263,7 @@ async function onArchive(env: Environment): Promise<void> {
             </td>
             <td class="space-x-3 px-4 py-3 text-right text-sm">
               <template v-if="!env.archived_at">
-                <button type="button" class="link text-action" @click="openEdit(env)">
+                <button type="button" class="link text-action-text" @click="openEdit(env)">
                   {{ $t('common.edit') }}
                 </button>
                 <button

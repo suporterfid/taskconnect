@@ -59,7 +59,7 @@ async function onSubmit(): Promise<void> {
             <label for="password" class="block text-sm font-medium text-text">
               {{ $t('auth.login.password') }}
             </label>
-            <RouterLink to="/forgot-password" class="link text-xs text-action">
+            <RouterLink to="/forgot-password" class="link text-xs text-action-text">
               {{ $t('auth.login.forgotPassword') }}
             </RouterLink>
           </div>

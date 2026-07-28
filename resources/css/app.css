@@ -29,6 +29,8 @@
     --color-action: var(--color-purple-500);
     --color-action-hover: var(--color-purple-800);
     --color-focus: var(--color-purple-500);
+    /* Text-only accent shade — see the token comment in frontend/src/style.css (#118). */
+    --color-action-text: #9561f2;
 
     /* Status tones — measured contrast ratios recorded in frontend/src/style.css. */
     --color-success: #4ade80;

@@ -7,7 +7,7 @@ describe('BaseButton', () => {
   it.each([
     ['primary', 'bg-action'],
     ['secondary', 'border-border'],
-    ['tertiary', 'text-action'],
+    ['tertiary', 'text-action-text'],
     ['danger', 'bg-danger-strong'],
   ] as const)('renders the %s variant', (variant, expectedClass) => {
     const wrapper = mount(BaseButton, { props: { variant }, slots: { default: 'Save' } })

@@ -125,7 +125,7 @@ async function onRetry(run: TaskRun): Promise<void> {
     <p v-if="taskIdFilter || runStateFilter" class="mb-4 text-sm text-muted">
       <template v-if="taskIdFilter">
         {{ $t('runs.filteredByTask') }}
-        <RouterLink :to="`/tasks/${taskIdFilter}`" class="link text-action">
+        <RouterLink :to="`/tasks/${taskIdFilter}`" class="link text-action-text">
           {{ taskIdFilter }}
         </RouterLink>
       </template>
@@ -137,7 +137,7 @@ async function onRetry(run: TaskRun): Promise<void> {
         </span>
       </template>
       ·
-      <RouterLink to="/runs" class="link text-action">
+      <RouterLink to="/runs" class="link text-action-text">
         {{ $t('runs.clearFilter') }}
       </RouterLink>
     </p>
@@ -173,7 +173,7 @@ async function onRetry(run: TaskRun): Promise<void> {
           <tr v-for="run in filtered" :key="run.id">
             <td class="px-4 py-3 font-mono text-sm text-text">{{ run.id }}</td>
             <td class="px-4 py-3 text-sm">
-              <RouterLink v-if="run.task_id" :to="`/tasks/${run.task_id}`" class="link text-action">
+              <RouterLink v-if="run.task_id" :to="`/tasks/${run.task_id}`" class="link text-action-text">
                 {{ run.task_id }}
               </RouterLink>
               <span v-else class="text-muted">—</span>
@@ -202,13 +202,13 @@ async function onRetry(run: TaskRun): Promise<void> {
                 <button
                   v-if="canRetry(run.run_state)"
                   type="button"
-                  class="link text-action disabled:opacity-60"
+                  class="link text-action-text disabled:opacity-60"
                   :disabled="actionLoading !== null"
                   @click="onRetry(run)"
                 >
                   {{ $t('runs.actions.retry') }}
                 </button>
-                <RouterLink :to="`/runs/${run.id}`" class="link text-action">
+                <RouterLink :to="`/runs/${run.id}`" class="link text-action-text">
                   {{ $t('runs.view') }}
                 </RouterLink>
               </div>

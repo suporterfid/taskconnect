@@ -93,7 +93,7 @@ async function onTest(): Promise<void> {
 <template>
   <div>
     <div class="mb-4">
-      <RouterLink to="/endpoint-profiles" class="link text-sm text-action">
+      <RouterLink to="/endpoint-profiles" class="link text-sm text-action-text">
         ← {{ $t('common.back') }}
       </RouterLink>
     </div>

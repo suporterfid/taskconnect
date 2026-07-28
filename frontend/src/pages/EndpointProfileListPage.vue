@@ -96,7 +96,7 @@ async function onTest(profile: EndpointProfile): Promise<void> {
     <EmptyState v-else-if="!data?.length" :message="$t('endpointProfiles.empty')">
       <p>{{ $t('endpointProfiles.empty') }}</p>
       <p class="mt-2 text-sm">{{ $t('endpointProfiles.emptyHint') }}</p>
-      <RouterLink to="/endpoint-profiles/new" class="mt-4 inline-block link text-sm text-action">
+      <RouterLink to="/endpoint-profiles/new" class="mt-4 inline-block link text-sm text-action-text">
         {{ $t('endpointProfiles.create') }}
       </RouterLink>
     </EmptyState>
@@ -124,7 +124,7 @@ async function onTest(profile: EndpointProfile): Promise<void> {
         <tbody class="divide-y divide-border bg-surface">
           <tr v-for="profile in data" :key="profile.id">
             <td class="px-4 py-3">
-              <RouterLink :to="`/endpoint-profiles/${profile.id}`" class="link font-medium text-action">
+              <RouterLink :to="`/endpoint-profiles/${profile.id}`" class="link font-medium text-action-text">
                 {{ profile.name }}
               </RouterLink>
             </td>
@@ -146,7 +146,7 @@ async function onTest(profile: EndpointProfile): Promise<void> {
             <td class="space-x-3 px-4 py-3 text-right text-sm">
               <button
                 type="button"
-                class="link text-action disabled:opacity-60"
+                class="link text-action-text disabled:opacity-60"
                 :disabled="testingId === profile.id"
                 @click="onTest(profile)"
               >
@@ -156,10 +156,10 @@ async function onTest(profile: EndpointProfile): Promise<void> {
                     : $t('endpointProfiles.detail.test')
                 }}
               </button>
-              <RouterLink :to="`/endpoint-profiles/${profile.id}`" class="link text-action">
+              <RouterLink :to="`/endpoint-profiles/${profile.id}`" class="link text-action-text">
                 {{ $t('endpointProfiles.view') }}
               </RouterLink>
-              <RouterLink :to="`/endpoint-profiles/${profile.id}/edit`" class="link text-action">
+              <RouterLink :to="`/endpoint-profiles/${profile.id}/edit`" class="link text-action-text">
                 {{ $t('common.edit') }}
               </RouterLink>
             </td>

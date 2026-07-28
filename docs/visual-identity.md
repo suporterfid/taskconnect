@@ -51,6 +51,7 @@ two files are kept in sync so it's correct the moment it is wired up).
 | `--color-border-strong` | `rgb(211 211 211 / 48%)` | — |
 | `--color-action` | `#814dde` | `--color-purple-500` |
 | `--color-action-hover` | `#1f0d69` | `--color-purple-800` |
+| `--color-action-text` | `#9561f2` | — (lightened shade of `--color-purple-500`) |
 | `--color-focus` | `#814dde` | `--color-purple-500` |
 
 ### Shape, spacing, motion
@@ -103,6 +104,20 @@ out of `style.css` and fails if an edit silently drops a pair below its required
 Each status tone always pairs with an icon (`frontend/src/utils/icons.ts`'s `semanticIcons`
 map) and a text label (`BaseBadge` requires a `label` prop, not just a slot) — §3.3's "never
 color alone" rule. See [Icon family](#icon-family-96) below.
+
+### Text-safe accent token (#118)
+
+`--color-action` (`#814dde`) is right as a *background* with white text (`BaseButton`
+primary) and for icons/borders, but as small/normal-size *foreground* text on the app's dark
+backgrounds it measures 4.05:1 on canvas and 3.50:1 on surface — both below the 4.5:1
+normal-text minimum. This was never contrast-checked before #98's real-browser axe sweep
+surfaced it (jsdom, used everywhere else, can't compute real contrast).
+
+`--color-action-text` (`#9561f2`) is a lightened shade of the same hue, for text-only uses
+only: 5.27:1 on canvas, 4.56:1 on surface. Every link (`link text-action-text`) and
+`BaseButton`'s `tertiary` variant now use it; `--color-action` itself is untouched, so
+buttons, icons, and borders keep their original value. Both pairs are asserted in
+`frontend/src/style.contrast.spec.ts`.
 
 ### In-app type scale (#87)
 
@@ -162,4 +177,4 @@ inline styles instead — see the comment at the top of that template for the fu
 - Shared spec: [`docs/visual-identity-spec.md`](visual-identity-spec.md)
 - Token source of truth: `frontend/src/style.css` (mirrored, currently dormant, in `resources/css/app.css`)
 - Contrast verification: `frontend/src/style.contrast.spec.ts` (unit), `frontend/e2e/a11y.spec.ts` (real-browser axe sweep)
-- Known, tracked gap: [#118](https://github.com/suporterfid/taskconnect/issues/118) — `--color-action` (`text-action` link color) measures below the 4.5:1 normal-text minimum on both `canvas` (4.05:1) and `surface` (3.50:1); fixing it means introducing and measuring a new text-only token across ~22 files, which needs a maintainer's sign-off on the exact replacement value before it lands.
+- Resolved gap: [#118](https://github.com/suporterfid/taskconnect/issues/118) — `--color-action`'s text usages measured below 4.5:1; fixed via the `--color-action-text` token, see [Text-safe accent token](#text-safe-accent-token-118) above.

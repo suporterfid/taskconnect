@@ -48,7 +48,7 @@ function statusLabel(status: string): string {
 <template>
   <div data-testid="pipeline-detail-page">
     <div class="mb-4">
-      <RouterLink to="/pipelines" class="link text-sm text-action">
+      <RouterLink to="/pipelines" class="link text-sm text-action-text">
         ← {{ $t('common.back') }}
       </RouterLink>
     </div>
@@ -113,13 +113,13 @@ function statusLabel(status: string): string {
                 />
               </td>
               <td class="px-4 py-3 text-sm">
-                <RouterLink v-if="node.task_id" :to="`/tasks/${node.task_id}`" class="link text-action">
+                <RouterLink v-if="node.task_id" :to="`/tasks/${node.task_id}`" class="link text-action-text">
                   {{ node.task_id }}
                 </RouterLink>
                 <span v-else class="text-muted">—</span>
               </td>
               <td class="px-4 py-3 text-sm">
-                <RouterLink v-if="node.task_run_id" :to="`/runs/${node.task_run_id}`" class="link text-action">
+                <RouterLink v-if="node.task_run_id" :to="`/runs/${node.task_run_id}`" class="link text-action-text">
                   {{ node.task_run_id }}
                 </RouterLink>
                 <span v-else class="text-muted">—</span>
