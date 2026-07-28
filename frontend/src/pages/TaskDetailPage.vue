@@ -6,12 +6,16 @@ import { RouterLink, useRouter } from 'vue-router'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseBadge from '@/components/ui/BaseBadge.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { Task, TaskRun } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
 import { formatScheduleHuman } from '@/utils/scheduleHuman'
+import { toneForRunState, toneForTaskStatus } from '@/utils/statusTone'
 
 const props = defineProps<{ id: string }>()
 const { t, locale } = useI18n()
@@ -134,7 +138,7 @@ async function onArchive(): Promise<void> {
 <template>
   <div>
     <div class="mb-4">
-      <RouterLink to="/tasks" class="text-sm text-violet-600 hover:underline">
+      <RouterLink to="/tasks" class="link text-sm text-action">
         ← {{ $t('common.back') }}
       </RouterLink>
     </div>
@@ -146,82 +150,83 @@ async function onArchive(): Promise<void> {
         <PageHeader :title="data.name" :subtitle="$t('tasks.detail.title')" />
         <RouterLink
           :to="`/tasks/${id}/edit`"
-          class="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          class="rounded-md border border-border px-4 py-2 text-sm text-text hover:border-border-strong"
         >
           {{ $t('common.edit') }}
         </RouterLink>
       </div>
 
-      <p
-        v-if="actionError"
-        class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
-        role="alert"
-      >
-        {{ actionError }}
-      </p>
+      <BaseAlert v-if="actionError" tone="danger" class="mb-4">{{ actionError }}</BaseAlert>
 
-      <dl class="grid gap-4 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900 sm:grid-cols-2">
+      <dl class="grid gap-4 rounded-lg border border-border bg-surface p-6 sm:grid-cols-2">
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('common.status') }}</dt>
-          <dd class="mt-1 text-sm font-medium">
-            {{ $t(`tasks.status.${data.definition_status}`) }}
+          <dt class="text-sm text-muted">{{ $t('common.status') }}</dt>
+          <dd class="mt-1 text-sm">
+            <BaseBadge
+              :label="$t(`tasks.status.${data.definition_status}`)"
+              :tone="toneForTaskStatus(data.definition_status).tone"
+              :icon="toneForTaskStatus(data.definition_status).icon"
+            />
           </dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('tasks.fields.workspaceId') }}</dt>
-          <dd class="mt-1 font-mono text-sm">{{ data.workspace_id || '—' }}</dd>
+          <dt class="text-sm text-muted">{{ $t('tasks.fields.workspaceId') }}</dt>
+          <dd class="mt-1 font-mono text-sm text-text">{{ data.workspace_id || '—' }}</dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('tasks.fields.taskType') }}</dt>
-          <dd class="mt-1 font-mono text-sm">{{ data.task_type || '—' }}</dd>
+          <dt class="text-sm text-muted">{{ $t('tasks.fields.taskType') }}</dt>
+          <dd class="mt-1 font-mono text-sm text-text">{{ data.task_type || '—' }}</dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('tasks.fields.priority') }}</dt>
-          <dd class="mt-1 text-sm">{{ data.priority ?? '—' }}</dd>
+          <dt class="text-sm text-muted">{{ $t('tasks.fields.priority') }}</dt>
+          <dd class="mt-1 text-sm tabular-nums text-text">{{ data.priority ?? '—' }}</dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('tasks.fields.egressProfile') }}</dt>
-          <dd class="mt-1 font-mono text-sm">{{ data.egress_profile || '—' }}</dd>
+          <dt class="text-sm text-muted">{{ $t('tasks.fields.egressProfile') }}</dt>
+          <dd class="mt-1 font-mono text-sm text-text">{{ data.egress_profile || '—' }}</dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('common.description') }}</dt>
-          <dd class="mt-1 text-sm">{{ data.description || '—' }}</dd>
+          <dt class="text-sm text-muted">{{ $t('common.description') }}</dt>
+          <dd class="mt-1 text-sm text-text">{{ data.description || '—' }}</dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('tasks.detail.schedule') }}</dt>
-          <dd class="mt-1 text-sm">
+          <dt class="text-sm text-muted">{{ $t('tasks.detail.schedule') }}</dt>
+          <dd class="mt-1 text-sm text-text">
             {{ scheduleLabel }}
           </dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('tasks.fields.timezone') }}</dt>
-          <dd class="mt-1 text-sm">{{ data.timezone || '—' }}</dd>
+          <dt class="text-sm text-muted">{{ $t('tasks.fields.timezone') }}</dt>
+          <dd class="mt-1 text-sm text-text">{{ data.timezone || '—' }}</dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('tasks.detail.nextRun') }}</dt>
-          <dd class="mt-1 text-sm">{{ formatDate(data.next_run_at) }}</dd>
+          <dt class="text-sm text-muted">{{ $t('tasks.detail.nextRun') }}</dt>
+          <dd class="mt-1 text-sm tabular-nums text-text">{{ formatDate(data.next_run_at) }}</dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('tasks.detail.lastRun') }}</dt>
-          <dd class="mt-1 text-sm">
+          <dt class="text-sm text-muted">{{ $t('tasks.detail.lastRun') }}</dt>
+          <dd class="mt-1 flex flex-wrap items-center gap-2 text-sm tabular-nums text-text">
             {{ formatDate(data.last_run_at) }}
-            <span v-if="data.last_run_state" class="text-gray-500">
-              ({{ $t(`runs.status.${data.last_run_state}`, data.last_run_state) }})
-            </span>
+            <BaseBadge
+              v-if="data.last_run_state"
+              :label="$t(`runs.status.${data.last_run_state}`, data.last_run_state)"
+              :tone="toneForRunState(data.last_run_state).tone"
+              :icon="toneForRunState(data.last_run_state).icon"
+            />
           </dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('tasks.fields.method') }}</dt>
-          <dd class="mt-1 font-mono text-sm">{{ data.method }}</dd>
+          <dt class="text-sm text-muted">{{ $t('tasks.fields.method') }}</dt>
+          <dd class="mt-1 font-mono text-sm text-text">{{ data.method }}</dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('tasks.fields.url') }}</dt>
-          <dd class="mt-1 break-all font-mono text-sm">{{ data.url_or_path || '—' }}</dd>
+          <dt class="text-sm text-muted">{{ $t('tasks.fields.url') }}</dt>
+          <dd class="mt-1 break-all font-mono text-sm text-text">{{ data.url_or_path || '—' }}</dd>
         </div>
         <div v-if="data.query && Object.keys(data.query).length">
-          <dt class="text-sm text-gray-500">{{ $t('tasks.fields.query') }}</dt>
+          <dt class="text-sm text-muted">{{ $t('tasks.fields.query') }}</dt>
           <dd class="mt-1">
-            <ul class="space-y-1 font-mono text-sm">
+            <ul class="space-y-1 font-mono text-sm text-text">
               <li v-for="(value, key) in data.query" :key="key">
                 {{ key }}={{ value }}
               </li>
@@ -229,81 +234,50 @@ async function onArchive(): Promise<void> {
           </dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('common.createdAt') }}</dt>
-          <dd class="mt-1 text-sm">{{ formatDate(data.created_at) }}</dd>
+          <dt class="text-sm text-muted">{{ $t('common.createdAt') }}</dt>
+          <dd class="mt-1 text-sm tabular-nums text-text">{{ formatDate(data.created_at) }}</dd>
         </div>
         <div>
-          <dt class="text-sm text-gray-500">{{ $t('common.updatedAt') }}</dt>
-          <dd class="mt-1 text-sm">{{ formatDate(data.updated_at) }}</dd>
+          <dt class="text-sm text-muted">{{ $t('common.updatedAt') }}</dt>
+          <dd class="mt-1 text-sm tabular-nums text-text">{{ formatDate(data.updated_at) }}</dd>
         </div>
       </dl>
 
       <div class="mt-6 flex flex-wrap gap-2">
-        <button
-          v-if="status === 'draft'"
-          type="button"
-          class="rounded-md bg-violet-600 px-3 py-2 text-sm text-white hover:bg-violet-700 disabled:opacity-60"
-          :disabled="actionLoading !== null"
-          @click="onActivate"
-        >
+        <BaseButton v-if="status === 'draft'" :disabled="actionLoading !== null" @click="onActivate">
           {{ $t('tasks.actions.activate') }}
-        </button>
-        <button
-          v-if="status === 'active'"
-          type="button"
-          class="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-60"
-          :disabled="actionLoading !== null"
-          @click="onPause"
-        >
+        </BaseButton>
+        <BaseButton v-if="status === 'active'" variant="secondary" :disabled="actionLoading !== null" @click="onPause">
           {{ $t('tasks.actions.pause') }}
-        </button>
-        <button
-          v-if="status === 'paused'"
-          type="button"
-          class="rounded-md bg-violet-600 px-3 py-2 text-sm text-white hover:bg-violet-700 disabled:opacity-60"
-          :disabled="actionLoading !== null"
-          @click="onResume"
-        >
+        </BaseButton>
+        <BaseButton v-if="status === 'paused'" :disabled="actionLoading !== null" @click="onResume">
           {{ $t('tasks.actions.resume') }}
-        </button>
-        <button
+        </BaseButton>
+        <BaseButton
           v-if="status === 'active' || status === 'paused' || status === 'draft'"
-          type="button"
-          class="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-60"
+          variant="secondary"
           :disabled="actionLoading !== null"
           @click="onRunNow"
         >
           {{ $t('tasks.actions.runNow') }}
-        </button>
-        <button
-          v-if="status !== 'archived'"
-          type="button"
-          class="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-60"
-          :disabled="actionLoading !== null"
-          @click="onTest"
-        >
+        </BaseButton>
+        <BaseButton v-if="status !== 'archived'" variant="secondary" :disabled="actionLoading !== null" @click="onTest">
           {{ $t('tasks.actions.test') }}
-        </button>
-        <button
-          type="button"
-          class="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-60"
-          :disabled="actionLoading !== null"
-          @click="onDuplicate"
-        >
+        </BaseButton>
+        <BaseButton variant="secondary" :disabled="actionLoading !== null" @click="onDuplicate">
           {{ $t('tasks.actions.duplicate') }}
-        </button>
-        <button
+        </BaseButton>
+        <BaseButton
           v-if="status !== 'archived'"
-          type="button"
-          class="rounded-md border border-red-200 px-3 py-2 text-sm text-red-700 hover:bg-red-50 disabled:opacity-60"
+          variant="danger"
           :disabled="actionLoading !== null"
           @click="onArchive"
         >
           {{ $t('tasks.actions.archive') }}
-        </button>
+        </BaseButton>
         <RouterLink
           :to="{ name: 'runs', query: { task_id: id } }"
-          class="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
+          class="inline-flex items-center rounded-md border border-border px-4 py-2 text-sm text-text hover:border-border-strong"
         >
           {{ $t('tasks.actions.viewRuns') }}
         </RouterLink>
