@@ -25,7 +25,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>TaskConnect</title>
+    <meta name="description" content="Open-source HTTP task scheduler for PHP/MySQL shared hosting.">
+    <meta property="og:title" content="TaskConnect">
+    <meta property="og:description" content="Open-source HTTP task scheduler for PHP/MySQL shared hosting.">
+    <meta property="og:image" content="{{ asset('build/social-card.png') }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ asset('build/social-card.png') }}">
     <link rel="icon" type="image/svg+xml" href="/build/favicon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="/build/apple-touch-icon.png">
+    <link rel="manifest" href="/build/site.webmanifest">
+    <meta name="theme-color" content="#000000">
     @foreach ($cssFiles as $css)
         <link rel="stylesheet" href="{{ asset('build/'.$css) }}">
     @endforeach

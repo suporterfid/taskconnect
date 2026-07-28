@@ -1,4 +1,4 @@
-# TaskConnect
+<img src="assets/brand/wordmark.svg" alt="TaskConnect" width="272" height="64">
 
 Open-source multi-tenant HTTP task scheduler for PHP/MySQL shared hosting.
 
