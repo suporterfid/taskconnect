@@ -98,7 +98,7 @@ function onLocaleChange(event: Event): void {
           v-for="item in navItems"
           :key="item.name"
           :to="item.to"
-          class="block rounded-md px-3 py-2 text-sm transition-colors"
+          class="block rounded-md px-3 py-2 text-sm transition-colors duration-standard ease-standard"
           :class="
             isActive(item.to)
               ? 'bg-violet-50 font-medium text-violet-700 dark:bg-violet-950 dark:text-violet-300'

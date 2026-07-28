@@ -97,6 +97,25 @@
 }
 
 /*
+ * Tailwind v4 doesn't treat `--duration-*` as a recognized theme namespace
+ * (unlike `--ease-*`, which already yields `ease-standard` etc. for free),
+ * so these bridge the tokens from #86 into real `duration-*` utilities —
+ * otherwise components would need the verbose `duration-(--duration-*)`
+ * arbitrary-value syntax, or worse, hardcode timing (§9). See #97.
+ */
+@utility duration-fast {
+  transition-duration: var(--duration-fast);
+}
+
+@utility duration-standard {
+  transition-duration: var(--duration-standard);
+}
+
+@utility duration-slow {
+  transition-duration: var(--duration-slow);
+}
+
+/*
  * Link primitive (§4.4): body-copy links get an underline on hover/focus.
  * Nothing references this yet — components keep their current styling until
  * migrated (#91-#94); this just makes the primitive available.
@@ -164,5 +183,23 @@
     font-size: 1.375rem;
     text-transform: none;
     letter-spacing: normal;
+  }
+
+  /*
+   * §9 floor: kills non-essential animation/transitions/smooth-scroll for
+   * anyone with prefers-reduced-motion set. This alone isn't the full
+   * answer for animations that convey state (a spinner shortened to
+   * ~0ms just reads as a frozen glyph) — see LoadingState.vue for the
+   * component-level alternative this makes necessary. See #97.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
