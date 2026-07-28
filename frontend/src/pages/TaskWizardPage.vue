@@ -5,6 +5,12 @@ import { RouterLink, useRouter } from 'vue-router'
 
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
+import BaseTextarea from '@/components/ui/BaseTextarea.vue'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type {
@@ -532,7 +538,7 @@ async function onSubmit(activate: boolean): Promise<void> {
 <template>
   <div>
     <div class="mb-4">
-      <RouterLink to="/tasks" class="text-sm text-violet-600 hover:underline">
+      <RouterLink to="/tasks" class="link text-sm text-action">
         ← {{ $t('common.back') }}
       </RouterLink>
     </div>
@@ -550,44 +556,30 @@ async function onSubmit(activate: boolean): Promise<void> {
           class="rounded-full px-3 py-1 text-xs"
           :class="
             index === step
-              ? 'bg-violet-600 text-white'
-              : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+              ? 'bg-action text-white'
+              : 'bg-surface-emphasis text-muted'
           "
         >
           {{ index + 1 }}. {{ label }}
         </li>
       </ol>
 
-      <div
-        class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
-      >
+      <BaseCard>
         <div v-if="step === 0" class="space-y-4">
           <label class="block text-sm font-medium">
             {{ $t('tasks.fields.name') }}
-            <input
-              v-model="form.name"
-              type="text"
-              required
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
-            />
+            <BaseInput v-model="form.name" type="text" required class="mt-1" />
           </label>
           <label class="block text-sm font-medium">
             {{ $t('tasks.fields.description') }}
-            <textarea
-              v-model="form.description"
-              rows="3"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
-            />
+            <BaseTextarea v-model="form.description" :rows="3" class="mt-1" />
           </label>
         </div>
 
         <div v-else-if="step === 1" class="space-y-4">
           <label class="block text-sm font-medium">
             {{ $t('tasks.fields.endpointProfile') }}
-            <select
-              v-model="form.endpoint_profile_id"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
-            >
+            <BaseSelect v-model="form.endpoint_profile_id" class="mt-1">
               <option value="">
                 {{ $t('tasks.fields.endpointProfileNone') }}
               </option>
@@ -598,48 +590,37 @@ async function onSubmit(activate: boolean): Promise<void> {
               >
                 {{ profile.name }}
               </option>
-            </select>
-            <span class="mt-1 block text-xs text-gray-500">{{
+            </BaseSelect>
+            <span class="mt-1 block text-xs text-muted">{{
               $t('tasks.fields.endpointProfileHint')
             }}</span>
           </label>
           <label class="block text-sm font-medium">
             {{ $t('tasks.fields.method') }}
-            <select
-              v-model="form.method"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
-            >
+            <BaseSelect v-model="form.method" class="mt-1">
               <option>GET</option>
               <option>POST</option>
               <option>PUT</option>
               <option>PATCH</option>
               <option>DELETE</option>
-            </select>
+            </BaseSelect>
           </label>
           <label class="block text-sm font-medium">
             {{ $t('tasks.fields.url') }}
-            <input
+            <BaseInput
               v-model="form.url_or_path"
               type="text"
               :required="!form.endpoint_profile_id"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
+              class="mt-1"
             />
           </label>
           <label class="block text-sm font-medium">
             {{ $t('tasks.fields.contentType') }}
-            <input
-              v-model="form.content_type"
-              type="text"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
-            />
+            <BaseInput v-model="form.content_type" type="text" class="mt-1" />
           </label>
           <label class="block text-sm font-medium">
             {{ $t('tasks.fields.body') }}
-            <textarea
-              v-model="form.body"
-              rows="4"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-950"
-            />
+            <BaseTextarea v-model="form.body" :rows="4" class="mt-1 font-mono text-sm" />
           </label>
 
           <fieldset>
@@ -652,33 +633,19 @@ async function onSubmit(activate: boolean): Promise<void> {
                 :key="index"
                 class="flex gap-2"
               >
-                <input
-                  v-model="row.key"
-                  type="text"
-                  class="w-1/3 rounded-md border border-gray-300 px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-950"
-                  placeholder="Header"
-                />
-                <input
-                  v-model="row.value"
-                  type="text"
-                  class="flex-1 rounded-md border border-gray-300 px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-950"
-                  placeholder="Value"
-                />
-                <button
-                  type="button"
-                  class="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
-                  @click="removeHeader(index)"
-                >
+                <div class="w-1/3">
+                  <BaseInput v-model="row.key" type="text" class="font-mono text-sm" placeholder="Header" />
+                </div>
+                <div class="flex-1">
+                  <BaseInput v-model="row.value" type="text" class="font-mono text-sm" placeholder="Value" />
+                </div>
+                <BaseButton variant="secondary" size="sm" @click="removeHeader(index)">
                   {{ $t('common.delete') }}
-                </button>
+                </BaseButton>
               </div>
-              <button
-                type="button"
-                class="text-sm text-violet-600 hover:underline"
-                @click="addHeader"
-              >
+              <BaseButton variant="tertiary" size="sm" @click="addHeader">
                 + {{ $t('tasks.wizard.addHeader') }}
-              </button>
+              </BaseButton>
             </div>
           </fieldset>
 
@@ -692,33 +659,19 @@ async function onSubmit(activate: boolean): Promise<void> {
                 :key="index"
                 class="flex gap-2"
               >
-                <input
-                  v-model="row.key"
-                  type="text"
-                  class="w-1/3 rounded-md border border-gray-300 px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-950"
-                  placeholder="Key"
-                />
-                <input
-                  v-model="row.value"
-                  type="text"
-                  class="flex-1 rounded-md border border-gray-300 px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-950"
-                  placeholder="Value"
-                />
-                <button
-                  type="button"
-                  class="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
-                  @click="removeQuery(index)"
-                >
+                <div class="w-1/3">
+                  <BaseInput v-model="row.key" type="text" class="font-mono text-sm" placeholder="Key" />
+                </div>
+                <div class="flex-1">
+                  <BaseInput v-model="row.value" type="text" class="font-mono text-sm" placeholder="Value" />
+                </div>
+                <BaseButton variant="secondary" size="sm" @click="removeQuery(index)">
                   {{ $t('tasks.fields.removeQuery') }}
-                </button>
+                </BaseButton>
               </div>
-              <button
-                type="button"
-                class="text-sm text-violet-600 hover:underline"
-                @click="addQuery"
-              >
+              <BaseButton variant="tertiary" size="sm" @click="addQuery">
                 + {{ $t('tasks.fields.addQuery') }}
-              </button>
+              </BaseButton>
             </div>
           </fieldset>
         </div>
@@ -726,10 +679,7 @@ async function onSubmit(activate: boolean): Promise<void> {
         <div v-else-if="step === 2" class="space-y-4">
           <label class="block text-sm font-medium">
             {{ $t('tasks.fields.scheduleKind') }}
-            <select
-              v-model="form.schedule_kind"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
-            >
+            <BaseSelect v-model="form.schedule_kind" class="mt-1">
               <option
                 v-for="kind in SCHEDULE_KINDS"
                 :key="kind"
@@ -737,16 +687,12 @@ async function onSubmit(activate: boolean): Promise<void> {
               >
                 {{ $t(`tasks.scheduleKinds.${kind}`) }}
               </option>
-            </select>
+            </BaseSelect>
           </label>
 
           <label class="block text-sm font-medium">
             {{ $t('tasks.fields.timezone') }}
-            <input
-              v-model="form.timezone"
-              type="text"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
-            />
+            <BaseInput v-model="form.timezone" type="text" class="mt-1" />
           </label>
 
           <label
@@ -754,11 +700,11 @@ async function onSubmit(activate: boolean): Promise<void> {
             class="block text-sm font-medium"
           >
             {{ $t('tasks.fields.at') }}
-            <input
+            <BaseInput
               v-model="form.at"
               type="datetime-local"
               required
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
+              class="mt-1"
             />
           </label>
 
@@ -767,14 +713,14 @@ async function onSubmit(activate: boolean): Promise<void> {
             class="block text-sm font-medium"
           >
             {{ $t('tasks.fields.cronExpression') }}
-            <input
+            <BaseInput
               v-model="form.cron_expression"
               type="text"
               required
               placeholder="0 9 * * 1-5"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-950"
+              class="mt-1 font-mono text-sm"
             />
-            <span class="mt-1 block text-xs text-gray-500">{{
+            <span class="mt-1 block text-xs text-muted">{{
               $t('tasks.fields.cronExpressionHint')
             }}</span>
           </label>
@@ -788,7 +734,7 @@ async function onSubmit(activate: boolean): Promise<void> {
               v-model.number="form.interval_minutes"
               type="number"
               min="1"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
+              class="mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text"
             />
           </label>
 
@@ -802,7 +748,7 @@ async function onSubmit(activate: boolean): Promise<void> {
               type="number"
               min="0"
               max="59"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
+              class="mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text"
             />
           </label>
 
@@ -815,11 +761,7 @@ async function onSubmit(activate: boolean): Promise<void> {
             class="block text-sm font-medium"
           >
             {{ $t('tasks.fields.time') }}
-            <input
-              v-model="form.time"
-              type="time"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
-            />
+            <BaseInput v-model="form.time" type="time" class="mt-1" />
           </label>
 
           <fieldset
@@ -858,24 +800,24 @@ async function onSubmit(activate: boolean): Promise<void> {
               type="number"
               min="1"
               max="31"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
+              class="mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text"
             />
           </label>
 
-          <div class="rounded-md border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950">
+          <div class="rounded-md border border-border bg-surface-emphasis p-3">
             <p class="text-sm font-medium">{{ $t('tasks.wizard.nextOccurrences') }}</p>
-            <p v-if="previewLoading" class="mt-2 text-sm text-gray-500">
+            <p v-if="previewLoading" class="mt-2 text-sm text-muted">
               {{ $t('common.loading') }}
             </p>
-            <p v-else-if="previewError" class="mt-2 text-sm text-red-600" role="alert">
+            <p v-else-if="previewError" class="mt-2 text-sm text-danger" role="alert">
               {{ previewError }}
             </p>
-            <ul v-else-if="previewOccurrences.length" class="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-300">
+            <ul v-else-if="previewOccurrences.length" class="mt-2 space-y-1 text-sm text-text">
               <li v-for="occurrence in previewOccurrences" :key="occurrence">
                 {{ formatPreviewDate(occurrence) }}
               </li>
             </ul>
-            <p v-else class="mt-2 text-sm text-gray-500">
+            <p v-else class="mt-2 text-sm text-muted">
               {{ $t('tasks.wizard.noOccurrences') }}
             </p>
           </div>
@@ -889,28 +831,24 @@ async function onSubmit(activate: boolean): Promise<void> {
                 v-model.number="form.max_attempts"
                 type="number"
                 min="1"
-                class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
+                class="mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text"
               />
             </label>
             <label class="block text-sm font-medium">
               {{ $t('tasks.fields.retryStrategy') }}
-              <input
-                v-model="form.retry_strategy"
-                type="text"
-                class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
-              />
+              <BaseInput v-model="form.retry_strategy" type="text" class="mt-1" />
             </label>
           </div>
 
           <label class="block text-sm font-medium">
             {{ $t('tasks.fields.successStatusRanges') }}
-            <input
+            <BaseInput
               v-model="form.success_status_ranges"
               type="text"
-              class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-950"
+              class="mt-1 font-mono text-sm"
               :placeholder="$t('tasks.fields.successStatusRangesPlaceholder')"
             />
-            <span class="mt-1 block text-xs text-gray-500">
+            <span class="mt-1 block text-xs text-muted">
               {{ $t('tasks.fields.successStatusRangesHint') }}
             </span>
           </label>
@@ -918,49 +856,38 @@ async function onSubmit(activate: boolean): Promise<void> {
 
         <div v-else-if="step === 4" class="space-y-4">
           <template v-if="form.endpoint_profile_id">
-            <p class="text-sm text-gray-600 dark:text-gray-400">
+            <p class="text-sm text-muted">
               {{ $t('tasks.wizard.testRun') }}
             </p>
-            <button
-              type="button"
-              class="rounded-md bg-violet-600 px-4 py-2 text-sm text-white disabled:opacity-50"
-              :disabled="testing"
-              @click="runProfileTest"
-            >
+            <BaseButton :disabled="testing" @click="runProfileTest">
               {{
                 testing
                   ? $t('tasks.wizard.testing')
                   : $t('tasks.wizard.testRun')
               }}
-            </button>
+            </BaseButton>
           </template>
           <template v-else>
-            <p class="text-sm text-amber-700 dark:text-amber-400">
+            <BaseAlert tone="warning" role="status">
               {{ $t('tasks.wizard.testNeedsProfile') }}
-            </p>
+            </BaseAlert>
             <div class="flex flex-wrap gap-3">
-              <button
-                type="button"
-                class="rounded-md border px-4 py-2 text-sm"
+              <BaseButton
+                variant="secondary"
                 :disabled="submitting || !form.name"
                 @click="saveDraftOnly"
               >
                 {{ $t('tasks.wizard.saveDraft') }}
-              </button>
-              <button
-                type="button"
-                class="rounded-md border px-4 py-2 text-sm"
-                @click="next"
-              >
+              </BaseButton>
+              <BaseButton variant="secondary" @click="next">
                 {{ $t('common.next') }}
-              </button>
+              </BaseButton>
             </div>
           </template>
 
-          <div v-if="draftTaskId || form.name" class="border-t border-gray-200 pt-4 dark:border-gray-800">
-            <button
-              type="button"
-              class="rounded-md border border-violet-600 px-4 py-2 text-sm text-violet-700 disabled:opacity-50 dark:text-violet-300"
+          <div v-if="draftTaskId || form.name" class="border-t border-border pt-4">
+            <BaseButton
+              variant="secondary"
               :disabled="testing || submitting || !form.name"
               @click="runTaskTest"
             >
@@ -969,15 +896,15 @@ async function onSubmit(activate: boolean): Promise<void> {
                   ? $t('tasks.wizard.testing')
                   : $t('tasks.actions.test')
               }}
-            </button>
+            </BaseButton>
           </div>
 
-          <p v-if="testMessage" class="text-sm text-green-700 dark:text-green-400">
+          <BaseAlert v-if="testMessage" tone="success" role="status">
             {{ testMessage }}
-          </p>
-          <p v-if="testError" class="text-sm text-red-600" role="alert">
+          </BaseAlert>
+          <BaseAlert v-if="testError" tone="danger" role="alert">
             {{ testError }}
-          </p>
+          </BaseAlert>
         </div>
 
         <div v-else class="space-y-2 text-sm">
@@ -1029,58 +956,46 @@ async function onSubmit(activate: boolean): Promise<void> {
             {{ form.success_status_ranges || $t('tasks.fields.successStatusRangesDefault') }}
           </p>
 
-          <div
+          <BaseAlert
             v-if="securityHttp || securityTlsOff"
-            class="mt-3 space-y-1 rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-800 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+            tone="warning"
             role="status"
+            class="mt-3"
           >
             <p v-if="securityHttp">{{ $t('tasks.wizard.securityHttp') }}</p>
             <p v-if="securityTlsOff">{{ $t('tasks.wizard.securityTlsOff') }}</p>
-          </div>
+          </BaseAlert>
         </div>
 
-        <p v-if="error" class="mt-4 text-sm text-red-600" role="alert">
+        <BaseAlert v-if="error" tone="danger" role="alert" class="mt-4">
           {{ error }}
-        </p>
+        </BaseAlert>
 
         <div class="mt-6 flex flex-wrap gap-3">
-          <button
-            v-if="step > 0"
-            type="button"
-            class="rounded-md border px-4 py-2 text-sm"
-            @click="back"
-          >
+          <BaseButton v-if="step > 0" variant="secondary" @click="back">
             {{ $t('common.back') }}
-          </button>
-          <button
+          </BaseButton>
+          <BaseButton
             v-if="step < steps.length - 1"
-            type="button"
-            class="rounded-md bg-violet-600 px-4 py-2 text-sm text-white"
             :disabled="step === 0 && !form.name"
             @click="next"
           >
             {{ $t('common.next') }}
-          </button>
+          </BaseButton>
           <template v-else>
-            <button
-              type="button"
-              class="rounded-md border px-4 py-2 text-sm"
+            <BaseButton
+              variant="secondary"
               :disabled="submitting || !form.name"
               @click="onSubmit(false)"
             >
               {{ $t('tasks.wizard.saveDraft') }}
-            </button>
-            <button
-              type="button"
-              class="rounded-md bg-violet-600 px-4 py-2 text-sm text-white"
-              :disabled="submitting || !form.name"
-              @click="onSubmit(true)"
-            >
+            </BaseButton>
+            <BaseButton :disabled="submitting || !form.name" @click="onSubmit(true)">
               {{ $t('tasks.wizard.activate') }}
-            </button>
+            </BaseButton>
           </template>
         </div>
-      </div>
+      </BaseCard>
     </template>
   </div>
 </template>

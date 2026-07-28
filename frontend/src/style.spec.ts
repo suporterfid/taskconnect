@@ -22,7 +22,6 @@ const legacyAllowlist: Record<string, Record<string, number>> = {
   'src/pages/PlatformHealthPage.vue': { 'bg-gray-900': 2, 'border-gray-200': 2, 'border-gray-800': 2, 'text-gray-500': 16 },
   'src/pages/SecretsPage.vue': { 'bg-gray-50': 2, 'bg-gray-900': 2, 'bg-gray-950': 2, 'bg-violet-600': 3, 'bg-violet-700': 3, 'border-gray-200': 3, 'border-gray-300': 5, 'border-gray-700': 1, 'border-gray-800': 2, 'divide-gray-200': 2, 'divide-gray-800': 2, 'text-gray-100': 1, 'text-gray-500': 9, 'text-gray-600': 4, 'text-gray-700': 4, 'text-gray-900': 1, 'text-violet-600': 2 },
   'src/pages/SettingsPage.vue': { 'bg-gray-50': 1, 'bg-gray-800': 3, 'bg-gray-900': 5, 'bg-gray-950': 1, 'bg-violet-600': 3, 'bg-violet-700': 3, 'border-gray-200': 6, 'border-gray-300': 6, 'border-gray-700': 3, 'border-gray-800': 6, 'divide-gray-200': 2, 'divide-gray-800': 2, 'text-gray-300': 4, 'text-gray-400': 2, 'text-gray-500': 21, 'text-gray-600': 2, 'text-gray-700': 4, 'text-violet-600': 1 },
-  'src/pages/TaskWizardPage.vue': { 'bg-gray-100': 1, 'bg-gray-50': 3, 'bg-gray-800': 3, 'bg-gray-900': 1, 'bg-gray-950': 23, 'bg-violet-600': 4, 'border-gray-200': 3, 'border-gray-300': 24, 'border-gray-700': 24, 'border-gray-800': 3, 'border-violet-600': 1, 'text-gray-300': 1, 'text-gray-400': 2, 'text-gray-500': 5, 'text-gray-600': 4, 'text-gray-700': 1, 'text-violet-300': 1, 'text-violet-600': 3, 'text-violet-700': 1 },
 }
 
 function vueFiles(directory: string): string[] {
