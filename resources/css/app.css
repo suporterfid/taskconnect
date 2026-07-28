@@ -44,8 +44,16 @@
     --duration-slow: 240ms;
     --ease-standard: cubic-bezier(0.2, 0, 0, 1);
 
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    /*
+     * Matches frontend/src/style.css's token value (#87). @font-face rules
+     * aren't duplicated here: this stylesheet's only consumer today is
+     * welcome.blade.php, which isn't wired to any route (routes/web.php
+     * serves app.blade.php, the SPA shell, for every non-API path) — see
+     * #94 for the Blade shell/welcome page migration.
+     */
+    --font-sans: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+        'Helvetica Neue', Arial, sans-serif;
+    --font-mono: ui-monospace, 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
 }
 
 @utility text-muted {

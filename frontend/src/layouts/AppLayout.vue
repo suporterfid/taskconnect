@@ -80,7 +80,7 @@ function onLocaleChange(event: Event): void {
 </script>
 
 <template>
-  <div class="flex min-h-screen bg-gray-50 dark:bg-gray-950">
+  <div class="app-shell flex min-h-screen bg-gray-50 dark:bg-gray-950">
     <aside
       class="flex w-64 shrink-0 flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900"
     >
@@ -88,7 +88,7 @@ function onLocaleChange(event: Event): void {
         <RouterLink to="/dashboard" class="text-lg font-semibold text-violet-600">
           {{ $t('common.appName') }}
         </RouterLink>
-        <p v-if="auth.user" class="mt-1 truncate text-xs text-gray-500">
+        <p v-if="auth.user" class="mt-1 truncate text-sm text-gray-500">
           {{ auth.user.email }}
         </p>
       </div>
