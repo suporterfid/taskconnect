@@ -6,11 +6,15 @@ import { RouterLink, useRoute } from 'vue-router'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseBadge from '@/components/ui/BaseBadge.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { RunState, TaskRun } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
+import { toneForRunState } from '@/utils/statusTone'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -118,95 +122,70 @@ async function onRetry(run: TaskRun): Promise<void> {
   <div>
     <PageHeader :title="$t('runs.title')" :subtitle="$t('runs.subtitle')" />
 
-    <p
-      v-if="taskIdFilter || runStateFilter"
-      class="mb-4 text-sm text-gray-600"
-    >
+    <p v-if="taskIdFilter || runStateFilter" class="mb-4 text-sm text-muted">
       <template v-if="taskIdFilter">
         {{ $t('runs.filteredByTask') }}
-        <RouterLink
-          :to="`/tasks/${taskIdFilter}`"
-          class="text-violet-600 hover:underline"
-        >
+        <RouterLink :to="`/tasks/${taskIdFilter}`" class="link text-action">
           {{ taskIdFilter }}
         </RouterLink>
       </template>
       <template v-if="runStateFilter">
         <span v-if="taskIdFilter"> · </span>
         {{ $t('runs.filteredByState') }}
-        <span class="font-medium">
+        <span class="font-medium text-text">
           {{ $t(`runs.status.${runStateFilter}`, runStateFilter) }}
         </span>
       </template>
       ·
-      <RouterLink to="/runs" class="text-violet-600 hover:underline">
+      <RouterLink to="/runs" class="link text-action">
         {{ $t('runs.clearFilter') }}
       </RouterLink>
     </p>
 
-    <p
-      v-if="actionError"
-      class="mb-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
-      role="alert"
-    >
-      {{ actionError }}
-    </p>
+    <BaseAlert v-if="actionError" tone="danger" class="mb-4">{{ actionError }}</BaseAlert>
 
     <LoadingState v-if="loading" />
     <ErrorState v-else-if="error" :message="error ?? $t('runs.loadError')" @retry="reload" />
-    <div
-      v-else-if="!tenant.currentTenantId || !tenant.currentEnvironmentId"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
-      {{ $t('runs.needsTenant') }}
-    </div>
-    <div
-      v-else-if="!filtered.length"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
-      {{ $t('runs.empty') }}
-    </div>
-    <div
-      v-else
-      class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800"
-    >
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-        <thead class="bg-gray-50 dark:bg-gray-900">
+    <EmptyState v-else-if="!tenant.currentTenantId || !tenant.currentEnvironmentId" :message="$t('runs.needsTenant')" />
+    <EmptyState v-else-if="!filtered.length" :message="$t('runs.empty')" />
+    <div v-else class="overflow-x-auto rounded-lg border border-border">
+      <table class="min-w-full divide-y divide-border">
+        <thead class="bg-surface">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('runs.fields.id') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('runs.fields.task') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('common.status') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('runs.fields.when') }}
             </th>
-            <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-right text-sm font-medium text-muted">
               {{ $t('common.actions') }}
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+        <tbody class="divide-y divide-border bg-surface">
           <tr v-for="run in filtered" :key="run.id">
-            <td class="px-4 py-3 font-mono text-sm">{{ run.id }}</td>
+            <td class="px-4 py-3 font-mono text-sm text-text">{{ run.id }}</td>
             <td class="px-4 py-3 text-sm">
-              <RouterLink
-                v-if="run.task_id"
-                :to="`/tasks/${run.task_id}`"
-                class="text-violet-600 hover:underline"
-              >
+              <RouterLink v-if="run.task_id" :to="`/tasks/${run.task_id}`" class="link text-action">
                 {{ run.task_id }}
               </RouterLink>
-              <span v-else>—</span>
+              <span v-else class="text-muted">—</span>
             </td>
             <td class="px-4 py-3 text-sm">
-              {{ $t(`runs.status.${run.run_state}`, run.run_state) }}
+              <BaseBadge
+                :label="$t(`runs.status.${run.run_state}`, run.run_state)"
+                :tone="toneForRunState(run.run_state).tone"
+                :icon="toneForRunState(run.run_state).icon"
+              />
             </td>
-            <td class="px-4 py-3 text-sm text-gray-600">
+            <td class="px-4 py-3 text-sm tabular-nums text-muted">
               {{ displayTime(run) }}
             </td>
             <td class="px-4 py-3 text-right text-sm">
@@ -214,7 +193,7 @@ async function onRetry(run: TaskRun): Promise<void> {
                 <button
                   v-if="canCancel(run.run_state)"
                   type="button"
-                  class="text-gray-700 hover:underline disabled:opacity-60"
+                  class="link text-muted disabled:opacity-60"
                   :disabled="actionLoading !== null"
                   @click="onCancel(run)"
                 >
@@ -223,16 +202,13 @@ async function onRetry(run: TaskRun): Promise<void> {
                 <button
                   v-if="canRetry(run.run_state)"
                   type="button"
-                  class="text-violet-600 hover:underline disabled:opacity-60"
+                  class="link text-action disabled:opacity-60"
                   :disabled="actionLoading !== null"
                   @click="onRetry(run)"
                 >
                   {{ $t('runs.actions.retry') }}
                 </button>
-                <RouterLink
-                  :to="`/runs/${run.id}`"
-                  class="text-violet-600 hover:underline"
-                >
+                <RouterLink :to="`/runs/${run.id}`" class="link text-action">
                   {{ $t('runs.view') }}
                 </RouterLink>
               </div>
