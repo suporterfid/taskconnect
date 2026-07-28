@@ -2,6 +2,7 @@
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import api from '@/services/api'
 import type { AuditLog } from '@/services/types'
@@ -39,57 +40,47 @@ function formatWhen(value?: string | null): string {
   <div>
     <PageHeader :title="$t('settings.audit.title')" :subtitle="$t('settings.audit.subtitle')" />
 
-    <p
-      v-if="!tenant.currentTenantId"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
-      {{ $t('settings.audit.needsTenant') }}
-    </p>
+    <EmptyState v-if="!tenant.currentTenantId" :message="$t('settings.audit.needsTenant')" />
     <LoadingState v-else-if="loading" />
     <ErrorState
       v-else-if="error"
       :message="error ?? $t('settings.audit.loadError')"
       @retry="reload"
     />
-    <p
-      v-else-if="!data?.length"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
-      {{ $t('settings.audit.empty') }}
-    </p>
-    <div v-else class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800">
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-        <thead class="bg-gray-50 dark:bg-gray-900">
+    <EmptyState v-else-if="!data?.length" :message="$t('settings.audit.empty')" />
+    <div v-else class="overflow-hidden rounded-lg border border-border">
+      <table class="min-w-full divide-y divide-border">
+        <thead class="bg-surface">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.audit.fields.when') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.audit.fields.action') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.audit.fields.resource') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.audit.fields.actor') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.audit.fields.requestId') }}
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+        <tbody class="divide-y divide-border bg-surface">
           <tr v-for="log in data" :key="log.id">
-            <td class="px-4 py-3 text-sm">{{ formatWhen(log.created_at) }}</td>
-            <td class="px-4 py-3 text-sm font-medium">{{ log.action }}</td>
-            <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+            <td class="px-4 py-3 text-sm tabular-nums text-text">{{ formatWhen(log.created_at) }}</td>
+            <td class="px-4 py-3 text-sm font-medium text-text">{{ log.action }}</td>
+            <td class="px-4 py-3 text-sm text-muted">
               {{ log.resource_type }}
               <span v-if="log.resource_id"> · {{ log.resource_id }}</span>
             </td>
-            <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+            <td class="px-4 py-3 text-sm text-muted">
               {{ log.actor?.email ?? '—' }}
             </td>
-            <td class="px-4 py-3 font-mono text-xs text-gray-500">
+            <td class="px-4 py-3 font-mono text-xs text-muted">
               {{ log.request_id ?? '—' }}
             </td>
           </tr>

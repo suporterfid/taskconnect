@@ -6,11 +6,15 @@ import { RouterLink } from 'vue-router'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseBadge from '@/components/ui/BaseBadge.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { EndpointProfile, EndpointTestResult } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
+import { semanticIcons } from '@/utils/icons'
 
 const { t } = useI18n()
 const tenant = useTenantStore()
@@ -66,18 +70,18 @@ async function onTest(profile: EndpointProfile): Promise<void> {
       />
       <RouterLink
         to="/endpoint-profiles/new"
-        class="shrink-0 rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
+        class="shrink-0 rounded-md bg-action px-4 py-2 text-sm font-medium text-white hover:bg-action-hover"
       >
         {{ $t('endpointProfiles.create') }}
       </RouterLink>
     </div>
 
-    <p v-if="actionError" class="mb-4 text-sm text-red-600" role="alert">
+    <BaseAlert v-if="actionError" tone="danger" role="alert" class="mb-4">
       {{ actionError }}
-    </p>
-    <p v-else-if="actionMessage" class="mb-4 text-sm text-green-700" role="status">
+    </BaseAlert>
+    <BaseAlert v-else-if="actionMessage" tone="success" role="status" class="mb-4">
       {{ actionMessage }}
-    </p>
+    </BaseAlert>
 
     <LoadingState v-if="loading" />
     <ErrorState
@@ -85,88 +89,64 @@ async function onTest(profile: EndpointProfile): Promise<void> {
       :message="error ?? $t('endpointProfiles.loadError')"
       @retry="reload"
     />
-    <div
+    <EmptyState
       v-else-if="!tenant.currentTenantId || !tenant.currentEnvironmentId"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
-      {{ $t('endpointProfiles.needsTenant') }}
-    </div>
-    <div
-      v-else-if="!data?.length"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
+      :message="$t('endpointProfiles.needsTenant')"
+    />
+    <EmptyState v-else-if="!data?.length" :message="$t('endpointProfiles.empty')">
       <p>{{ $t('endpointProfiles.empty') }}</p>
       <p class="mt-2 text-sm">{{ $t('endpointProfiles.emptyHint') }}</p>
-      <RouterLink
-        to="/endpoint-profiles/new"
-        class="mt-4 inline-block text-sm text-violet-600 hover:underline"
-      >
+      <RouterLink to="/endpoint-profiles/new" class="mt-4 inline-block link text-sm text-action">
         {{ $t('endpointProfiles.create') }}
       </RouterLink>
-    </div>
-    <div
-      v-else
-      class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800"
-    >
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-        <thead class="bg-gray-50 dark:bg-gray-900">
+    </EmptyState>
+    <div v-else class="overflow-hidden rounded-lg border border-border">
+      <table class="min-w-full divide-y divide-border">
+        <thead class="bg-surface">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('common.name') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('endpointProfiles.method') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('endpointProfiles.detail.baseUrl') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('common.status') }}
             </th>
-            <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-right text-sm font-medium text-muted">
               {{ $t('common.actions') }}
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+        <tbody class="divide-y divide-border bg-surface">
           <tr v-for="profile in data" :key="profile.id">
             <td class="px-4 py-3">
-              <RouterLink
-                :to="`/endpoint-profiles/${profile.id}`"
-                class="font-medium text-violet-600 hover:underline"
-              >
+              <RouterLink :to="`/endpoint-profiles/${profile.id}`" class="link font-medium text-action">
                 {{ profile.name }}
               </RouterLink>
             </td>
             <td class="px-4 py-3">
-              <span
-                class="rounded bg-gray-100 px-2 py-0.5 font-mono text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-200"
-              >
+              <span class="rounded bg-surface-emphasis px-2 py-0.5 font-mono text-xs text-text">
                 {{ profile.method }}
               </span>
             </td>
-            <td class="max-w-xs truncate px-4 py-3 font-mono text-sm text-gray-600">
+            <td class="max-w-xs truncate px-4 py-3 font-mono text-sm text-muted">
               {{ profile.base_url }}
             </td>
             <td class="px-4 py-3 text-sm">
-              <span
-                :class="
-                  profile.enabled
-                    ? 'text-green-700'
-                    : 'text-gray-500'
-                "
-              >
-                {{
-                  profile.enabled
-                    ? $t('endpointProfiles.enabled')
-                    : $t('endpointProfiles.disabled')
-                }}
-              </span>
+              <BaseBadge
+                :label="profile.enabled ? $t('endpointProfiles.enabled') : $t('endpointProfiles.disabled')"
+                :tone="profile.enabled ? 'success' : 'neutral'"
+                :icon="profile.enabled ? semanticIcons.success : semanticIcons.neutral"
+              />
             </td>
             <td class="space-x-3 px-4 py-3 text-right text-sm">
               <button
                 type="button"
-                class="text-violet-600 hover:underline disabled:opacity-60"
+                class="link text-action disabled:opacity-60"
                 :disabled="testingId === profile.id"
                 @click="onTest(profile)"
               >
@@ -176,16 +156,10 @@ async function onTest(profile: EndpointProfile): Promise<void> {
                     : $t('endpointProfiles.detail.test')
                 }}
               </button>
-              <RouterLink
-                :to="`/endpoint-profiles/${profile.id}`"
-                class="text-violet-600 hover:underline"
-              >
+              <RouterLink :to="`/endpoint-profiles/${profile.id}`" class="link text-action">
                 {{ $t('endpointProfiles.view') }}
               </RouterLink>
-              <RouterLink
-                :to="`/endpoint-profiles/${profile.id}/edit`"
-                class="text-violet-600 hover:underline"
-              >
+              <RouterLink :to="`/endpoint-profiles/${profile.id}/edit`" class="link text-action">
                 {{ $t('common.edit') }}
               </RouterLink>
             </td>

@@ -5,6 +5,12 @@ import { RouterLink, useRouter } from 'vue-router'
 
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
+import BaseTextarea from '@/components/ui/BaseTextarea.vue'
+import FormField from '@/components/ui/FormField.vue'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type {
@@ -224,7 +230,7 @@ onMounted(async () => {
     <div class="mb-4">
       <RouterLink
         :to="isEdit && id ? `/endpoint-profiles/${id}` : '/endpoint-profiles'"
-        class="text-sm text-violet-600 hover:underline"
+        class="link text-sm text-action"
       >
         ← {{ $t('common.back') }}
       </RouterLink>
@@ -243,76 +249,100 @@ onMounted(async () => {
 
     <form
       v-else
-      class="space-y-6 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
+      class="space-y-6 rounded-lg border border-border bg-surface p-6"
       @submit.prevent="onSubmit"
     >
-      <p v-if="error" class="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+      <BaseAlert v-if="error" tone="danger" role="alert">
         {{ error }}
-      </p>
+      </BaseAlert>
 
       <div class="grid gap-4 sm:grid-cols-2">
-        <label class="block sm:col-span-2">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('endpointProfiles.fields.name')
-          }}</span>
-          <input
-            v-model="form.name"
-            required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          />
-        </label>
+        <FormField
+          id="name"
+          class="sm:col-span-2"
+          :label="$t('endpointProfiles.fields.name')"
+          required
+        >
+          <template #default="{ describedBy, ariaInvalid }">
+            <BaseInput
+              id="name"
+              v-model="form.name"
+              required
+              :described-by="describedBy"
+              :aria-invalid="ariaInvalid"
+            />
+          </template>
+        </FormField>
 
-        <label class="block sm:col-span-2">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('endpointProfiles.fields.description')
-          }}</span>
-          <textarea
-            v-model="form.description"
-            rows="2"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          />
-        </label>
+        <FormField
+          id="description"
+          class="sm:col-span-2"
+          :label="$t('endpointProfiles.fields.description')"
+        >
+          <template #default="{ describedBy, ariaInvalid }">
+            <BaseTextarea
+              id="description"
+              v-model="form.description"
+              :rows="2"
+              :described-by="describedBy"
+              :aria-invalid="ariaInvalid"
+            />
+          </template>
+        </FormField>
 
-        <label class="block sm:col-span-2">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('endpointProfiles.fields.baseUrl')
-          }}</span>
-          <input
-            v-model="form.base_url"
-            type="url"
-            required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm"
-          />
-        </label>
+        <FormField
+          id="base_url"
+          class="sm:col-span-2"
+          :label="$t('endpointProfiles.fields.baseUrl')"
+          required
+        >
+          <template #default="{ describedBy, ariaInvalid }">
+            <BaseInput
+              id="base_url"
+              v-model="form.base_url"
+              type="url"
+              required
+              class="font-mono text-sm"
+              :described-by="describedBy"
+              :aria-invalid="ariaInvalid"
+            />
+          </template>
+        </FormField>
 
-        <label class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('endpointProfiles.fields.method')
-          }}</span>
-          <select
-            v-model="form.method"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          >
-            <option v-for="method in methods" :key="method" :value="method">
-              {{ method }}
-            </option>
-          </select>
-        </label>
+        <FormField id="method" :label="$t('endpointProfiles.fields.method')">
+          <template #default="{ describedBy, ariaInvalid }">
+            <BaseSelect
+              id="method"
+              v-model="form.method"
+              :described-by="describedBy"
+              :aria-invalid="ariaInvalid"
+            >
+              <option v-for="method in methods" :key="method" :value="method">
+                {{ method }}
+              </option>
+            </BaseSelect>
+          </template>
+        </FormField>
 
-        <label class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('endpointProfiles.fields.allowedPathPrefix')
-          }}</span>
-          <input
-            v-model="form.allowed_path_prefix"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm"
-            placeholder="/api"
-          />
-        </label>
+        <FormField
+          id="allowed_path_prefix"
+          :label="$t('endpointProfiles.fields.allowedPathPrefix')"
+        >
+          <template #default="{ describedBy, ariaInvalid }">
+            <BaseInput
+              id="allowed_path_prefix"
+              v-model="form.allowed_path_prefix"
+              class="font-mono text-sm"
+              placeholder="/api"
+              :described-by="describedBy"
+              :aria-invalid="ariaInvalid"
+            />
+          </template>
+        </FormField>
       </div>
 
       <fieldset>
-        <legend class="mb-2 text-sm font-medium text-gray-700">
+        <legend class="mb-2 text-sm font-medium text-text">
           {{ $t('endpointProfiles.fields.headers') }}
         </legend>
         <div class="space-y-2">
@@ -321,143 +351,160 @@ onMounted(async () => {
             :key="index"
             class="flex gap-2"
           >
-            <input
-              v-model="row.key"
-              :placeholder="$t('endpointProfiles.fields.headerKey')"
-              class="w-1/3 rounded-md border border-gray-300 px-3 py-2 font-mono text-sm"
-            />
-            <input
-              v-model="row.value"
-              :placeholder="$t('endpointProfiles.fields.headerValue')"
-              class="flex-1 rounded-md border border-gray-300 px-3 py-2 font-mono text-sm"
-            />
-            <button
-              type="button"
-              class="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
-              @click="removeHeader(index)"
-            >
+            <div class="w-1/3">
+              <BaseInput
+                v-model="row.key"
+                :placeholder="$t('endpointProfiles.fields.headerKey')"
+                class="font-mono text-sm"
+              />
+            </div>
+            <div class="flex-1">
+              <BaseInput
+                v-model="row.value"
+                :placeholder="$t('endpointProfiles.fields.headerValue')"
+                class="font-mono text-sm"
+              />
+            </div>
+            <BaseButton variant="secondary" size="sm" @click="removeHeader(index)">
               {{ $t('endpointProfiles.fields.removeHeader') }}
-            </button>
+            </BaseButton>
           </div>
-          <button
-            type="button"
-            class="text-sm text-violet-600 hover:underline"
-            @click="addHeader"
-          >
+          <BaseButton variant="tertiary" size="sm" @click="addHeader">
             + {{ $t('endpointProfiles.fields.addHeader') }}
-          </button>
+          </BaseButton>
         </div>
       </fieldset>
 
       <div class="grid gap-4 sm:grid-cols-2">
-        <label class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('endpointProfiles.fields.authMode')
-          }}</span>
-          <select
-            v-model="form.auth_mode"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          >
-            <option v-for="mode in authModes" :key="mode" :value="mode">
-              {{ $t(`endpointProfiles.authModes.${mode}`) }}
-            </option>
-          </select>
-        </label>
-
-        <label v-if="showAuthHeader" class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('endpointProfiles.fields.authHeaderName')
-          }}</span>
-          <input
-            v-model="form.auth_header_name"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm"
-            :placeholder="$t('endpointProfiles.fields.authHeaderNamePlaceholder')"
-          />
-        </label>
-
-        <label v-if="showAuthQuery" class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('endpointProfiles.fields.authQueryParam')
-          }}</span>
-          <input
-            v-model="form.auth_query_param"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm"
-            :placeholder="$t('endpointProfiles.fields.authQueryParamPlaceholder')"
-          />
-        </label>
-
-        <label class="block sm:col-span-2">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('endpointProfiles.fields.secret')
-          }}</span>
-          <select
-            v-model="form.secret_id"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          >
-            <option value="">
-              {{ $t('endpointProfiles.fields.secretNone') }}
-            </option>
-            <option
-              v-for="secret in secrets"
-              :key="secret.id"
-              :value="secret.id"
+        <FormField id="auth_mode" :label="$t('endpointProfiles.fields.authMode')">
+          <template #default="{ describedBy, ariaInvalid }">
+            <BaseSelect
+              id="auth_mode"
+              v-model="form.auth_mode"
+              :described-by="describedBy"
+              :aria-invalid="ariaInvalid"
             >
-              {{ secret.name }}
-            </option>
-          </select>
-          <span
-            v-if="needsSecret"
-            class="mt-1 block text-xs text-gray-500"
-          >{{ $t('endpointProfiles.fields.secretHint') }}</span>
-        </label>
+              <option v-for="mode in authModes" :key="mode" :value="mode">
+                {{ $t(`endpointProfiles.authModes.${mode}`) }}
+              </option>
+            </BaseSelect>
+          </template>
+        </FormField>
 
-        <label class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('endpointProfiles.fields.connectTimeout')
-          }}</span>
-          <input
-            v-model.number="form.connect_timeout"
-            type="number"
-            min="1"
-            max="300"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          />
-        </label>
+        <FormField
+          v-if="showAuthHeader"
+          id="auth_header_name"
+          :label="$t('endpointProfiles.fields.authHeaderName')"
+        >
+          <template #default="{ describedBy, ariaInvalid }">
+            <BaseInput
+              id="auth_header_name"
+              v-model="form.auth_header_name"
+              class="font-mono text-sm"
+              :placeholder="$t('endpointProfiles.fields.authHeaderNamePlaceholder')"
+              :described-by="describedBy"
+              :aria-invalid="ariaInvalid"
+            />
+          </template>
+        </FormField>
 
-        <label class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('endpointProfiles.fields.totalTimeout')
-          }}</span>
-          <input
-            v-model.number="form.total_timeout"
-            type="number"
-            min="1"
-            max="600"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          />
-        </label>
+        <FormField
+          v-if="showAuthQuery"
+          id="auth_query_param"
+          :label="$t('endpointProfiles.fields.authQueryParam')"
+        >
+          <template #default="{ describedBy, ariaInvalid }">
+            <BaseInput
+              id="auth_query_param"
+              v-model="form.auth_query_param"
+              class="font-mono text-sm"
+              :placeholder="$t('endpointProfiles.fields.authQueryParamPlaceholder')"
+              :described-by="describedBy"
+              :aria-invalid="ariaInvalid"
+            />
+          </template>
+        </FormField>
+
+        <FormField
+          id="secret_id"
+          class="sm:col-span-2"
+          :label="$t('endpointProfiles.fields.secret')"
+          :hint="needsSecret ? $t('endpointProfiles.fields.secretHint') : undefined"
+        >
+          <template #default="{ describedBy, ariaInvalid }">
+            <BaseSelect
+              id="secret_id"
+              v-model="form.secret_id"
+              :described-by="describedBy"
+              :aria-invalid="ariaInvalid"
+            >
+              <option value="">
+                {{ $t('endpointProfiles.fields.secretNone') }}
+              </option>
+              <option
+                v-for="secret in secrets"
+                :key="secret.id"
+                :value="secret.id"
+              >
+                {{ secret.name }}
+              </option>
+            </BaseSelect>
+          </template>
+        </FormField>
+
+        <FormField
+          id="connect_timeout"
+          :label="$t('endpointProfiles.fields.connectTimeout')"
+        >
+          <template #default="{ describedBy, ariaInvalid }">
+            <input
+              id="connect_timeout"
+              v-model.number="form.connect_timeout"
+              type="number"
+              min="1"
+              max="300"
+              class="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text"
+              :aria-describedby="describedBy"
+              :aria-invalid="ariaInvalid ? true : undefined"
+            />
+          </template>
+        </FormField>
+
+        <FormField
+          id="total_timeout"
+          :label="$t('endpointProfiles.fields.totalTimeout')"
+        >
+          <template #default="{ describedBy, ariaInvalid }">
+            <input
+              id="total_timeout"
+              v-model.number="form.total_timeout"
+              type="number"
+              min="1"
+              max="600"
+              class="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text"
+              :aria-describedby="describedBy"
+              :aria-invalid="ariaInvalid ? true : undefined"
+            />
+          </template>
+        </FormField>
       </div>
 
       <div class="flex flex-wrap gap-6">
-        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+        <label class="inline-flex items-center gap-2 text-sm text-text">
           <input v-model="form.follow_redirects" type="checkbox" class="rounded" />
           {{ $t('endpointProfiles.fields.followRedirects') }}
         </label>
-        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+        <label class="inline-flex items-center gap-2 text-sm text-text">
           <input v-model="form.verify_tls" type="checkbox" class="rounded" />
           {{ $t('endpointProfiles.fields.verifyTls') }}
         </label>
-        <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+        <label class="inline-flex items-center gap-2 text-sm text-text">
           <input v-model="form.enabled" type="checkbox" class="rounded" />
           {{ $t('endpointProfiles.fields.enabled') }}
         </label>
       </div>
 
-      <div
-        v-if="!form.verify_tls"
-        class="space-y-3 rounded-md border border-amber-300 bg-amber-50 p-4 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100"
-        role="alert"
-      >
+      <BaseAlert v-if="!form.verify_tls" tone="warning" role="alert" class="space-y-3">
         <p class="text-sm">
           {{ $t('endpointProfiles.tlsWarning') }}
         </p>
@@ -470,24 +517,20 @@ onMounted(async () => {
           />
           <span>{{ $t('endpointProfiles.tlsConfirm') }}</span>
         </label>
-      </div>
+      </BaseAlert>
 
-      <div class="flex justify-end gap-3 border-t border-gray-100 pt-4">
+      <div class="flex justify-end gap-3 border-t border-border pt-4">
         <RouterLink
           :to="isEdit && id ? `/endpoint-profiles/${id}` : '/endpoint-profiles'"
-          class="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          class="inline-flex items-center rounded-md border border-border px-4 py-2 text-sm text-text hover:border-border-strong"
         >
           {{ $t('common.cancel') }}
         </RouterLink>
-        <button
-          type="submit"
-          :disabled="submitting || !canSubmit"
-          class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
-        >
+        <BaseButton type="submit" :disabled="submitting || !canSubmit">
           {{
             submitting ? $t('common.loading') : $t('endpointProfiles.save')
           }}
-        </button>
+        </BaseButton>
       </div>
     </form>
   </div>
