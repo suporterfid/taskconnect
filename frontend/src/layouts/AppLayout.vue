@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { Menu, X } from 'lucide-vue-next'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 
+import AppIcon from '@/components/AppIcon.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useLocaleStore } from '@/stores/locale'
 import { useTenantStore } from '@/stores/tenant'
@@ -13,6 +15,18 @@ const { t } = useI18n()
 const auth = useAuthStore()
 const tenant = useTenantStore()
 const localeStore = useLocaleStore()
+
+// §10 360px smoke pass: the sidebar has no room to sit alongside content below
+// ~500px, so it becomes an off-canvas drawer under the `md` breakpoint instead of
+// forcing the page to scroll horizontally.
+const mobileNavOpen = ref(false)
+
+watch(
+  () => route.path,
+  () => {
+    mobileNavOpen.value = false
+  },
+)
 
 const navItems = computed(() => {
   const items = [
@@ -88,14 +102,35 @@ function onLocaleChange(event: Event): void {
       {{ $t('common.skipToContent') }}
     </a>
 
-    <aside class="flex w-64 shrink-0 flex-col border-r border-border bg-surface">
-      <div class="border-b border-border px-4 py-5">
-        <RouterLink to="/dashboard" class="text-lg font-semibold text-action">
-          {{ $t('common.appName') }}
-        </RouterLink>
-        <p v-if="auth.user" class="mt-1 truncate text-sm text-muted">
-          {{ auth.user.email }}
-        </p>
+    <div
+      v-if="mobileNavOpen"
+      class="fixed inset-0 z-30 bg-canvas/70 md:hidden"
+      @click="mobileNavOpen = false"
+    />
+
+    <aside
+      id="app-sidebar"
+      class="fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col border-r border-border bg-surface transition-transform duration-standard ease-standard md:static md:translate-x-0"
+      :class="mobileNavOpen ? 'translate-x-0' : '-translate-x-full'"
+      @keydown.escape="mobileNavOpen = false"
+    >
+      <div class="flex items-center justify-between gap-2 border-b border-border px-4 py-5">
+        <div>
+          <RouterLink to="/dashboard" class="text-lg font-semibold text-action">
+            {{ $t('common.appName') }}
+          </RouterLink>
+          <p v-if="auth.user" class="mt-1 truncate text-sm text-muted">
+            {{ auth.user.email }}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="shrink-0 rounded-md p-2 text-muted hover:bg-surface-emphasis hover:text-text md:hidden"
+          :aria-label="$t('common.navToggle.close')"
+          @click="mobileNavOpen = false"
+        >
+          <AppIcon :icon="X" :size="20" />
+        </button>
       </div>
 
       <nav class="flex-1 space-y-1 p-3" :aria-label="$t('common.navMain')">
@@ -128,6 +163,17 @@ function onLocaleChange(event: Event): void {
 
     <div class="flex min-w-0 flex-1 flex-col">
       <header class="flex flex-wrap items-center gap-4 border-b border-border bg-surface px-6 py-3">
+        <button
+          type="button"
+          class="rounded-md p-2 text-muted hover:bg-surface-emphasis hover:text-text md:hidden"
+          :aria-label="$t('common.navToggle.open')"
+          aria-controls="app-sidebar"
+          :aria-expanded="mobileNavOpen"
+          @click="mobileNavOpen = true"
+        >
+          <AppIcon :icon="Menu" :size="20" />
+        </button>
+
         <label class="flex items-center gap-2 text-sm">
           <span class="text-muted">{{ $t('common.tenant.label') }}</span>
           <select
