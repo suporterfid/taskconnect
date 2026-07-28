@@ -1,5 +1,6 @@
 {
   "appName": "TaskConnect",
+  "skipToContent": "Pular para o conteúdo principal",
   "loading": "Carregando…",
   "error": "Algo deu errado",
   "retry": "Tentar novamente",
