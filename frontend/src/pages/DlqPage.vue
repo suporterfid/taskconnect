@@ -6,6 +6,10 @@ import { RouterLink } from 'vue-router'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
@@ -78,90 +82,67 @@ function onFilter(): void {
       class="mb-4 flex flex-wrap items-end gap-3"
     >
       <label class="block text-sm">
-        <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('dlq.filters.type') }}</span>
-        <input
+        <span class="font-medium text-text">{{ $t('dlq.filters.type') }}</span>
+        <BaseInput
           v-model="typeFilter"
           type="search"
-          class="mt-1 w-64 rounded-md border border-gray-300 px-3 py-2 dark:border-gray-700 dark:bg-gray-950"
+          class="mt-1 w-64"
           :placeholder="$t('dlq.filters.anyType')"
           @change="onFilter"
         />
       </label>
-      <button
-        type="button"
-        class="rounded-md border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50 dark:border-gray-700"
-        @click="onFilter"
-      >
+      <BaseButton variant="secondary" @click="onFilter">
         {{ $t('common.search') }}
-      </button>
+      </BaseButton>
     </div>
 
     <LoadingState v-if="loading" />
     <ErrorState v-else-if="error" :message="error" @retry="reload" />
-    <div
-      v-else-if="!tenant.currentTenantId || !tenant.currentEnvironmentId"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
-      {{ $t('dlq.needsTenant') }}
-    </div>
-    <div
-      v-else-if="!data?.length"
-      data-testid="dlq-empty"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
-      {{ $t('dlq.empty') }}
-    </div>
+    <EmptyState v-else-if="!tenant.currentTenantId || !tenant.currentEnvironmentId" :message="$t('dlq.needsTenant')" />
+    <EmptyState v-else-if="!data?.length" data-testid="dlq-empty" :message="$t('dlq.empty')" />
     <div v-else data-testid="dlq-table">
-      <p v-if="actionError" class="mb-3 text-sm text-red-600" role="alert">{{ actionError }}</p>
-      <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-          <thead class="bg-gray-50 dark:bg-gray-900">
+      <BaseAlert v-if="actionError" tone="danger" class="mb-3">{{ actionError }}</BaseAlert>
+      <div class="overflow-x-auto rounded-lg border border-border">
+        <table class="min-w-full divide-y divide-border">
+          <thead class="bg-surface">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ $t('dlq.columns.run') }}</th>
-              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ $t('dlq.columns.task') }}</th>
-              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ $t('dlq.columns.type') }}</th>
-              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ $t('dlq.columns.finished') }}</th>
-              <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">{{ $t('dlq.columns.error') }}</th>
-              <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">{{ $t('common.actions') }}</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('dlq.columns.run') }}</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('dlq.columns.task') }}</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('dlq.columns.type') }}</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('dlq.columns.finished') }}</th>
+              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('dlq.columns.error') }}</th>
+              <th class="px-4 py-3 text-right text-sm font-medium text-muted">{{ $t('common.actions') }}</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+          <tbody class="divide-y divide-border bg-surface">
             <tr v-for="run in data" :key="run.id" :data-testid="`dlq-row-${run.id}`">
-              <td class="px-4 py-3 font-mono text-xs">
+              <td class="px-4 py-3 font-mono text-xs text-text">
                 <RouterLink
                   :to="`/runs/${run.id}`"
-                  class="text-violet-600 hover:underline"
+                  class="link text-action"
                   data-testid="dlq-run-link"
                 >
                   {{ run.id }}
                 </RouterLink>
               </td>
               <td class="px-4 py-3 text-sm">
-                <RouterLink
-                  v-if="run.task_id"
-                  :to="`/tasks/${run.task_id}`"
-                  class="text-violet-600 hover:underline"
-                >
+                <RouterLink v-if="run.task_id" :to="`/tasks/${run.task_id}`" class="link text-action">
                   {{ run.task_name || run.task_id }}
                 </RouterLink>
-                <span v-else>—</span>
+                <span v-else class="text-muted">—</span>
               </td>
-              <td class="px-4 py-3 font-mono text-xs text-gray-600">{{ run.task_type || '—' }}</td>
-              <td class="px-4 py-3 text-sm text-gray-600">{{ formatDate(run.finished_at) }}</td>
-              <td class="px-4 py-3 font-mono text-xs text-gray-600">
+              <td class="px-4 py-3 font-mono text-xs text-muted">{{ run.task_type || '—' }}</td>
+              <td class="px-4 py-3 text-sm tabular-nums text-muted">{{ formatDate(run.finished_at) }}</td>
+              <td class="px-4 py-3 font-mono text-xs text-muted">
                 {{ run.final_error_code || run.final_http_status || '—' }}
               </td>
               <td class="space-x-3 px-4 py-3 text-right text-sm">
-                <RouterLink
-                  :to="`/runs/${run.id}`"
-                  class="text-violet-600 hover:underline"
-                  data-testid="dlq-inspect"
-                >
+                <RouterLink :to="`/runs/${run.id}`" class="link text-action" data-testid="dlq-inspect">
                   {{ $t('dlq.actions.inspect') }}
                 </RouterLink>
                 <button
                   type="button"
-                  class="text-violet-600 hover:underline disabled:opacity-60"
+                  class="link text-action disabled:opacity-60"
                   data-testid="dlq-replay"
                   :disabled="actionLoading === run.id"
                   @click="onReplay(run)"
