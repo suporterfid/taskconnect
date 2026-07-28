@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import AppIcon from '@/components/AppIcon.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import { semanticIcons } from '@/utils/icons'
+
 defineProps<{
   message: string
 }>()
@@ -9,17 +13,13 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div
-    class="rounded-lg border border-red-200 bg-red-50 p-6 text-center dark:border-red-900 dark:bg-red-950/30"
-    role="alert"
-  >
-    <p class="text-red-700 dark:text-red-300">{{ message }}</p>
-    <button
-      type="button"
-      class="mt-4 rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
-      @click="emit('retry')"
-    >
+  <div class="rounded-lg border border-danger/30 bg-danger/10 p-6 text-center" role="alert">
+    <p class="flex items-center justify-center gap-2 text-danger">
+      <AppIcon :icon="semanticIcons.danger" :size="16" />
+      {{ message }}
+    </p>
+    <BaseButton variant="danger" class="mt-4" @click="emit('retry')">
       {{ $t('common.retry') }}
-    </button>
+    </BaseButton>
   </div>
 </template>

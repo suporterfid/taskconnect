@@ -16,7 +16,7 @@ const prefersReducedMotion = usePreferredReducedMotion()
       broken circle, not a loading indicator) — see #97.
     -->
     <div
-      class="h-8 w-8 rounded-full border-2 border-violet-600"
+      class="h-8 w-8 rounded-full border-2 border-action"
       :class="prefersReducedMotion === 'reduce' ? '' : 'animate-spin border-t-transparent'"
       aria-hidden="true"
     />
