@@ -80,15 +80,20 @@ function onLocaleChange(event: Event): void {
 </script>
 
 <template>
-  <div class="app-shell flex min-h-screen bg-gray-50 dark:bg-gray-950">
-    <aside
-      class="flex w-64 shrink-0 flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900"
+  <div class="app-shell flex min-h-screen bg-canvas">
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:text-text"
     >
-      <div class="border-b border-gray-200 px-4 py-5 dark:border-gray-800">
-        <RouterLink to="/dashboard" class="text-lg font-semibold text-violet-600">
+      {{ $t('common.skipToContent') }}
+    </a>
+
+    <aside class="flex w-64 shrink-0 flex-col border-r border-border bg-surface">
+      <div class="border-b border-border px-4 py-5">
+        <RouterLink to="/dashboard" class="text-lg font-semibold text-action">
           {{ $t('common.appName') }}
         </RouterLink>
-        <p v-if="auth.user" class="mt-1 truncate text-sm text-gray-500">
+        <p v-if="auth.user" class="mt-1 truncate text-sm text-muted">
           {{ auth.user.email }}
         </p>
       </div>
@@ -98,21 +103,22 @@ function onLocaleChange(event: Event): void {
           v-for="item in navItems"
           :key="item.name"
           :to="item.to"
-          class="block rounded-md px-3 py-2 text-sm transition-colors duration-standard ease-standard"
+          :aria-current="isActive(item.to) ? 'page' : undefined"
+          class="block rounded-md border-l-4 px-3 py-2 text-sm transition-colors duration-standard ease-standard"
           :class="
             isActive(item.to)
-              ? 'bg-violet-50 font-medium text-violet-700 dark:bg-violet-950 dark:text-violet-300'
-              : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              ? 'border-action bg-surface-emphasis font-medium text-text'
+              : 'border-transparent text-muted hover:bg-surface-emphasis hover:text-text'
           "
         >
           {{ item.label }}
         </RouterLink>
       </nav>
 
-      <div class="border-t border-gray-200 p-3 dark:border-gray-800">
+      <div class="border-t border-border p-3">
         <button
           type="button"
-          class="w-full rounded-md px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+          class="w-full rounded-md px-3 py-2 text-left text-sm text-muted hover:bg-surface-emphasis hover:text-text"
           @click="onLogout"
         >
           {{ $t('common.nav.logout') }}
@@ -121,13 +127,11 @@ function onLocaleChange(event: Event): void {
     </aside>
 
     <div class="flex min-w-0 flex-1 flex-col">
-      <header
-        class="flex flex-wrap items-center gap-4 border-b border-gray-200 bg-white px-6 py-3 dark:border-gray-800 dark:bg-gray-900"
-      >
+      <header class="flex flex-wrap items-center gap-4 border-b border-border bg-surface px-6 py-3">
         <label class="flex items-center gap-2 text-sm">
-          <span class="text-gray-500">{{ $t('common.tenant.label') }}</span>
+          <span class="text-muted">{{ $t('common.tenant.label') }}</span>
           <select
-            class="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-800"
+            class="rounded-md border border-border bg-surface px-2 py-1 text-sm text-text"
             :value="tenant.currentTenantId ?? ''"
             @change="onTenantChange"
           >
@@ -141,9 +145,9 @@ function onLocaleChange(event: Event): void {
         </label>
 
         <label class="flex items-center gap-2 text-sm">
-          <span class="text-gray-500">{{ $t('common.environment.label') }}</span>
+          <span class="text-muted">{{ $t('common.environment.label') }}</span>
           <select
-            class="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-800"
+            class="rounded-md border border-border bg-surface px-2 py-1 text-sm text-text"
             :value="tenant.currentEnvironmentId ?? ''"
             @change="onEnvironmentChange"
           >
@@ -161,9 +165,9 @@ function onLocaleChange(event: Event): void {
         </label>
 
         <label class="ml-auto flex items-center gap-2 text-sm">
-          <span class="text-gray-500">{{ $t('common.locale.label') }}</span>
+          <span class="text-muted">{{ $t('common.locale.label') }}</span>
           <select
-            class="rounded-md border border-gray-300 bg-white px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-800"
+            class="rounded-md border border-border bg-surface px-2 py-1 text-sm text-text"
             :value="localeStore.currentLocale"
             @change="onLocaleChange"
           >
@@ -173,7 +177,7 @@ function onLocaleChange(event: Event): void {
         </label>
       </header>
 
-      <main class="flex-1 p-6">
+      <main id="main-content" class="flex-1 p-6">
         <RouterView />
       </main>
     </div>
