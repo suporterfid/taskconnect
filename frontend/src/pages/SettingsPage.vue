@@ -6,6 +6,14 @@ import { RouterLink } from 'vue-router'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseAlert from '@/components/ui/BaseAlert.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
+import BaseTextarea from '@/components/ui/BaseTextarea.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import FormField from '@/components/ui/FormField.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import type { SupportedLocale } from '@/i18n'
 import { ApiError } from '@/services/api'
@@ -83,10 +91,9 @@ const {
   return response.data
 })
 
-async function onLocaleChange(event: Event): Promise<void> {
-  const locale = (event.target as HTMLSelectElement).value as SupportedLocale
-  localeStore.switchLocale(locale)
-  await persistPreferences({ locale })
+async function onLocaleChange(locale: string): Promise<void> {
+  localeStore.switchLocale(locale as SupportedLocale)
+  await persistPreferences({ locale: locale as SupportedLocale })
 }
 
 async function onTimezoneSave(): Promise<void> {
@@ -190,60 +197,61 @@ function formatWhen(value?: string | null): string {
     <PageHeader :title="$t('settings.title')" :subtitle="$t('settings.subtitle')" />
 
     <div class="space-y-6">
-      <section class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-        <h2 class="text-lg font-medium">{{ $t('settings.sections.locale') }}</h2>
-        <p class="mt-2 text-sm text-gray-500">
+      <BaseCard>
+        <h2 class="text-lg font-medium text-text">{{ $t('settings.sections.locale') }}</h2>
+        <p class="mt-2 text-sm text-muted">
           {{ $t('settings.locale.hint') }}
         </p>
 
-        <label class="mt-4 flex max-w-xs flex-col gap-1 text-sm">
-          <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('common.locale.label') }}</span>
-          <select
-            class="rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-800"
-            :value="localeStore.currentLocale"
-            :disabled="saving"
-            @change="onLocaleChange"
-          >
-            <option value="en">{{ $t('common.locale.en') }}</option>
-            <option value="pt-BR">{{ $t('common.locale.pt-BR') }}</option>
-          </select>
-        </label>
+        <FormField id="locale" class="mt-4 max-w-xs" :label="$t('common.locale.label')">
+          <template #default="{ describedBy, ariaInvalid }">
+            <BaseSelect
+              id="locale"
+              :model-value="localeStore.currentLocale"
+              :disabled="saving"
+              :described-by="describedBy"
+              :aria-invalid="ariaInvalid"
+              @update:model-value="onLocaleChange"
+            >
+              <option value="en">{{ $t('common.locale.en') }}</option>
+              <option value="pt-BR">{{ $t('common.locale.pt-BR') }}</option>
+            </BaseSelect>
+          </template>
+        </FormField>
 
-        <label class="mt-4 flex max-w-xs flex-col gap-1 text-sm">
-          <span class="font-medium text-gray-700 dark:text-gray-300">{{ $t('settings.timezone.label') }}</span>
-          <input
-            v-model="timezone"
-            type="text"
-            class="rounded-md border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-800"
-            :disabled="saving"
-          />
-        </label>
-        <button
-          type="button"
-          class="mt-3 rounded-md bg-violet-600 px-4 py-2 text-sm text-white hover:bg-violet-700 disabled:opacity-50"
-          :disabled="saving"
-          @click="onTimezoneSave"
-        >
+        <FormField id="timezone" class="mt-4 max-w-xs" :label="$t('settings.timezone.label')">
+          <template #default="{ describedBy, ariaInvalid }">
+            <BaseInput
+              id="timezone"
+              v-model="timezone"
+              type="text"
+              :disabled="saving"
+              :described-by="describedBy"
+              :aria-invalid="ariaInvalid"
+            />
+          </template>
+        </FormField>
+        <BaseButton class="mt-3" :disabled="saving" @click="onTimezoneSave">
           {{ $t('settings.timezone.save') }}
-        </button>
+        </BaseButton>
 
-        <p v-if="note" class="mt-3 text-sm text-green-700" role="status">
+        <BaseAlert v-if="note" tone="success" role="status" class="mt-3">
           {{ note }}
-        </p>
-        <p v-if="saveError" class="mt-3 text-sm text-red-600" role="alert">
+        </BaseAlert>
+        <BaseAlert v-if="saveError" tone="danger" role="alert" class="mt-3">
           {{ saveError }}
-        </p>
-      </section>
+        </BaseAlert>
+      </BaseCard>
 
-      <section class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-        <h2 class="text-lg font-medium">
+      <BaseCard>
+        <h2 class="text-lg font-medium text-text">
           {{ $t('settings.notifications.title') }}
         </h2>
-        <p class="mt-2 text-sm text-gray-500">
+        <p class="mt-2 text-sm text-muted">
           {{ $t('settings.notifications.hint') }}
         </p>
 
-        <label class="mt-4 inline-flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+        <label class="mt-4 inline-flex items-start gap-2 text-sm text-text">
           <input
             v-model="failureEmailsEnabled"
             type="checkbox"
@@ -252,79 +260,64 @@ function formatWhen(value?: string | null): string {
           />
           <span>
             <span class="font-medium">{{ $t('settings.notifications.failureEmails') }}</span>
-            <span class="mt-1 block text-gray-500">
+            <span class="mt-1 block text-muted">
               {{ $t('settings.notifications.failureEmailsHint') }}
             </span>
           </span>
         </label>
-        <button
-          type="button"
-          class="mt-3 rounded-md bg-violet-600 px-4 py-2 text-sm text-white hover:bg-violet-700 disabled:opacity-50"
-          :disabled="saving"
-          @click="onFailureEmailsSave"
-        >
-          {{ $t('settings.notifications.save') }}
-        </button>
-      </section>
+        <div>
+          <BaseButton class="mt-3" :disabled="saving" @click="onFailureEmailsSave">
+            {{ $t('settings.notifications.save') }}
+          </BaseButton>
+        </div>
+      </BaseCard>
 
-      <section class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-        <h2 class="text-lg font-medium">
+      <BaseCard>
+        <h2 class="text-lg font-medium text-text">
           {{ $t('settings.outboundAllowHosts.title') }}
         </h2>
-        <p class="mt-2 text-sm text-gray-500">
+        <p class="mt-2 text-sm text-muted">
           {{ $t('settings.outboundAllowHosts.hint') }}
         </p>
 
-        <p
-          v-if="!canEditAllowHosts"
-          class="mt-4 rounded-md border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500"
-        >
-          {{ $t('settings.outboundAllowHosts.needsTenant') }}
-        </p>
+        <EmptyState v-if="!canEditAllowHosts" class="mt-4" :message="$t('settings.outboundAllowHosts.needsTenant')" />
         <template v-else>
-          <label class="mt-4 block text-sm">
-            <span class="font-medium text-gray-700 dark:text-gray-300">
-              {{ $t('settings.outboundAllowHosts.label') }}
-            </span>
-            <textarea
-              v-model="allowHostsText"
-              rows="5"
-              class="mt-1 w-full rounded-md border border-gray-300 bg-white px-3 py-2 font-mono text-sm dark:border-gray-700 dark:bg-gray-800"
-              :disabled="savingAllowHosts"
-              :placeholder="$t('settings.outboundAllowHosts.placeholder')"
-            />
-          </label>
-          <button
-            type="button"
-            class="mt-3 rounded-md bg-violet-600 px-4 py-2 text-sm text-white hover:bg-violet-700 disabled:opacity-50"
-            :disabled="savingAllowHosts"
-            @click="onSaveAllowHosts"
+          <FormField
+            id="allow_hosts"
+            class="mt-4"
+            :label="$t('settings.outboundAllowHosts.label')"
           >
+            <template #default="{ describedBy, ariaInvalid }">
+              <BaseTextarea
+                id="allow_hosts"
+                v-model="allowHostsText"
+                :rows="5"
+                class="font-mono text-sm"
+                :disabled="savingAllowHosts"
+                :placeholder="$t('settings.outboundAllowHosts.placeholder')"
+                :described-by="describedBy"
+                :aria-invalid="ariaInvalid"
+              />
+            </template>
+          </FormField>
+          <BaseButton class="mt-3" :disabled="savingAllowHosts" @click="onSaveAllowHosts">
             {{ $t('settings.outboundAllowHosts.save') }}
-          </button>
-          <p
-            v-if="allowHostsNote"
-            class="mt-3 text-sm text-green-700"
-            role="status"
-          >
+          </BaseButton>
+          <BaseAlert v-if="allowHostsNote" tone="success" role="status" class="mt-3">
             {{ allowHostsNote }}
-          </p>
-          <p
-            v-if="allowHostsError"
-            class="mt-3 text-sm text-red-600"
-            role="alert"
-          >
+          </BaseAlert>
+          <BaseAlert v-if="allowHostsError" tone="danger" role="alert" class="mt-3">
             {{ allowHostsError }}
-          </p>
+          </BaseAlert>
         </template>
-      </section>
+      </BaseCard>
 
-      <section class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-        <h2 class="text-lg font-medium">{{ $t('settings.retention.title') }}</h2>
-        <p class="mt-2 text-sm text-gray-500">
+      <BaseCard>
+        <h2 class="text-lg font-medium text-text">{{ $t('settings.retention.title') }}</h2>
+        <p class="mt-2 text-sm text-muted">
           {{ $t('settings.retention.subtitle') }}
         </p>
-        <p class="mt-1 text-sm text-gray-500">
+        <p class="mt-1 text-sm text-muted">
           {{ $t('settings.retention.hint') }}
         </p>
 
@@ -334,136 +327,119 @@ function formatWhen(value?: string | null): string {
           :message="retentionError ?? $t('settings.retention.loadError')"
           @retry="reloadRetention"
         />
-        <dl
-          v-else-if="retention"
-          class="mt-4 grid gap-3 sm:grid-cols-2"
-        >
+        <dl v-else-if="retention" class="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
-            <dt class="text-sm text-gray-500">
+            <dt class="text-sm text-muted">
               {{ $t('settings.retention.fields.payloadSnapshotsDays') }}
             </dt>
-            <dd class="mt-1 text-sm font-medium">
+            <dd class="mt-1 text-sm font-medium tabular-nums text-text">
               {{ retention.payload_snapshots_days }}
             </dd>
           </div>
           <div>
-            <dt class="text-sm text-gray-500">
+            <dt class="text-sm text-muted">
               {{ $t('settings.retention.fields.attemptMetadataDays') }}
             </dt>
-            <dd class="mt-1 text-sm font-medium">
+            <dd class="mt-1 text-sm font-medium tabular-nums text-text">
               {{ retention.attempt_metadata_days }}
             </dd>
           </div>
           <div>
-            <dt class="text-sm text-gray-500">
+            <dt class="text-sm text-muted">
               {{ $t('settings.retention.fields.runSummaryDays') }}
             </dt>
-            <dd class="mt-1 text-sm font-medium">
+            <dd class="mt-1 text-sm font-medium tabular-nums text-text">
               {{ retention.run_summary_days }}
             </dd>
           </div>
           <div>
-            <dt class="text-sm text-gray-500">
+            <dt class="text-sm text-muted">
               {{ $t('settings.retention.fields.auditLogsDays') }}
             </dt>
-            <dd class="mt-1 text-sm font-medium">
+            <dd class="mt-1 text-sm font-medium tabular-nums text-text">
               {{ retention.audit_logs_days }}
             </dd>
           </div>
           <div>
-            <dt class="text-sm text-gray-500">
+            <dt class="text-sm text-muted">
               {{ $t('settings.retention.fields.apiIdempotencyHours') }}
             </dt>
-            <dd class="mt-1 text-sm font-medium">
+            <dd class="mt-1 text-sm font-medium tabular-nums text-text">
               {{ retention.api_idempotency_hours }}
             </dd>
           </div>
           <div>
-            <dt class="text-sm text-gray-500">
+            <dt class="text-sm text-muted">
               {{ $t('settings.retention.fields.systemHeartbeatDays') }}
             </dt>
-            <dd class="mt-1 text-sm font-medium">
+            <dd class="mt-1 text-sm font-medium tabular-nums text-text">
               {{ retention.system_heartbeat_days }}
             </dd>
           </div>
           <div>
-            <dt class="text-sm text-gray-500">
+            <dt class="text-sm text-muted">
               {{ $t('settings.retention.fields.deadRunsDays') }}
             </dt>
-            <dd class="mt-1 text-sm font-medium">
+            <dd class="mt-1 text-sm font-medium tabular-nums text-text">
               {{ retention.dead_runs_days ?? '—' }}
             </dd>
           </div>
         </dl>
-      </section>
+      </BaseCard>
 
-      <section class="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
+      <BaseCard>
         <div class="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h2 class="text-lg font-medium">{{ $t('settings.audit.title') }}</h2>
-            <p class="mt-1 text-sm text-gray-500">{{ $t('settings.audit.subtitle') }}</p>
+            <h2 class="text-lg font-medium text-text">{{ $t('settings.audit.title') }}</h2>
+            <p class="mt-1 text-sm text-muted">{{ $t('settings.audit.subtitle') }}</p>
           </div>
-          <RouterLink
-            v-if="canLoadAudit"
-            to="/audit-logs"
-            class="text-sm text-violet-600 hover:underline"
-          >
+          <RouterLink v-if="canLoadAudit" to="/audit-logs" class="link text-sm text-action">
             {{ $t('settings.audit.viewAll') }}
           </RouterLink>
         </div>
 
-        <p
-          v-if="!canLoadAudit"
-          class="rounded-md border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500"
-        >
-          {{ $t('settings.audit.needsTenant') }}
-        </p>
+        <EmptyState v-if="!canLoadAudit" :message="$t('settings.audit.needsTenant')" />
         <LoadingState v-else-if="auditLoading" />
         <ErrorState
           v-else-if="auditError"
           :message="auditError ?? $t('settings.audit.loadError')"
           @retry="reloadAudit"
         />
-        <p
-          v-else-if="!auditLogs?.length"
-          class="rounded-md border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500"
-        >
-          {{ $t('settings.audit.empty') }}
-        </p>
-        <div v-else class="overflow-hidden rounded-md border border-gray-200 dark:border-gray-800">
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-            <thead class="bg-gray-50 dark:bg-gray-950">
+        <EmptyState v-else-if="!auditLogs?.length" :message="$t('settings.audit.empty')" />
+        <div v-else class="overflow-hidden rounded-md border border-border">
+          <table class="min-w-full divide-y divide-border">
+            <thead class="bg-surface-emphasis">
               <tr>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                <th class="px-3 py-2 text-left text-sm font-medium text-muted">
                   {{ $t('settings.audit.fields.when') }}
                 </th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                <th class="px-3 py-2 text-left text-sm font-medium text-muted">
                   {{ $t('settings.audit.fields.action') }}
                 </th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                <th class="px-3 py-2 text-left text-sm font-medium text-muted">
                   {{ $t('settings.audit.fields.resource') }}
                 </th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase text-gray-500">
+                <th class="px-3 py-2 text-left text-sm font-medium text-muted">
                   {{ $t('settings.audit.fields.actor') }}
                 </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+            <tbody class="divide-y divide-border">
               <tr v-for="log in auditLogs.slice(0, 8)" :key="log.id">
-                <td class="px-3 py-2 text-sm">{{ formatWhen(log.created_at) }}</td>
-                <td class="px-3 py-2 text-sm font-medium">{{ log.action }}</td>
-                <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">
+                <td class="px-3 py-2 text-sm tabular-nums text-text">{{ formatWhen(log.created_at) }}</td>
+                <td class="px-3 py-2 text-sm font-medium text-text">{{ log.action }}</td>
+                <td class="px-3 py-2 text-sm text-muted">
                   {{ log.resource_type }}
                   <span v-if="log.resource_id"> · {{ log.resource_id }}</span>
                 </td>
-                <td class="px-3 py-2 text-sm text-gray-600 dark:text-gray-400">
+                <td class="px-3 py-2 text-sm text-muted">
                   {{ log.actor?.email ?? '—' }}
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-      </section>
+      </BaseCard>
     </div>
   </div>
 </template>

@@ -8,6 +8,12 @@ import PageHeader from '@/components/PageHeader.vue'
 import BaseAlert from '@/components/ui/BaseAlert.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseInput from '@/components/ui/BaseInput.vue'
+import BaseSelect from '@/components/ui/BaseSelect.vue'
+import CodeBlock from '@/components/ui/CodeBlock.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import FormField from '@/components/ui/FormField.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
@@ -319,25 +325,19 @@ function dismissPlaintext(): void {
         :title="$t('settings.apiKeys.title')"
         :subtitle="$t('settings.apiKeys.subtitle')"
       />
-      <button
-        type="button"
-        class="shrink-0 rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
-        @click="openCreate"
-      >
+      <BaseButton class="shrink-0" @click="openCreate">
         {{ $t('settings.apiKeys.create') }}
-      </button>
+      </BaseButton>
     </div>
 
-    <BaseAlert v-if="revealedPlaintext" tone="warning" class="mb-6">
+    <BaseAlert v-if="revealedPlaintext" tone="warning" role="alert" class="mb-6">
       <div class="space-y-3">
         <h2 class="font-semibold text-text">
           {{ $t('settings.apiKeys.plaintextTitle') }}
         </h2>
         <p>{{ $t('settings.apiKeys.plaintextWarning') }}</p>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <code class="flex-1 break-all rounded-md border border-border bg-surface px-3 py-2 font-mono text-text">
-            {{ revealedPlaintext }}
-          </code>
+          <CodeBlock class="flex-1">{{ revealedPlaintext }}</CodeBlock>
           <BaseButton @click="copyPlaintext">
             {{
               copied
@@ -352,126 +352,122 @@ function dismissPlaintext(): void {
       </div>
     </BaseAlert>
 
-    <BaseAlert v-if="formError && !showForm" tone="danger" class="mb-4">
+    <BaseAlert v-if="formError && !showForm" tone="danger" role="alert" class="mb-4">
       {{ formError }}
     </BaseAlert>
 
-    <form
-      v-if="showForm"
-      class="mb-6 space-y-4 rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900"
-      @submit.prevent="onSubmit"
-    >
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-        {{ formTitle }}
-      </h2>
-      <BaseAlert v-if="formError" tone="danger">
-        {{ formError }}
-      </BaseAlert>
+    <form v-if="showForm" class="mb-6" @submit.prevent="onSubmit">
+      <BaseCard class="space-y-4">
+        <h2 class="text-lg font-semibold text-text">
+          {{ formTitle }}
+        </h2>
+        <BaseAlert v-if="formError" tone="danger" role="alert">
+          {{ formError }}
+        </BaseAlert>
 
-      <div class="grid gap-4 sm:grid-cols-2">
-        <label class="block sm:col-span-2">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('settings.apiKeys.fields.name')
-          }}</span>
-          <input
-            v-model="form.name"
-            required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          />
-        </label>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <FormField id="apikey_name" class="sm:col-span-2" :label="$t('settings.apiKeys.fields.name')" required>
+            <template #default="{ describedBy, ariaInvalid }">
+              <BaseInput
+                id="apikey_name"
+                v-model="form.name"
+                required
+                :described-by="describedBy"
+                :aria-invalid="ariaInvalid"
+              />
+            </template>
+          </FormField>
 
-        <label v-if="!editingId" class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('settings.apiKeys.fields.environment')
-          }}</span>
-          <select
-            v-model="form.environment_id"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+          <FormField
+            v-if="!editingId"
+            id="apikey_environment"
+            :label="$t('settings.apiKeys.fields.environment')"
+            :hint="$t('settings.apiKeys.fields.environmentHint')"
           >
-            <option value="">
-              {{ $t('settings.apiKeys.fields.environmentAny') }}
-            </option>
-            <option
-              v-for="env in tenant.activeEnvironments"
-              :key="env.id"
-              :value="env.id"
+            <template #default="{ describedBy, ariaInvalid }">
+              <BaseSelect
+                id="apikey_environment"
+                v-model="form.environment_id"
+                :described-by="describedBy"
+                :aria-invalid="ariaInvalid"
+              >
+                <option value="">
+                  {{ $t('settings.apiKeys.fields.environmentAny') }}
+                </option>
+                <option
+                  v-for="env in tenant.activeEnvironments"
+                  :key="env.id"
+                  :value="env.id"
+                >
+                  {{ env.name }}
+                </option>
+              </BaseSelect>
+            </template>
+          </FormField>
+
+          <div v-else class="block">
+            <span class="mb-1 block text-sm font-medium text-text">{{
+              $t('settings.apiKeys.fields.environmentReadonly')
+            }}</span>
+            <p class="rounded-md border border-border px-3 py-2 text-sm text-muted">
+              {{ environmentLabel(editingKey?.environment_id) }}
+            </p>
+          </div>
+
+          <FormField
+            id="apikey_expires_at"
+            :label="$t('settings.apiKeys.fields.expiresAt')"
+            :hint="$t('settings.apiKeys.fields.expiresAtHint')"
+          >
+            <template #default="{ describedBy, ariaInvalid }">
+              <BaseInput
+                id="apikey_expires_at"
+                v-model="form.expires_at"
+                type="datetime-local"
+                :described-by="describedBy"
+                :aria-invalid="ariaInvalid"
+              />
+            </template>
+          </FormField>
+        </div>
+
+        <fieldset>
+          <legend class="mb-2 text-sm font-medium text-text">
+            {{ $t('settings.apiKeys.fields.permissions') }}
+          </legend>
+          <div class="grid gap-2 sm:grid-cols-2">
+            <label
+              v-for="option in PERMISSION_OPTIONS"
+              :key="option.value"
+              class="flex items-center gap-2 text-sm text-text"
             >
-              {{ env.name }}
-            </option>
-          </select>
-          <span class="mt-1 block text-xs text-gray-500">{{
-            $t('settings.apiKeys.fields.environmentHint')
-          }}</span>
-        </label>
+              <input
+                type="checkbox"
+                :checked="isPermissionChecked(option.value)"
+                :disabled="option.value !== '*' && fullAccessSelected"
+                @change="
+                  togglePermission(
+                    option.value,
+                    ($event.target as HTMLInputElement).checked,
+                  )
+                "
+              />
+              {{ $t(option.labelKey) }}
+            </label>
+          </div>
+        </fieldset>
 
-        <div v-else class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('settings.apiKeys.fields.environmentReadonly')
-          }}</span>
-          <p class="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-600 dark:border-gray-700">
-            {{ environmentLabel(editingKey?.environment_id) }}
-          </p>
+        <div class="flex justify-end gap-3">
+          <BaseButton variant="secondary" @click="cancelForm">
+            {{ $t('common.cancel') }}
+          </BaseButton>
+          <BaseButton type="submit" :disabled="submitting">
+            {{
+              submitting ? $t('common.loading') : $t('settings.apiKeys.save')
+            }}
+          </BaseButton>
         </div>
-
-        <label class="block">
-          <span class="mb-1 block text-sm font-medium text-gray-700">{{
-            $t('settings.apiKeys.fields.expiresAt')
-          }}</span>
-          <input
-            v-model="form.expires_at"
-            type="datetime-local"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-          />
-          <span class="mt-1 block text-xs text-gray-500">{{
-            $t('settings.apiKeys.fields.expiresAtHint')
-          }}</span>
-        </label>
-      </div>
-
-      <fieldset>
-        <legend class="mb-2 text-sm font-medium text-gray-700">
-          {{ $t('settings.apiKeys.fields.permissions') }}
-        </legend>
-        <div class="grid gap-2 sm:grid-cols-2">
-          <label
-            v-for="option in PERMISSION_OPTIONS"
-            :key="option.value"
-            class="flex items-center gap-2 text-sm text-gray-700"
-          >
-            <input
-              type="checkbox"
-              :checked="isPermissionChecked(option.value)"
-              :disabled="option.value !== '*' && fullAccessSelected"
-              @change="
-                togglePermission(
-                  option.value,
-                  ($event.target as HTMLInputElement).checked,
-                )
-              "
-            />
-            {{ $t(option.labelKey) }}
-          </label>
-        </div>
-      </fieldset>
-
-      <div class="flex justify-end gap-3">
-        <button
-          type="button"
-          class="rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-          @click="cancelForm"
-        >
-          {{ $t('common.cancel') }}
-        </button>
-        <button
-          type="submit"
-          :disabled="submitting"
-          class="rounded-md bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
-        >
-          {{
-            submitting ? $t('common.loading') : $t('settings.apiKeys.save')
-          }}
-        </button>
-      </div>
+      </BaseCard>
     </form>
 
     <LoadingState v-if="loading" />
@@ -480,75 +476,60 @@ function dismissPlaintext(): void {
       :message="error ?? $t('settings.apiKeys.loadError')"
       @retry="reload"
     />
-    <div
-      v-else-if="!tenant.currentTenantId"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
-      {{ $t('settings.apiKeys.needsTenant') }}
-    </div>
-    <div
-      v-else-if="!data?.length"
-      class="rounded-lg border border-dashed border-gray-300 p-12 text-center text-gray-500"
-    >
+    <EmptyState v-else-if="!tenant.currentTenantId" :message="$t('settings.apiKeys.needsTenant')" />
+    <EmptyState v-else-if="!data?.length" :message="$t('settings.apiKeys.empty')">
       <p>{{ $t('settings.apiKeys.empty') }}</p>
       <p class="mt-2 text-sm">{{ $t('settings.apiKeys.emptyHint') }}</p>
-      <button
-        type="button"
-        class="mt-4 text-sm text-violet-600 hover:underline"
-        @click="openCreate"
-      >
+      <BaseButton variant="tertiary" class="mt-4" @click="openCreate">
         {{ $t('settings.apiKeys.create') }}
-      </button>
-    </div>
-    <div
-      v-else
-      class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800"
-    >
-      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-        <thead class="bg-gray-50 dark:bg-gray-900">
+      </BaseButton>
+    </EmptyState>
+    <div v-else class="overflow-x-auto rounded-lg border border-border">
+      <table class="min-w-full divide-y divide-border">
+        <thead class="bg-surface">
           <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.apiKeys.fields.name') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.apiKeys.fields.prefix') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.apiKeys.fields.permissions') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.apiKeys.fields.environment') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.apiKeys.fields.lastUsedAt') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('settings.apiKeys.fields.expiresAt') }}
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
               {{ $t('common.status') }}
             </th>
-            <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">
+            <th class="px-4 py-3 text-right text-sm font-medium text-muted">
               {{ $t('common.actions') }}
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-800 dark:bg-gray-950">
+        <tbody class="divide-y divide-border bg-surface">
           <tr v-for="key in data" :key="key.id">
-            <td class="px-4 py-3 font-medium">{{ key.name }}</td>
-            <td class="px-4 py-3 font-mono text-sm text-gray-600">
+            <td class="px-4 py-3 font-medium text-text">{{ key.name }}</td>
+            <td class="px-4 py-3 font-mono text-sm text-muted">
               {{ key.key_prefix }}…
             </td>
-            <td class="max-w-xs truncate px-4 py-3 text-sm text-gray-600">
+            <td class="max-w-xs truncate px-4 py-3 text-sm text-muted">
               {{ permissionsLabel(key.permissions ?? []) }}
             </td>
-            <td class="px-4 py-3 text-sm text-gray-600">
+            <td class="px-4 py-3 text-sm text-muted">
               {{ environmentLabel(key.environment_id) }}
             </td>
-            <td class="px-4 py-3 text-sm text-gray-600">
+            <td class="px-4 py-3 text-sm tabular-nums text-muted">
               {{ formatDate(key.last_used_at) }}
             </td>
-            <td class="px-4 py-3 text-sm text-gray-600">
+            <td class="px-4 py-3 text-sm tabular-nums text-muted">
               {{
                 key.expires_at
                   ? formatDate(key.expires_at)
@@ -564,16 +545,12 @@ function dismissPlaintext(): void {
             </td>
             <td class="space-x-3 px-4 py-3 text-right text-sm">
               <template v-if="keyStatus(key) !== 'revoked'">
-                <button
-                  type="button"
-                  class="text-violet-600 hover:underline"
-                  @click="openEdit(key)"
-                >
+                <button type="button" class="link text-action" @click="openEdit(key)">
                   {{ $t('common.edit') }}
                 </button>
                 <button
                   type="button"
-                  class="text-danger hover:underline disabled:opacity-60"
+                  class="link text-danger disabled:opacity-60"
                   :disabled="revokingId === key.id"
                   @click="onRevoke(key)"
                 >
