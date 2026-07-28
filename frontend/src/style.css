@@ -82,6 +82,16 @@
   --color-action-hover: var(--color-purple-800);
   --color-focus: var(--color-purple-500);
 
+  /*
+   * Provisional: #90 owns the full status palette (success/warning/info +
+   * verified contrast pairs for danger). BaseButton's danger variant and
+   * BaseInput's invalid state need *something* today, so this borrows
+   * Tailwind's own default red scale rather than inventing a new raw hex.
+   * white-on-red-600 and red-600-on-canvas both clear 4.5:1. See #89.
+   */
+  --color-danger: var(--color-red-600);
+  --color-danger-strong: var(--color-red-700);
+
   --spacing: 0.25rem;
   --container-reading: 45rem;
   --container-app: 80rem;

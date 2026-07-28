@@ -30,6 +30,10 @@
     --color-action-hover: var(--color-purple-800);
     --color-focus: var(--color-purple-500);
 
+    /* Provisional pending #90's full status palette — see frontend/src/style.css. */
+    --color-danger: var(--color-red-600);
+    --color-danger-strong: var(--color-red-700);
+
     --spacing: 0.25rem;
     --container-reading: 45rem;
     --container-app: 80rem;
