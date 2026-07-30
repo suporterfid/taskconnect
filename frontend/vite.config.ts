@@ -9,9 +9,11 @@ const apiProxyTarget =
 
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
-  // Assets are served from /build/ (Laravel public/build). Without this, Vite
-  // emits absolute /assets/* URLs that miss the directory and return HTML.
-  base: '/build/',
+  // Production deploys this app under the fixed /tc subpath (see
+  // docs/deployment/ and the shared root .htaccess routing Jotter/TaskConnect/
+  // GrandpaSSOn on one domain). Without the /tc prefix, the browser requests
+  // /build/* which falls through the shared routing to a different app.
+  base: '/tc/build/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
