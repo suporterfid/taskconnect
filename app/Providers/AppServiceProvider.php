@@ -46,6 +46,7 @@ use App\Domain\Shared\SystemClock;
 use App\Infrastructure\Dns\SystemDnsResolver;
 use App\Infrastructure\HttpClient\GuzzlePinnedHttpTransport;
 use App\Infrastructure\HttpClient\PinnedHttpTransport;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -108,6 +109,16 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // asset()/url() derive their root from the incoming request's
+        // scheme+host by default, ignoring any path segment in APP_URL. This
+        // app deploys under a fixed subpath in production (/tc, see
+        // docs/deployment/), so without forcing the root URL, asset('build/x')
+        // resolves to https://host/build/x instead of https://host/tc/build/x.
+        // Forcing it from config('app.url') keeps this correct for both the
+        // subpath production deployment and a plain root-domain APP_URL (e.g.
+        // local dev), since it just uses whatever APP_URL is configured to be.
+        URL::forceRootUrl(config('app.url'));
+
         if ($this->app->runningInConsole()) {
             return;
         }
