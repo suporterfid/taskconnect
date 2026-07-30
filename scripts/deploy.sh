@@ -33,30 +33,34 @@ if [[ ! -f "$CONFIG" ]]; then
 fi
 
 j() { jq -r "$1" "$CONFIG"; }
+# jq's `//` operator treats `false` (not just null/missing) as "use the
+# default", so `.foo // true` silently ignores an explicit `false` in the
+# config. jbool() distinguishes null/missing from an explicit boolean.
+jbool() { jq -r "(${1}) | if . == null then ${2} else . end" "$CONFIG"; }
 
 SITE="$(j '.site // empty')"
-INJECT_HTACCESS="$(j '.options.inject_root_htaccess // true')"
-UPLOAD_ENV="$(j '.options.upload_env // false')"
+INJECT_HTACCESS="$(jbool '.options.inject_root_htaccess' 'true')"
+UPLOAD_ENV="$(jbool '.options.upload_env' 'false')"
 ENV_SOURCE="$(j '.options.env_source // ".env.production"')"
-DELETE_REMOTE="$(j '.options.delete_remote // false')"
+DELETE_REMOTE="$(jbool '.options.delete_remote' 'false')"
 
-SSH_ENABLED="$(j '.ssh.enabled // false')"
+SSH_ENABLED="$(jbool '.ssh.enabled' 'false')"
 SSH_HOST="$(j '.ssh.host // empty')"
 SSH_PORT="$(j '.ssh.port // 22')"
 SSH_USER="$(j '.ssh.username // empty')"
 SSH_PASS="$(j '.ssh.password // empty')"
 APP_DIR="$(j '.ssh.app_dir // empty')"
 PHP_BIN="$(j '.ssh.php_binary // "php"')"
-RUN_MIGRATIONS="$(j '.ssh.run_migrations // false')"
-RUN_OPTIMIZE="$(j '.ssh.run_optimize // true')"
-STORAGE_LINK="$(j '.ssh.storage_link // true')"
+RUN_MIGRATIONS="$(jbool '.ssh.run_migrations' 'false')"
+RUN_OPTIMIZE="$(jbool '.ssh.run_optimize' 'true')"
+STORAGE_LINK="$(jbool '.ssh.storage_link' 'true')"
 
 FTP_HOST="$(j '.ftp.host // empty')"
 FTP_PORT="$(j '.ftp.port // 21')"
 FTP_USER="$(j '.ftp.username // empty')"
 FTP_PASS="$(j '.ftp.password // empty')"
-FTP_SECURE="$(j '.ftp.secure // true')"
-FTP_VERIFY="$(j '.ftp.verify_certificate // false')"
+FTP_SECURE="$(jbool '.ftp.secure' 'true')"
+FTP_VERIFY="$(jbool '.ftp.verify_certificate' 'false')"
 REMOTE_DIR="$(j '.ftp.remote_dir // empty')"
 
 run_ssh() {
@@ -196,10 +200,12 @@ fi
 if [[ -d storage ]]; then
   cp -a storage /tmp/tc-preserve/storage
 fi
-if [[ -d bootstrap/cache ]]; then
-  mkdir -p /tmp/tc-preserve/bootstrap
-  cp -a bootstrap/cache /tmp/tc-preserve/bootstrap/cache
-fi
+# bootstrap/cache is NOT preserved: it's pure derived cache (services.php,
+# packages.php, config.php, routes-v7.php), regenerated below by the
+# RUN_OPTIMIZE step. Restoring an old cache here can resurrect a provider
+# list built when a require-dev-only package was present on the server
+# (e.g. from a stray non---no-dev composer install), fataling every
+# artisan/web request against an otherwise-clean release.
 
 if [[ "\$DELETE_REMOTE" == "true" ]]; then
   find . -mindepth 1 -maxdepth 1 \
@@ -235,12 +241,12 @@ if [[ -d /tmp/tc-preserve/storage ]]; then
   # freshly extracted tree without wiping the new empty skeleton dirs.
   cp -a /tmp/tc-preserve/storage/. storage/ 2>/dev/null || true
 fi
-if [[ -d /tmp/tc-preserve/bootstrap/cache ]]; then
-  mkdir -p bootstrap/cache
-  cp -a /tmp/tc-preserve/bootstrap/cache/. bootstrap/cache/ 2>/dev/null || true
-fi
 rm -rf /tmp/tc-preserve
 
+# Always start from an empty bootstrap/cache -- whatever the release shipped
+# (should already be empty) plus explicit belt-and-suspenders here, since a
+# stale cache is exactly what broke a prior deploy (see #126).
+rm -f bootstrap/cache/*.php 2>/dev/null || true
 mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache
 chmod -R ug+rwX storage bootstrap/cache 2>/dev/null || true
 
