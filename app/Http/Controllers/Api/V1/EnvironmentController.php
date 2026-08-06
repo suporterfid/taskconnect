@@ -161,7 +161,7 @@ class EnvironmentController extends Controller
             $this->outboundPolicy->validateUrl($url, [], EgressProfile::PublicCrawl);
         } catch (OutboundPolicyViolation $exception) {
             throw ValidationException::withMessages([
-                'notifications.dead_run_webhook_url' => [$exception->getMessage() !== '' ? $exception->getMessage() : 'Webhook URL is not allowed.'],
+                'notifications.dead_run_webhook_url' => [$exception->getMessage() !== '' ? $exception->getMessage() : __('messages.webhook_url_not_allowed')],
             ]);
         }
     }

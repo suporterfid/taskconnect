@@ -20,7 +20,7 @@ class ForgotPasswordController extends Controller
 
         return response()->json([
             'data' => [
-                'message' => 'If an account exists for that email, a reset link has been sent.',
+                'message' => __('messages.account_reset_link_sent'),
             ],
         ]);
     }

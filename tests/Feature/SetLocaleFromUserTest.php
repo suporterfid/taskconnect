@@ -39,4 +39,17 @@ class SetLocaleFromUserTest extends TestCase
         $response->assertStatus(422);
         $this->assertStringContainsString('must be a string', $response->json('error.details.timezone.0'));
     }
+
+    public function test_generic_error_envelope_message_is_localized(): void
+    {
+        $user = User::factory()->create();
+        UserPreference::query()->where('user_id', $user->id)->update(['locale' => 'pt-BR']);
+
+        $this->actingAs($user);
+
+        $response = $this->getJson('/api/v1/tenants/tnt_does_not_exist/audit-logs');
+
+        $response->assertStatus(404);
+        $this->assertSame('O recurso solicitado não foi encontrado.', $response->json('error.message'));
+    }
 }

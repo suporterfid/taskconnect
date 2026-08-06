@@ -26,7 +26,7 @@ final class ApiErrorRenderer
             return [
                 'message' => self::envelope(
                     'validation_error',
-                    'The request is invalid.',
+                    __('messages.validation_error'),
                     $exception->errors(),
                     $requestId,
                 ),
@@ -38,7 +38,7 @@ final class ApiErrorRenderer
             return [
                 'message' => self::envelope(
                     'unauthenticated',
-                    'Authentication is required.',
+                    __('messages.unauthenticated'),
                     null,
                     $requestId,
                 ),
@@ -50,7 +50,7 @@ final class ApiErrorRenderer
             return [
                 'message' => self::envelope(
                     'forbidden',
-                    'You do not have permission to perform this action.',
+                    __('messages.forbidden'),
                     null,
                     $requestId,
                 ),
@@ -62,7 +62,7 @@ final class ApiErrorRenderer
             return [
                 'message' => self::envelope(
                     'not_found',
-                    'The requested resource was not found.',
+                    __('messages.not_found'),
                     null,
                     $requestId,
                 ),
@@ -112,7 +112,7 @@ final class ApiErrorRenderer
         return [
             'message' => self::envelope(
                 'internal_error',
-                'An unexpected error occurred.',
+                __('messages.unexpected_error'),
                 null,
                 $requestId,
             ),
