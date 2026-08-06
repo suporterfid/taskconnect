@@ -89,7 +89,7 @@ function onEnvironmentChange(event: Event): void {
 
 function onLocaleChange(event: Event): void {
   const locale = (event.target as HTMLSelectElement).value as SupportedLocale
-  localeStore.switchLocale(locale)
+  void localeStore.persistLocale(locale)
 }
 </script>
 
