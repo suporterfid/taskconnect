@@ -33,12 +33,14 @@ class TaskRunFailedMailTest extends TestCase
         $this->assertStringContainsString('timeout', $html);
 
         $textContent = view('mail.task-run-failed', [
-            'runId' => 'run_test123',
-            'taskId' => 'task_test456',
-            'taskName' => 'Nightly export',
-            'state' => RunState::Dead,
-            'error' => 'timeout',
-            'runUrl' => 'https://taskconnect.example/runs/run_test123',
+            'taskRunLine' => __('mail.task_run_line', [
+                'runId' => 'run_test123',
+                'taskName' => 'Nightly export',
+                'state' => RunState::Dead->value,
+            ]),
+            'errorCodeLine' => __('mail.error_code_line', ['error' => 'timeout']),
+            'viewRunLine' => __('mail.view_run_line', ['runUrl' => 'https://taskconnect.example/runs/run_test123']),
+            'diagnosticsLine' => __('mail.diagnostics_line'),
         ])->render();
 
         $this->assertStringContainsString('Nightly export', $textContent);

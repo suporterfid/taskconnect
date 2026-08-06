@@ -1,7 +1,7 @@
-Task run {{ $runId }} for task {{ $taskName ?? '#'.$taskId }} is now {{ $state }}.
+{{ $taskRunLine }}
 
-Error code: {{ $error ?? 'n/a' }}
+{{ $errorCodeLine }}
 
-View this run: {{ $runUrl }}
+{{ $viewRunLine }}
 
-Inspect the run history in TaskConnect for redacted diagnostics and retry options.
+{{ $diagnosticsLine }}

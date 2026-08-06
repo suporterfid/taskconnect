@@ -62,7 +62,8 @@ final class FailureNotifier
                 continue;
             }
 
-            Mail::to($admin->email)->send(new TaskRunFailedMail($run));
+            $locale = $prefs instanceof UserPreference ? $prefs->locale : 'en';
+            Mail::to($admin->email)->send((new TaskRunFailedMail($run))->locale($locale));
             $sent++;
         }
 
