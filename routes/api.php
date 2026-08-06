@@ -32,7 +32,7 @@ Route::prefix('v1')->group(function (): void {
         Route::post('auth/reset-password', ResetPasswordController::class);
     });
 
-    Route::middleware('auth.api_or_sanctum')->group(function (): void {
+    Route::middleware(['auth.api_or_sanctum', 'locale.from_user'])->group(function (): void {
         Route::post('auth/logout', LogoutController::class);
         Route::get('me', MeController::class);
         Route::patch('me/preferences', [UserPreferencesController::class, 'update']);
