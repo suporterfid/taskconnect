@@ -522,7 +522,7 @@ onMounted(async () => {
       <div class="flex justify-end gap-3 border-t border-border pt-4">
         <RouterLink
           :to="isEdit && id ? `/endpoint-profiles/${id}` : '/endpoint-profiles'"
-          class="inline-flex items-center rounded-md border border-border px-4 py-2 text-sm text-text hover:border-border-strong"
+          class="action-link"
         >
           {{ $t('common.cancel') }}
         </RouterLink>

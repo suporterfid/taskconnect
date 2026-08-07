@@ -150,7 +150,7 @@ async function onArchive(): Promise<void> {
         <PageHeader :title="data.name" :subtitle="$t('tasks.detail.title')" />
         <RouterLink
           :to="`/tasks/${id}/edit`"
-          class="rounded-md border border-border px-4 py-2 text-sm text-text hover:border-border-strong"
+          class="primary-action"
         >
           {{ $t('common.edit') }}
         </RouterLink>
@@ -277,7 +277,7 @@ async function onArchive(): Promise<void> {
         </BaseButton>
         <RouterLink
           :to="{ name: 'runs', query: { task_id: id } }"
-          class="inline-flex items-center rounded-md border border-border px-4 py-2 text-sm text-text hover:border-border-strong"
+          class="action-link"
         >
           {{ $t('tasks.actions.viewRuns') }}
         </RouterLink>

@@ -158,7 +158,7 @@ function formatDate(value?: string | null): string {
           v-for="stat in stats"
           :key="stat.label"
           :to="stat.to"
-          class="rounded-lg border border-border bg-surface p-5 transition-colors duration-standard ease-standard hover:border-border-strong"
+          class="min-h-11 min-w-11 rounded-lg border border-border bg-surface p-5 transition-colors duration-standard ease-standard hover:border-border-strong"
         >
           <p class="text-sm text-muted">{{ stat.label }}</p>
           <p class="mt-2 text-3xl font-semibold tabular-nums text-text">

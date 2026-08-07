@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
@@ -17,6 +17,21 @@ function vueFiles(directory: string): string[] {
     const path = join(directory, entry.name)
     return entry.isDirectory() ? vueFiles(path) : entry.name.endsWith('.vue') ? [path] : []
   })
+}
+
+function normalizedLinkElements(source: string): string[] {
+  return [...source.matchAll(/<(?:RouterLink|a)\b[\s\S]*?>/g)].map(([element]) =>
+    element.replace(/\s+/g, ' ').trim(),
+  )
+}
+
+function hasMinimumActionTarget(element: string): boolean {
+  const classes = element.match(/\bclass="([^"]*)"/)?.[1]?.split(/\s+/) ?? []
+  return (
+    classes.includes('action-link') ||
+    classes.includes('primary-action') ||
+    (classes.includes('min-h-11') && classes.includes('min-w-11'))
+  )
 }
 
 describe('Task 3 semantic component contracts', () => {
@@ -126,29 +141,45 @@ describe('Task 3 source-wide migration guard', () => {
     }
   })
 
-  it('applies the 44px action-link contract to standalone navigation and return links', () => {
-    const inventory = [
-      ['pages/EndpointProfileDetailPage.vue', 'to="/endpoint-profiles"'],
-      ['pages/EndpointProfileFormPage.vue', "'/endpoint-profiles'"],
-      ['pages/PipelineDetailPage.vue', 'to="/pipelines"'],
-      ['pages/RunDetailPage.vue', 'to="/runs"'],
-      ['pages/TaskDetailPage.vue', 'to="/tasks"'],
-      ['pages/TaskWizardPage.vue', 'to="/tasks"'],
-      ['pages/ForgotPasswordPage.vue', 'to="/login"'],
-      ['pages/ResetPasswordPage.vue', 'to="/login"'],
-      ['pages/LoginPage.vue', 'to="/forgot-password"'],
-      ['pages/DashboardPage.vue', 'to="/runs"'],
-      ['pages/SettingsPage.vue', 'to="/audit-logs"'],
-    ] as const
+  it('gives every standalone navigation element a 44px action contract', () => {
+    const exemptInlineOrTableLinks = new Map<string, number>([
+      // Inline data links in dashboard list rows.
+      ['pages/DashboardPage.vue::<RouterLink :to="`/runs/${run.id}`" class="link text-sm font-medium text-action-text">', 1],
+      ['pages/DashboardPage.vue::<RouterLink :to="`/tasks/${task.id}`" class="link text-sm font-medium text-action-text">', 1],
+      // Links contained by data-table cells.
+      ['pages/DlqPage.vue::<RouterLink :to="`/runs/${run.id}`" class="link text-action-text" data-testid="dlq-run-link" >', 1],
+      ['pages/DlqPage.vue::<RouterLink v-if="run.task_id" :to="`/tasks/${run.task_id}`" class="link text-action-text">', 1],
+      ['pages/DlqPage.vue::<RouterLink :to="`/runs/${run.id}`" class="link text-action-text" data-testid="dlq-inspect">', 1],
+      ['pages/EndpointProfileListPage.vue::<RouterLink :to="`/endpoint-profiles/${profile.id}`" class="link font-medium text-action-text">', 1],
+      ['pages/EndpointProfileListPage.vue::<RouterLink :to="`/endpoint-profiles/${profile.id}`" class="link text-action-text">', 1],
+      ['pages/EndpointProfileListPage.vue::<RouterLink :to="`/endpoint-profiles/${profile.id}/edit`" class="link text-action-text">', 1],
+      ['pages/PipelineDetailPage.vue::<RouterLink v-if="node.task_id" :to="`/tasks/${node.task_id}`" class="link text-action-text">', 1],
+      ['pages/PipelineDetailPage.vue::<RouterLink v-if="node.task_run_id" :to="`/runs/${node.task_run_id}`" class="link text-action-text">', 1],
+      ['pages/PipelineListPage.vue::<RouterLink :to="`/pipelines/${instance.template_name}/instances/${instance.id}`" class="link text-action-text" data-testid="pipeline-instance-link" >', 1],
+      ['pages/RunListPage.vue::<RouterLink v-if="run.task_id" :to="`/tasks/${run.task_id}`" class="link text-action-text">', 1],
+      ['pages/RunListPage.vue::<RouterLink :to="`/runs/${run.id}`" class="link text-action-text">', 1],
+      ['pages/TaskListPage.vue::<RouterLink :to="`/tasks/${task.id}`" class="link text-action-text">', 2],
+      // Inline prose and definition-value links.
+      ['pages/RunDetailPage.vue::<RouterLink v-if="data.run.task_id" :to="`/tasks/${data.run.task_id}`" class="link text-action-text">', 1],
+      ['pages/RunListPage.vue::<RouterLink :to="`/tasks/${taskIdFilter}`" class="link text-action-text">', 1],
+      ['pages/RunListPage.vue::<RouterLink to="/runs" class="link text-action-text">', 1],
+    ])
+    const exemptionUse = new Map<string, number>()
+    const violations: string[] = []
 
-    for (const [file, destination] of inventory) {
-      const source = read(file)
-      const links = [...source.matchAll(/<RouterLink\b[\s\S]*?>/g)].map(([link]) => link)
-      expect(
-        links.some((link) => link.includes(destination) && link.includes('action-link')),
-        `${file} ${destination}`,
-      ).toBe(true)
+    for (const file of vueFiles(join(sourceRoot, 'pages'))) {
+      const page = `pages/${relative(join(sourceRoot, 'pages'), file).replaceAll('\\', '/')}`
+      for (const element of normalizedLinkElements(readFileSync(file, 'utf8'))) {
+        if (hasMinimumActionTarget(element)) continue
+        const signature = `${page}::${element}`
+        const used = (exemptionUse.get(signature) ?? 0) + 1
+        exemptionUse.set(signature, used)
+        if (used > (exemptInlineOrTableLinks.get(signature) ?? 0)) violations.push(signature)
+      }
     }
+
+    expect(violations).toEqual([])
+    expect(exemptionUse).toEqual(exemptInlineOrTableLinks)
   })
 
   it('reflows all key/value editor rows with logical min-width and wrap-safe actions', () => {
