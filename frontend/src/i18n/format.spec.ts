@@ -36,4 +36,28 @@ describe('locale-aware formatting', () => {
     expect(formatUnit(2, 'day', 'en', translate)).toBe('2 days')
     expect(formatUnit(1000, 'hour', 'pt-BR', translate)).toBe('1.000 horas')
   })
+
+  it('localizes seconds and milliseconds in English and Brazilian Portuguese', () => {
+    const messages = {
+      en: {
+        second: ['second', 'seconds'],
+        millisecond: ['millisecond', 'milliseconds'],
+      },
+      'pt-BR': {
+        second: ['segundo', 'segundos'],
+        millisecond: ['milissegundo', 'milissegundos'],
+      },
+    } as const
+    const translateFor = (selectedLocale: keyof typeof messages) =>
+      (key: string, named: Record<string, unknown>) => {
+        const unit = key.split('.').at(-1) as keyof (typeof messages)[typeof selectedLocale]
+        const raw = Number(named.rawCount)
+        return `${String(named.formattedCount)} ${messages[selectedLocale][unit][raw === 1 ? 0 : 1]}`
+      }
+
+    expect(formatUnit(1, 'second', 'en', translateFor('en'))).toBe('1 second')
+    expect(formatUnit(2, 'second', 'pt-BR', translateFor('pt-BR'))).toBe('2 segundos')
+    expect(formatUnit(1000, 'millisecond', 'en', translateFor('en'))).toBe('1,000 milliseconds')
+    expect(formatUnit(1000, 'millisecond', 'pt-BR', translateFor('pt-BR'))).toBe('1.000 milissegundos')
+  })
 })

@@ -21,7 +21,9 @@
   "units": {
     "day": "{formattedCount} day | {formattedCount} days",
     "hour": "{formattedCount} hour | {formattedCount} hours",
-    "minute": "{formattedCount} minute | {formattedCount} minutes"
+    "minute": "{formattedCount} minute | {formattedCount} minutes",
+    "second": "{formattedCount} second | {formattedCount} seconds",
+    "millisecond": "{formattedCount} millisecond | {formattedCount} milliseconds"
   },
   "name": "Name",
   "description": "Description",

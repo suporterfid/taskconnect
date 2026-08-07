@@ -261,6 +261,25 @@ describe('Task 3 source-wide migration guard', () => {
     expect(pipelineList).toContain(':directional="true"')
   })
 
+  it('isolates page-header and API-key machine values and forbids raw duration suffixes', () => {
+    const pageHeader = read('components/PageHeader.vue')
+    const apiKeys = read('pages/ApiKeysPage.vue')
+    const endpointProfile = read('pages/EndpointProfileDetailPage.vue')
+    const runDetail = read('pages/RunDetailPage.vue')
+    const format = read('i18n/format.ts')
+
+    expect(pageHeader).toContain('<BidiText :value="title" />')
+    expect(apiKeys.match(/<BidiText :value="environmentLabel\(/g)).toHaveLength(2)
+    expect(apiKeys).toContain('<BidiText :value="key.key_prefix" />')
+    expect(endpointProfile).toContain("formatUnit(data.connect_timeout, 'second'")
+    expect(endpointProfile).toContain("formatUnit(data.total_timeout, 'second'")
+    expect(endpointProfile).not.toMatch(/connect_timeout\s*\}\}s|total_timeout\s*\}\}s/)
+    expect(runDetail).toContain('formatNumber(data.run.attempt_count, locale)')
+    expect(runDetail).toContain("formatUnit(attempt.duration_ms, 'millisecond'")
+    expect(runDetail).not.toMatch(/duration_ms\s*\}\}ms/)
+    expect(format).toContain("'second' | 'millisecond'")
+  })
+
   it('maps every reusable overlay surface to the declared semantic layer contract', () => {
     expect(style).toMatch(/\.menu-surface,[\s\S]*\.tooltip-surface\s*\{\s*z-index:\s*var\(--layer-popover\)/)
     expect(style).toMatch(/\.toast-surface\s*\{\s*z-index:\s*var\(--layer-toast\)/)

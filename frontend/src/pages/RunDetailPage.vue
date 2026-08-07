@@ -15,7 +15,7 @@ import CodeBlock from '@/components/ui/CodeBlock.vue'
 import BidiText from '@/components/ui/BidiText.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
-import { formatDateTime } from '@/i18n/format'
+import { formatDateTime, formatNumber, formatUnit } from '@/i18n/format'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { TaskRun, TaskRunAttempt } from '@/services/types'
@@ -174,7 +174,7 @@ async function onRetry(): Promise<void> {
         </div>
         <div>
           <dt class="text-sm text-muted">{{ $t('runs.fields.attempts') }}</dt>
-          <dd class="mt-1 text-sm tabular-nums text-text">{{ data.run.attempt_count }}</dd>
+          <dd class="mt-1 text-sm tabular-nums text-text">{{ formatNumber(data.run.attempt_count, locale) }}</dd>
         </div>
         <div>
           <dt class="text-sm text-muted">{{ $t('runs.detail.scheduledFor') }}</dt>
@@ -244,7 +244,7 @@ async function onRetry(): Promise<void> {
             <p class="text-sm tabular-nums text-muted">
               {{ formatDate(attempt.started_at) }}
               <span v-if="attempt.duration_ms != null">
-                · {{ attempt.duration_ms }}ms
+                · {{ formatUnit(attempt.duration_ms, 'millisecond', locale, (key, named) => t(key, named)) }}
               </span>
             </p>
           </div>

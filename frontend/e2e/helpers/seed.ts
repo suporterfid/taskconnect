@@ -173,7 +173,7 @@ export async function seedTaskAndRunFixtures(
         timezone: 'UTC',
         schedule: { kind: 'daily_at', time: '09:00', timezone: 'UTC' },
         retry_policy: { max_attempts: 3, strategy: 'standard_exponential' },
-        definition_status: 'draft',
+        definition_status: 'active',
       },
     })
     if (!taskRes.ok()) {
@@ -182,7 +182,10 @@ export async function seedTaskAndRunFixtures(
     const taskId = ((await taskRes.json()).data as { id: string }).id
 
     const runRes = await ctx.post(`${base}/tasks/${taskId}/run-now`, {
-      headers: { 'X-XSRF-TOKEN': xsrf },
+      headers: {
+        'X-XSRF-TOKEN': xsrf,
+        'Idempotency-Key': `e2e-a11y-run-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      },
     })
     const runId = runRes.ok() ? (((await runRes.json()).data as { id?: string })?.id ?? null) : null
 

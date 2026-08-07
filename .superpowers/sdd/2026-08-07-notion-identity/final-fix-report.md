@@ -29,14 +29,23 @@ The responsive browser matrix exposed one real defect: at 480 px with exact 200%
 - Pipeline-flow GREEN: 1 file / 15 tests.
 - The first build after that change correctly rejected unsupported `AppIcon` size 14 (`TS2322`); the icon now uses the supported 16 px size and the subsequent production build passed.
 
+### Residual re-review addendum
+
+- Residual focused RED: 3 files / 21 tests, with 2 failures covering unisolated page-header titles and the missing bidi/unit source inventory.
+- Residual focused GREEN: **3 files / 21 tests passed**.
+- `PageHeader` now renders every title through `<bdi dir="auto">`; API-key environment fallbacks and key prefixes use the same production primitive.
+- `second` and `millisecond` extend the centralized unit contract and have English/Brazilian Portuguese plural messages. Endpoint-profile timeouts and run-attempt durations no longer concatenate raw `s`/`ms`; run attempt counts use `Intl.NumberFormat` through `formatNumber`.
+- The affected authenticated browser proof initially exposed an existing fixture mismatch: the helper described an active task but created a draft and omitted the required run-now idempotency key, leaving `runId` null. The E2E-only fixture now creates an active task with a unique idempotency key. The rerun passed and asserted the seeded Run Detail machine ID in `h1 > bdi[dir="auto"]` after the four-width exact-200%-text matrix.
+
 ## Final automated gates
 
 All project commands ran through `scripts/tc.ps1` and Docker Compose.
 
-- Frontend: **28 files / 213 tests passed**.
+- Frontend: **29 files / 216 tests passed**.
 - Backend: **239 tests / 843 assertions passed**.
 - Production build: `vue-tsc -b && vite build` passed; **1,940 modules transformed**.
 - Identity browser suite: **17/17 Chromium tests passed** in 1.5 minutes.
+- Affected residual browser proof: **1/1 Chromium test passed** in 25.1 seconds.
 - Release: checksum validation passed and the validator reported `secret-scan=pass`.
 
 Expected test-only stderr is limited to the simulated locale-persistence network failure and the isolated login-page router warning for `/forgot-password`.
@@ -57,8 +66,8 @@ The local browser environment used host port 8082 because another workspace owne
 ## Authoritative release audit
 
 - ZIP: `dist/taskconnect-release.zip`
-- Size: **9,293,814 bytes**
-- SHA256: `f3b051e3a6cf853e85a9db005515d4ad34a79f95a242e68f385c18972d084a4b`
+- Size: **9,293,915 bytes**
+- SHA256: `d23ab4fa4bfc028736b92d8ee5436aebd53dcf92d23308492e66dde6a76833d9`
 - Recorded checksum: exact match
 - Forbidden application source/test/output artifact count: **0**
 - Secret scan: **pass**
@@ -72,6 +81,7 @@ The release contains the compiled semantic CSS, theme bootstrap, Vite manifest, 
 - Literal directional arrow glyphs in product Vue/CSS: **0**
 - Numeric z-index declarations/classes in product Vue/CSS: **0**
 - Direct page/component `Intl` construction, `localeCompare`, or `toLocale*` fallback: **0**
+- Raw `s`/`ms` duration suffix concatenations in product Vue templates: **0**
 - Physical left/right CSS or directional spacing utilities: **0**
 - Release forbidden application artifact count: **0**
 

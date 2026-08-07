@@ -17,6 +17,7 @@ import BaseTextarea from '@/components/ui/BaseTextarea.vue'
 import BidiText from '@/components/ui/BidiText.vue'
 import CodeBlock from '@/components/ui/CodeBlock.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
+import { formatUnit } from '@/i18n/format'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { EndpointProfile, EndpointTestResult } from '@/services/types'
@@ -24,7 +25,7 @@ import { useTenantStore } from '@/stores/tenant'
 import { semanticIcons } from '@/utils/icons'
 
 const props = defineProps<{ id: string }>()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const tenant = useTenantStore()
 
@@ -184,8 +185,8 @@ async function onTest(): Promise<void> {
             {{ $t('endpointProfiles.detail.timeouts') }}
           </dt>
           <dd class="mt-1 text-sm tabular-nums text-text">
-            {{ data.connect_timeout }}s /
-            {{ data.total_timeout }}s
+            {{ formatUnit(data.connect_timeout, 'second', locale, (key, named) => t(key, named)) }} /
+            {{ formatUnit(data.total_timeout, 'second', locale, (key, named) => t(key, named)) }}
           </dd>
         </div>
         <div>

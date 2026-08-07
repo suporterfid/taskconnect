@@ -3,7 +3,7 @@ export type TranslationFunction = (
   named: Record<string, unknown>,
 ) => string
 
-export type LocalizedUnit = 'day' | 'hour' | 'minute'
+export type LocalizedUnit = 'day' | 'hour' | 'minute' | 'second' | 'millisecond'
 
 export function formatDateTime(
   value: string | Date,

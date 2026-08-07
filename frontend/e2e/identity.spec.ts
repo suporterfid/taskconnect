@@ -806,4 +806,9 @@ test('authenticated surface covers text-resize widths, shipped bidi, and directi
     const controls = await auditInteractiveControls(page, false)
     console.log(`text-resize-authenticated-${width}`, JSON.stringify({ typography, controls }))
   }
+
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto(`/runs/${fixture!.runId}`, { waitUntil: 'networkidle' })
+  const runTitle = page.locator('h1 bdi[dir="auto"]')
+  await expect(runTitle).toHaveText(fixture!.runId)
 })

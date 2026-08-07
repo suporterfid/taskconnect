@@ -11,6 +11,7 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
+import BidiText from '@/components/ui/BidiText.vue'
 import CodeBlock from '@/components/ui/CodeBlock.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import { formatDateTime } from '@/i18n/format'
@@ -401,7 +402,7 @@ function dismissPlaintext(): void {
               $t('settings.apiKeys.fields.environmentReadonly')
             }}</span>
             <p class="rounded-md border border-border px-3 py-2 text-sm text-muted">
-              {{ environmentLabel(editingKey?.environment_id) }}
+              <BidiText :value="environmentLabel(editingKey?.environment_id)" />
             </p>
           </div>
 
@@ -509,13 +510,13 @@ function dismissPlaintext(): void {
           <tr v-for="key in data" :key="key.id">
             <td class="px-4 py-3 font-medium text-text">{{ key.name }}</td>
             <td class="px-4 py-3 font-mono text-sm text-muted">
-              {{ key.key_prefix }}…
+              <BidiText :value="key.key_prefix" />…
             </td>
             <td class="max-w-sm whitespace-normal break-words px-4 py-3 text-sm text-muted">
               {{ permissionsLabel(key.permissions ?? []) }}
             </td>
             <td class="px-4 py-3 text-sm text-muted">
-              {{ environmentLabel(key.environment_id) }}
+              <BidiText :value="environmentLabel(key.environment_id)" />
             </td>
             <td class="px-4 py-3 text-sm tabular-nums text-muted">
               {{ formatDate(key.last_used_at) }}
