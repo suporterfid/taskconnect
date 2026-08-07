@@ -93,7 +93,7 @@ async function onTest(): Promise<void> {
 <template>
   <div>
     <div class="mb-4">
-      <RouterLink to="/endpoint-profiles" class="link text-sm text-action-text">
+      <RouterLink to="/endpoint-profiles" class="action-link">
         ← {{ $t('common.back') }}
       </RouterLink>
     </div>
@@ -113,7 +113,7 @@ async function onTest(): Promise<void> {
         <div class="flex flex-wrap gap-2">
           <RouterLink
             :to="`/endpoint-profiles/${data.id}/edit`"
-            class="action-link"
+            class="primary-action"
           >
             {{ $t('common.edit') }}
           </RouterLink>

@@ -189,7 +189,7 @@ function onLocaleChange(event: Event): void {
     </aside>
 
     <div class="flex min-w-0 flex-1 flex-col">
-      <header class="app-header sticky top-0 z-10 flex flex-wrap items-center gap-4 border-b border-border bg-surface">
+      <header class="app-header z-10 flex flex-wrap items-center gap-4 border-b border-border bg-surface">
         <button
           type="button"
           class="min-h-11 min-w-11 rounded-md p-2 text-muted hover:bg-surface-emphasis hover:text-text md:hidden"
@@ -301,6 +301,8 @@ function onLocaleChange(event: Event): void {
 }
 
 .app-header {
+  position: sticky;
+  inset-block-start: 0;
   padding-block-start: max(var(--space-3), var(--safe-block-start));
   padding-block-end: var(--space-3);
   padding-inline-start: max(var(--space-6), var(--safe-inline-start));
@@ -329,6 +331,7 @@ function onLocaleChange(event: Event): void {
 
 @media (max-width: 479px) {
   .app-header {
+    position: static;
     gap: var(--space-2);
     padding-inline-start: max(var(--space-4), var(--safe-inline-start));
     padding-inline-end: max(var(--space-4), var(--safe-inline-end));
@@ -341,6 +344,10 @@ function onLocaleChange(event: Event): void {
   .app-main {
     padding-inline-start: max(var(--space-4), var(--safe-inline-start));
     padding-inline-end: max(var(--space-4), var(--safe-inline-end));
+  }
+
+  .app-main :global(:focus) {
+    scroll-margin-block: var(--space-4);
   }
 }
 

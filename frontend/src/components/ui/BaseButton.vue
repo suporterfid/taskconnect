@@ -29,7 +29,7 @@ const variantClasses: Record<NonNullable<typeof props.variant>, string> = {
   tertiary: 'border border-transparent bg-transparent text-action-text underline hover:bg-surface-emphasis active:bg-[var(--color-bg-selected)]',
   // Destructive actions use the explicit danger foreground/background/border
   // triplet, so meaning and contrast never depend on an opacity construction.
-  danger: 'status-danger border border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] text-[var(--color-danger-fg)] hover:border-[var(--color-danger-fg)] active:border-2',
+  danger: 'destructive-action',
 }
 
 const sizeClasses: Record<NonNullable<typeof props.size>, string> = {

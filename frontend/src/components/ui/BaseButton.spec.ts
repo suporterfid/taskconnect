@@ -8,7 +8,7 @@ describe('BaseButton', () => {
     ['primary', 'bg-[var(--color-action-primary)]'],
     ['secondary', 'border-border-strong'],
     ['tertiary', 'text-action-text'],
-    ['danger', 'status-danger'],
+    ['danger', 'destructive-action'],
   ] as const)('renders the %s variant', (variant, expectedClass) => {
     const wrapper = mount(BaseButton, { props: { variant }, slots: { default: 'Save' } })
     expect(wrapper.text()).toBe('Save')

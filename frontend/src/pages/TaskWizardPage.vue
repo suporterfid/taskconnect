@@ -538,7 +538,7 @@ async function onSubmit(activate: boolean): Promise<void> {
 <template>
   <div>
     <div class="mb-4">
-      <RouterLink to="/tasks" class="link text-sm text-action-text">
+      <RouterLink to="/tasks" class="action-link">
         ← {{ $t('common.back') }}
       </RouterLink>
     </div>
@@ -631,15 +631,15 @@ async function onSubmit(activate: boolean): Promise<void> {
               <div
                 v-for="(row, index) in form.headers"
                 :key="index"
-                class="flex gap-2"
+                class="key-value-row"
               >
-                <div class="w-1/3">
+                <div class="min-w-0">
                   <BaseInput v-model="row.key" type="text" class="font-mono text-sm" placeholder="Header" />
                 </div>
-                <div class="flex-1">
+                <div class="min-w-0">
                   <BaseInput v-model="row.value" type="text" class="font-mono text-sm" placeholder="Value" />
                 </div>
-                <BaseButton variant="secondary" size="sm" @click="removeHeader(index)">
+                <BaseButton class="w-full sm:w-auto" variant="secondary" size="sm" @click="removeHeader(index)">
                   {{ $t('common.delete') }}
                 </BaseButton>
               </div>
@@ -657,15 +657,15 @@ async function onSubmit(activate: boolean): Promise<void> {
               <div
                 v-for="(row, index) in form.query"
                 :key="index"
-                class="flex gap-2"
+                class="key-value-row"
               >
-                <div class="w-1/3">
+                <div class="min-w-0">
                   <BaseInput v-model="row.key" type="text" class="font-mono text-sm" placeholder="Key" />
                 </div>
-                <div class="flex-1">
+                <div class="min-w-0">
                   <BaseInput v-model="row.value" type="text" class="font-mono text-sm" placeholder="Value" />
                 </div>
-                <BaseButton variant="secondary" size="sm" @click="removeQuery(index)">
+                <BaseButton class="w-full sm:w-auto" variant="secondary" size="sm" @click="removeQuery(index)">
                   {{ $t('tasks.fields.removeQuery') }}
                 </BaseButton>
               </div>

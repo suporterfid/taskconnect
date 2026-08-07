@@ -48,7 +48,7 @@ function statusLabel(status: string): string {
 <template>
   <div data-testid="pipeline-detail-page">
     <div class="mb-4">
-      <RouterLink to="/pipelines" class="link text-sm text-action-text">
+      <RouterLink to="/pipelines" class="action-link">
         ← {{ $t('common.back') }}
       </RouterLink>
     </div>

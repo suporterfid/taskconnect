@@ -62,7 +62,7 @@ async function onSubmit(): Promise<void> {
       </form>
 
       <p class="mt-6 text-center text-sm">
-        <RouterLink to="/login" class="link text-action-text">
+        <RouterLink to="/login" class="action-link">
           {{ $t('auth.forgot.backToLogin') }}
         </RouterLink>
       </p>

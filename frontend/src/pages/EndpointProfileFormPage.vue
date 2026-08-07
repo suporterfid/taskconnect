@@ -230,7 +230,7 @@ onMounted(async () => {
     <div class="mb-4">
       <RouterLink
         :to="isEdit && id ? `/endpoint-profiles/${id}` : '/endpoint-profiles'"
-        class="link text-sm text-action-text"
+        class="action-link"
       >
         ← {{ $t('common.back') }}
       </RouterLink>
@@ -349,23 +349,23 @@ onMounted(async () => {
           <div
             v-for="(row, index) in form.headers"
             :key="index"
-            class="flex gap-2"
+            class="key-value-row"
           >
-            <div class="w-1/3">
+            <div class="min-w-0">
               <BaseInput
                 v-model="row.key"
                 :placeholder="$t('endpointProfiles.fields.headerKey')"
                 class="font-mono text-sm"
               />
             </div>
-            <div class="flex-1">
+            <div class="min-w-0">
               <BaseInput
                 v-model="row.value"
                 :placeholder="$t('endpointProfiles.fields.headerValue')"
                 class="font-mono text-sm"
               />
             </div>
-            <BaseButton variant="secondary" size="sm" @click="removeHeader(index)">
+            <BaseButton class="w-full sm:w-auto" variant="secondary" size="sm" @click="removeHeader(index)">
               {{ $t('endpointProfiles.fields.removeHeader') }}
             </BaseButton>
           </div>

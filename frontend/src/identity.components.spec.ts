@@ -52,6 +52,14 @@ describe('Task 3 semantic component contracts', () => {
     expect(style).toMatch(/@utility action-link[\s\S]*min-block-size:\s*var\(--control-target-min-size\)/)
   })
 
+  it('gives destructive actions a strong outer boundary plus the complete danger triplet', () => {
+    expect(button).toContain('destructive-action')
+    expect(style).toMatch(/\.destructive-action\s*\{[\s\S]*border:[^;]*color-border-strong/)
+    expect(style).toMatch(/\.destructive-action\s*\{[\s\S]*color-danger-border/)
+    expect(style).toMatch(/\.destructive-action\s*\{[\s\S]*color-danger-bg/)
+    expect(style).toMatch(/\.destructive-action\s*\{[\s\S]*color-danger-fg/)
+  })
+
   it('uses a strong essential boundary and a non-color invalid cue for every field control', () => {
     for (const control of [input, select, textarea]) {
       expect(control).toContain('border-border-strong')
@@ -87,6 +95,8 @@ describe('Task 3 semantic component contracts', () => {
 })
 
 describe('Task 3 source-wide migration guard', () => {
+  const style = read('style.css')
+
   it('does not bypass semantic colors or logical direction in product Vue surfaces', () => {
     const forbidden = [
       /\btext-white\b/,
@@ -113,6 +123,70 @@ describe('Task 3 source-wide migration guard', () => {
       expect(source, file).toContain('role="region"')
       expect(source, file).toContain('tabindex="0"')
       expect(source, file).toContain("$t('common.table.scrollRegion')")
+    }
+  })
+
+  it('applies the 44px action-link contract to standalone navigation and return links', () => {
+    const inventory = [
+      ['pages/EndpointProfileDetailPage.vue', 'to="/endpoint-profiles"'],
+      ['pages/EndpointProfileFormPage.vue', "'/endpoint-profiles'"],
+      ['pages/PipelineDetailPage.vue', 'to="/pipelines"'],
+      ['pages/RunDetailPage.vue', 'to="/runs"'],
+      ['pages/TaskDetailPage.vue', 'to="/tasks"'],
+      ['pages/TaskWizardPage.vue', 'to="/tasks"'],
+      ['pages/ForgotPasswordPage.vue', 'to="/login"'],
+      ['pages/ResetPasswordPage.vue', 'to="/login"'],
+      ['pages/LoginPage.vue', 'to="/forgot-password"'],
+      ['pages/DashboardPage.vue', 'to="/runs"'],
+      ['pages/SettingsPage.vue', 'to="/audit-logs"'],
+    ] as const
+
+    for (const [file, destination] of inventory) {
+      const source = read(file)
+      const links = [...source.matchAll(/<RouterLink\b[\s\S]*?>/g)].map(([link]) => link)
+      expect(
+        links.some((link) => link.includes(destination) && link.includes('action-link')),
+        `${file} ${destination}`,
+      ).toBe(true)
+    }
+  })
+
+  it('reflows all key/value editor rows with logical min-width and wrap-safe actions', () => {
+    const endpointEditor = read('pages/EndpointProfileFormPage.vue')
+    const taskEditor = read('pages/TaskWizardPage.vue')
+
+    expect(endpointEditor.match(/class="key-value-row"/g)).toHaveLength(1)
+    expect(taskEditor.match(/class="key-value-row"/g)).toHaveLength(2)
+    for (const source of [endpointEditor, taskEditor]) {
+      expect(source).not.toContain('class="w-1/3"')
+      expect(source).toContain('class="min-w-0"')
+    }
+    expect(style).toMatch(/\.key-value-row\s*\{[\s\S]*minmax\(0, 1fr\)[\s\S]*minmax\(0, 2fr\)/)
+    expect(style).toMatch(/@media\s*\(max-width:\s*479px\)[\s\S]*\.key-value-row\s*\{[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\)/)
+  })
+
+  it('keeps the narrow top bar in flow and removes the desktop focus offset there', () => {
+    const layout = read('layouts/AppLayout.vue')
+    const narrow = layout.match(/@media \(max-width: 479px\) \{([\s\S]*?)\n\}/)?.[1] ?? ''
+
+    expect(narrow).toMatch(/\.app-header\s*\{[\s\S]*position:\s*static/)
+    expect(narrow).toMatch(/\.app-main :global\(:focus\)\s*\{[\s\S]*scroll-margin-block:\s*var\(--space-4\)/)
+    expect(narrow).not.toContain('--space-16')
+  })
+
+  it('exposes the full values previously truncated in data tables', () => {
+    const inventory = [
+      ['pages/ApiKeysPage.vue', 'permissionsLabel(key.permissions'],
+      ['pages/EndpointProfileListPage.vue', 'profile.base_url'],
+      ['pages/TaskListPage.vue', 'scheduleLabel(task)'],
+    ] as const
+
+    for (const [file, value] of inventory) {
+      const source = read(file)
+      const line = source.split('\n').findIndex((candidate) => candidate.includes(value))
+      expect(line, `${file} contains ${value}`).toBeGreaterThan(0)
+      expect(source.split('\n').slice(Math.max(0, line - 2), line + 2).join('\n')).not.toContain('truncate')
+      expect(source.split('\n').slice(Math.max(0, line - 2), line + 2).join('\n')).toMatch(/break-(?:words|all)/)
     }
   })
 

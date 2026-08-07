@@ -124,7 +124,7 @@ function formatDate(value?: string | null): string {
       <template #actions>
         <RouterLink
           to="/tasks/new"
-          class="action-link"
+          class="primary-action"
         >
           {{ $t('dashboard.createTask') }}
         </RouterLink>
@@ -170,7 +170,7 @@ function formatDate(value?: string | null): string {
       <section class="mt-8">
         <div class="mb-3 flex items-center justify-between gap-3">
           <h2>{{ $t('dashboard.recent.title') }}</h2>
-          <RouterLink to="/runs" class="link text-sm text-action-text">
+          <RouterLink to="/runs" class="action-link">
             {{ $t('dashboard.recent.viewAll') }}
           </RouterLink>
         </div>

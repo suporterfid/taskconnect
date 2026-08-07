@@ -224,7 +224,7 @@ function scheduleLabel(task: Task): string {
   <div>
     <div class="page-header">
       <PageHeader :title="$t('tasks.title')" :subtitle="$t('tasks.subtitle')" />
-      <RouterLink to="/tasks/new" class="action-link">
+      <RouterLink to="/tasks/new" class="primary-action">
         {{ $t('tasks.create') }}
       </RouterLink>
     </div>
@@ -283,7 +283,7 @@ function scheduleLabel(task: Task): string {
       <p>{{ $t('tasks.empty') }}</p>
       <RouterLink
         to="/tasks/new"
-        class="action-link mt-4"
+        class="primary-action mt-4"
       >
         {{ $t('tasks.emptyCta') }}
       </RouterLink>
@@ -388,7 +388,7 @@ function scheduleLabel(task: Task): string {
               <td class="px-4 py-3 font-mono text-xs text-muted">
                 {{ task.egress_profile || '—' }}
               </td>
-              <td class="max-w-xs truncate px-4 py-3 text-sm text-muted">
+              <td class="max-w-sm whitespace-normal break-words px-4 py-3 text-sm text-muted">
                 {{ scheduleLabel(task) }}
               </td>
               <td class="px-4 py-3 text-sm tabular-nums text-muted">

@@ -134,7 +134,7 @@ async function onRetry(): Promise<void> {
 <template>
   <div>
     <div class="mb-4">
-      <RouterLink to="/runs" class="link text-sm text-action-text">
+      <RouterLink to="/runs" class="action-link">
         ← {{ $t('common.back') }}
       </RouterLink>
     </div>

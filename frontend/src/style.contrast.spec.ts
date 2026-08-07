@@ -144,4 +144,9 @@ describe.each(['light', 'dark'] as const)('%s semantic color contract', (theme) 
     expect(contrastRatio(actual['--color-border-strong'], actual['--color-bg-canvas'])).toBeGreaterThanOrEqual(3)
     expect(contrastRatio(actual['--color-focus-ring'], actual['--color-bg-canvas'])).toBeGreaterThanOrEqual(3)
   })
+
+  it('provides the destructive action outer boundary at 3:1 against its adjacent canvas', () => {
+    expect(contrastRatio(actual['--color-border-strong'], actual['--color-bg-canvas'])).toBeGreaterThanOrEqual(3)
+    expect(frontendStyleCss).toMatch(/\.destructive-action\s*\{[\s\S]*border:[^;]*color-border-strong/)
+  })
 })

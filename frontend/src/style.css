@@ -226,6 +226,36 @@
   align-items: center;
   justify-content: center;
   padding-block: var(--space-2);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-control);
+  color: var(--color-text-link);
+  font-size: var(--text-compact);
+  line-height: var(--leading-compact);
+  font-weight: 500;
+  text-align: center;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--color-bg-hover);
+    text-decoration-thickness: 2px;
+  }
+
+  &:active { background: var(--color-bg-selected); }
+}
+
+@utility primary-action {
+  display: inline-flex;
+  min-inline-size: var(--control-target-min-size);
+  min-block-size: var(--control-target-min-size);
+  max-inline-size: 100%;
+  align-items: center;
+  justify-content: center;
+  padding-block: var(--space-2);
   padding-inline: var(--space-4);
   border-radius: var(--radius-control);
   background: var(--color-action-primary);
@@ -307,6 +337,30 @@
     color: var(--color-info-fg);
   }
 
+  .destructive-action {
+    border: var(--border-width-emphasis) solid var(--color-border-strong);
+    background: var(--color-danger-bg);
+    color: var(--color-danger-fg);
+    box-shadow: inset 0 0 0 1px var(--color-danger-border);
+  }
+
+  .destructive-action:hover {
+    box-shadow: inset 0 0 0 2px var(--color-danger-fg);
+  }
+
+  .destructive-action:active {
+    background: var(--color-bg-hover);
+  }
+
+  .key-value-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+    gap: var(--space-2);
+    align-items: start;
+  }
+
+  .key-value-row > * { min-inline-size: 0; }
+
   .menu-surface,
   .tooltip-surface,
   .toast-surface,
@@ -346,6 +400,12 @@
     min-inline-size: var(--control-target-min-size);
     min-block-size: var(--control-target-min-size);
     white-space: normal;
+  }
+}
+
+@media (max-width: 479px) {
+  .key-value-row {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -457,5 +517,10 @@
   .dialog-surface {
     border: 1px solid CanvasText;
     box-shadow: none;
+  }
+
+  .destructive-action {
+    border: 2px solid ButtonText;
+    box-shadow: inset 0 0 0 1px ButtonText;
   }
 }

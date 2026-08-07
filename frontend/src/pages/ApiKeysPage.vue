@@ -520,7 +520,7 @@ function dismissPlaintext(): void {
             <td class="px-4 py-3 font-mono text-sm text-muted">
               {{ key.key_prefix }}…
             </td>
-            <td class="max-w-xs truncate px-4 py-3 text-sm text-muted">
+            <td class="max-w-sm whitespace-normal break-words px-4 py-3 text-sm text-muted">
               {{ permissionsLabel(key.permissions ?? []) }}
             </td>
             <td class="px-4 py-3 text-sm text-muted">

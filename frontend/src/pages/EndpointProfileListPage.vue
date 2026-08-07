@@ -70,7 +70,7 @@ async function onTest(profile: EndpointProfile): Promise<void> {
       />
       <RouterLink
         to="/endpoint-profiles/new"
-        class="action-link shrink-0"
+        class="primary-action shrink-0"
       >
         {{ $t('endpointProfiles.create') }}
       </RouterLink>
@@ -96,7 +96,7 @@ async function onTest(profile: EndpointProfile): Promise<void> {
     <EmptyState v-else-if="!data?.length" :message="$t('endpointProfiles.empty')">
       <p>{{ $t('endpointProfiles.empty') }}</p>
       <p class="mt-2 text-sm">{{ $t('endpointProfiles.emptyHint') }}</p>
-      <RouterLink to="/endpoint-profiles/new" class="mt-4 inline-block link text-sm text-action-text">
+      <RouterLink to="/endpoint-profiles/new" class="primary-action mt-4">
         {{ $t('endpointProfiles.create') }}
       </RouterLink>
     </EmptyState>
@@ -133,7 +133,7 @@ async function onTest(profile: EndpointProfile): Promise<void> {
                 {{ profile.method }}
               </span>
             </td>
-            <td class="max-w-xs truncate px-4 py-3 font-mono text-sm text-muted">
+            <td class="max-w-sm whitespace-normal break-all px-4 py-3 font-mono text-sm text-muted">
               {{ profile.base_url }}
             </td>
             <td class="px-4 py-3 text-sm">
