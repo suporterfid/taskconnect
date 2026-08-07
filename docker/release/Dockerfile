@@ -55,11 +55,11 @@ RUN cd /release/app \
     && mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache \
     && find storage bootstrap/cache -type d -exec chmod 775 {} \;
 
-RUN cd /release && zip -r /taskconnect-release.zip app \
-    && sha256sum /taskconnect-release.zip > /taskconnect-release.zip.sha256
+RUN cd /release && zip -r taskconnect-release.zip app \
+    && sha256sum taskconnect-release.zip > taskconnect-release.zip.sha256
 
 FROM scratch AS export
 
 COPY --from=release /release/app /app
-COPY --from=release /taskconnect-release.zip /taskconnect-release.zip
-COPY --from=release /taskconnect-release.zip.sha256 /taskconnect-release.zip.sha256
+COPY --from=release /release/taskconnect-release.zip /taskconnect-release.zip
+COPY --from=release /release/taskconnect-release.zip.sha256 /taskconnect-release.zip.sha256

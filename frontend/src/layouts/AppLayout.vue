@@ -297,7 +297,9 @@ function onLocaleChange(event: Event): void {
 }
 
 .nav-item {
+  min-inline-size: 0;
   border-inline-start: 4px solid transparent;
+  overflow-wrap: anywhere;
 }
 
 .app-header {

@@ -430,6 +430,15 @@
     font-synthesis: none;
   }
 
+  #app,
+  h1,
+  h2,
+  h3,
+  p {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
   ::selection {
     background: var(--color-bg-selected);
     color: var(--color-text-primary);

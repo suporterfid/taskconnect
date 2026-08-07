@@ -99,7 +99,7 @@ Verbs:
 }
 
 function Invoke-Up {
-    Invoke-Compose @('up', '-d', '--build', 'mysql', 'mailpit', 'receiver', 'app')
+    Invoke-Compose -ComposeArgs @('up', '-d', '--build', 'mysql', 'mailpit', 'receiver', 'app')
 }
 
 function Invoke-Down {
@@ -159,7 +159,7 @@ function Invoke-Artisan {
 
 function Invoke-Npm {
     param([string[]]$NpmArgs)
-    $composeArgs = @('--profile', 'dev', 'run', '--rm', '--service-ports', 'node', 'npm') + $NpmArgs
+    $composeArgs = @('--profile', 'dev', 'run', '--rm', '--build', '--service-ports', 'node', 'npm') + $NpmArgs
     Invoke-Compose -ComposeArgs $composeArgs
 }
 
@@ -185,7 +185,7 @@ function Invoke-Test {
 }
 
 function Invoke-E2E {
-    param([string[]]$Args)
+    param([string[]]$E2EArgs)
 
     if (-not (Test-Path 'package.json')) {
         throw 'No package.json found.'
@@ -201,7 +201,7 @@ function Invoke-E2E {
         '-e', "E2E_PASSWORD=$env:E2E_PASSWORD",
         '-e', "PLAYWRIGHT_BASE_URL=$(if ($env:PLAYWRIGHT_BASE_URL) { $env:PLAYWRIGHT_BASE_URL } else { 'http://app' })"
     )
-    Invoke-Compose (@('--profile', 'dev', 'run', '--rm', '--service-ports') + $envArgs + @('node', 'npm', 'run', 'e2e', '--') + $Args)
+    Invoke-Compose -ComposeArgs (@('--profile', 'dev', 'run', '--rm', '--build', '--service-ports') + $envArgs + @('node', 'npm', '--prefix', 'frontend', 'run', 'e2e', '--') + $E2EArgs)
 }
 
 function Invoke-Release {
@@ -211,11 +211,7 @@ function Invoke-Release {
         throw "Release build failed with exit code $LASTEXITCODE"
     }
     Write-Output 'Release artifact written to dist/'
-    $dist = (Resolve-Path (Join-Path $PSScriptRoot '..\dist')).Path
-    bash "$PSScriptRoot/validate-release.sh" $dist
-    if ($LASTEXITCODE -ne 0) {
-        throw "Release validation failed with exit code $LASTEXITCODE"
-    }
+    Invoke-Compose -ComposeArgs @('run', '--rm', '--no-deps', 'app', 'bash', 'scripts/validate-release.sh', 'dist')
 }
 
 function Invoke-Deploy {
@@ -263,7 +259,7 @@ switch ($Verb) {
     'artisan' { Invoke-Artisan -ArtisanArgs $VerbArgs }
     'npm' { Invoke-Npm -NpmArgs $VerbArgs }
     'test' { Invoke-Test -TestArgs $VerbArgs }
-    'e2e' { Invoke-E2E -Args $VerbArgs }
+    'e2e' { Invoke-E2E -E2EArgs $VerbArgs }
     'release' { Invoke-Release }
     'deploy' { Invoke-Deploy -Args $VerbArgs }
     'shell' { Invoke-Shell }

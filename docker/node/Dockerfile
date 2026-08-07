@@ -1,4 +1,4 @@
-FROM node:22-bookworm-slim
+FROM mcr.microsoft.com/playwright:v1.61.1-noble
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \

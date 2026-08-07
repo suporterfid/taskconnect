@@ -15,9 +15,12 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
-          ? { launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE } }
-          : {}),
+        launchOptions: {
+          args: ['--unsafely-treat-insecure-origin-as-secure=http://app'],
+          ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
+            ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE }
+            : {}),
+        },
       },
     },
   ],

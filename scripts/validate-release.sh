@@ -65,7 +65,9 @@ fi
 require_file "$APP/artisan"
 require_dir "$APP/vendor"
 require_dir "$APP/public/build"
-require_file "$APP/public/build/manifest.json"
+if [[ ! -f "$APP/public/build/manifest.json" && ! -f "$APP/public/build/.vite/manifest.json" ]]; then
+  fail "missing Vite manifest under $APP/public/build"
+fi
 
 if [[ -d "$APP/node_modules" || -d "$APP/frontend/node_modules" ]]; then
   fail "release must not include node_modules"

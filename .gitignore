@@ -21,6 +21,7 @@
 /storage/pail
 /vendor
 /dist
+/output/playwright/
 /deploy.config.json
 Homestead.json
 Homestead.yaml

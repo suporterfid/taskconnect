@@ -1,7 +1,24 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { AxiosError } from 'axios'
 
-import { parseErrorEnvelope } from './api'
+import { generateRequestId, parseErrorEnvelope } from './api'
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
+describe('generateRequestId', () => {
+  it('uses secure random bytes when randomUUID is unavailable', () => {
+    vi.stubGlobal('crypto', {
+      getRandomValues: (bytes: Uint8Array) => {
+        bytes.set(Array.from({ length: 16 }, (_, index) => index))
+        return bytes
+      },
+    })
+
+    expect(generateRequestId()).toBe('00010203-0405-4607-8809-0a0b0c0d0e0f')
+  })
+})
 
 function axiosError(
   data: unknown,

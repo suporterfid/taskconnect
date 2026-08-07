@@ -195,6 +195,15 @@
         font-family: var(--font-ui);
     }
 
+    #app,
+    h1,
+    h2,
+    h3,
+    p {
+        min-inline-size: 0;
+        overflow-wrap: anywhere;
+    }
+
     :focus-visible {
         outline: 2px solid var(--color-focus-ring);
         outline-offset: 2px;

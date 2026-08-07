@@ -85,6 +85,11 @@ describe('AppLayout structural directionality contract', () => {
     expect(layoutSource).toMatch(/\.app-main\s*\{[^}]*padding-block-end:[^}]*--safe-block-end/s)
   })
 
+  it('allows expanded navigation labels to wrap without widening the mobile canvas', () => {
+    expect(layoutSource).toMatch(/\.nav-item\s*\{[^}]*min-inline-size:\s*0/s)
+    expect(layoutSource).toMatch(/\.nav-item\s*\{[^}]*overflow-wrap:\s*anywhere/s)
+  })
+
   it('removes the closed mobile sidebar from focus navigation and restores it when open or desktop', async () => {
     const media = new ResponsiveMediaStub(true)
     const wrapper = await mountLayout(media)

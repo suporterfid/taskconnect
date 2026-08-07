@@ -2,6 +2,15 @@ import { request as pwRequest, type APIRequestContext } from '@playwright/test'
 
 const PIPELINE_TEMPLATE = 'convert-index-publish'
 
+function statefulHeaders(baseURL: string): Record<string, string> {
+  return {
+    Accept: 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+    Origin: new URL(baseURL).origin,
+    Referer: `${new URL(baseURL).origin}/`,
+  }
+}
+
 /**
  * Auto-seed a dead run (DLQ) and a pipeline instance for the E2E operator's default
  * workspace, so `dlq-pipelines.spec.ts` can assert inspect/replay and pipeline detail
@@ -19,10 +28,7 @@ export async function seedDlqAndPipelineFixtures(baseURL: string): Promise<void>
 
   const ctx = await pwRequest.newContext({
     baseURL,
-    extraHTTPHeaders: {
-      Accept: 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-    },
+    extraHTTPHeaders: statefulHeaders(baseURL),
   })
 
   try {
@@ -119,10 +125,7 @@ export async function seedTaskAndRunFixtures(
 
   const ctx = await pwRequest.newContext({
     baseURL,
-    extraHTTPHeaders: {
-      Accept: 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-    },
+    extraHTTPHeaders: statefulHeaders(baseURL),
   })
 
   try {
