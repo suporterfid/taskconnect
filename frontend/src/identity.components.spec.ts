@@ -79,6 +79,7 @@ describe('Task 3 semantic component contracts', () => {
     for (const control of [input, select, textarea]) {
       expect(control).toContain('border-border-strong')
       expect(control).toContain('invalid-control')
+      expect(control).toContain('min-w-0')
       expect(control).not.toContain("'border-danger'")
       expect(control).not.toContain("'border-border'")
     }

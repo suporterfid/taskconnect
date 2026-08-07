@@ -204,8 +204,48 @@ function Invoke-E2E {
     Invoke-Compose -ComposeArgs (@('--profile', 'dev', 'run', '--rm', '--build', '--service-ports') + $envArgs + @('node', 'npm', '--prefix', 'frontend', 'run', 'e2e', '--') + $E2EArgs)
 }
 
+function Clear-ReleaseOutput {
+    $distPath = [IO.Path]::GetFullPath((Join-Path $RootDir 'dist'))
+    $rootPath = [IO.Path]::GetFullPath($RootDir)
+    if ([IO.Path]::GetDirectoryName($distPath) -ne $rootPath -or [IO.Path]::GetFileName($distPath) -ne 'dist') {
+        throw "Refusing to clean unexpected release directory: $distPath"
+    }
+
+    if (Test-Path -LiteralPath $distPath) {
+        $distItem = Get-Item -LiteralPath $distPath -Force -ErrorAction Stop
+        if (($distItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            throw "Refusing to clean reparse-point release directory: $distPath"
+        }
+    } else {
+        New-Item -ItemType Directory -Path $distPath -ErrorAction Stop | Out-Null
+    }
+
+    foreach ($targetName in @('app', 'taskconnect-release.zip', 'taskconnect-release.zip.sha256')) {
+        $targetPath = [IO.Path]::GetFullPath((Join-Path $distPath $targetName))
+        if ([IO.Path]::GetDirectoryName($targetPath) -ne $distPath -or -not (Test-Path -LiteralPath $targetPath)) {
+            continue
+        }
+
+        $targetItem = Get-Item -LiteralPath $targetPath -Force -ErrorAction Stop
+        if (($targetItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+            throw "Refusing to remove release reparse point: $targetPath"
+        }
+        if ($targetItem.PSIsContainer) {
+            $nestedReparsePoints = @(Get-ChildItem -LiteralPath $targetPath -Recurse -Force -ErrorAction Stop |
+                Where-Object { ($_.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0 })
+            if ($nestedReparsePoints.Count -gt 0) {
+                throw "Refusing to remove release tree containing reparse points: $targetPath"
+            }
+            Get-ChildItem -LiteralPath $targetPath -Recurse -Force -ErrorAction Stop |
+                ForEach-Object { $_.Attributes = 'Normal' }
+        }
+        $targetItem.Attributes = 'Normal'
+        Remove-Item -LiteralPath $targetPath -Recurse -Force -ErrorAction Stop
+    }
+}
+
 function Invoke-Release {
-    New-Item -ItemType Directory -Force -Path 'dist' | Out-Null
+    Clear-ReleaseOutput
     docker build -f docker/release/Dockerfile --target export --output "type=local,dest=./dist" .
     if ($LASTEXITCODE -ne 0) {
         throw "Release build failed with exit code $LASTEXITCODE"
@@ -225,12 +265,7 @@ function Invoke-Deploy {
     }
 
     Write-Output 'Building production release tree (dist/app)...'
-    if (Test-Path 'dist/app') {
-        # Exported vendor files can be read-only; clear the attribute before removal.
-        Get-ChildItem 'dist/app' -Recurse -Force | ForEach-Object { $_.Attributes = 'Normal' }
-        Remove-Item -Recurse -Force 'dist/app'
-    }
-    New-Item -ItemType Directory -Force -Path 'dist' | Out-Null
+    Clear-ReleaseOutput
     docker build -f docker/release/Dockerfile --target export --output "type=local,dest=./dist" .
     if ($LASTEXITCODE -ne 0) { throw "Release build failed with exit code $LASTEXITCODE" }
 

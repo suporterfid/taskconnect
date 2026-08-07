@@ -22,7 +22,7 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
     :required="required"
     :aria-describedby="describedBy"
     :aria-invalid="ariaInvalid"
-    class="base-control min-h-11 w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-text disabled:cursor-not-allowed"
+    class="base-control min-h-11 min-w-0 w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-text disabled:cursor-not-allowed"
     :class="ariaInvalid === 'true' ? 'invalid-control' : undefined"
     @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
   >

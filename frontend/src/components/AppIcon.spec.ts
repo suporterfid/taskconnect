@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
 import { mount } from '@vue/test-utils'
 import { ChevronLeft, Info, Settings } from 'lucide-vue-next'
 import { describe, expect, it } from 'vitest'
@@ -47,5 +50,11 @@ describe('AppIcon', () => {
 
     expect(directional.get('svg').classes()).toContain('app-icon--directional')
     expect(neutral.get('svg').classes()).not.toContain('app-icon--directional')
+  })
+
+  it('scopes RTL mirroring to directional icons without transforming the root element', () => {
+    const source = readFileSync(resolve(import.meta.dirname, 'AppIcon.vue'), 'utf8')
+    expect(source).toContain(":global([dir='rtl'] .app-icon--directional)")
+    expect(source).not.toContain(":global([dir='rtl']) .app-icon--directional")
   })
 })

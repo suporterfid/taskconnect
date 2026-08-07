@@ -65,16 +65,23 @@ fi
 require_file "$APP/artisan"
 require_dir "$APP/vendor"
 require_dir "$APP/public/build"
+require_file "$APP/public/build/licenses/INTER-LICENSE.txt"
 if [[ ! -f "$APP/public/build/manifest.json" && ! -f "$APP/public/build/.vite/manifest.json" ]]; then
   fail "missing Vite manifest under $APP/public/build"
 fi
 
-if [[ -d "$APP/node_modules" || -d "$APP/frontend/node_modules" ]]; then
+if [[ -d "$APP/node_modules" ]]; then
   fail "release must not include node_modules"
 fi
-if [[ -d "$APP/tests" ]]; then
-  fail "release must not include tests/"
-fi
+for forbidden in \
+  "$APP/frontend" \
+  "$APP/tests" \
+  "$APP/.superpowers" \
+  "$APP/output" \
+  "$APP/test-results" \
+  "$APP/playwright-report"; do
+  [[ ! -e "$forbidden" ]] || fail "release must not include: $forbidden"
+done
 
 # --- R9 secret hygiene -------------------------------------------------------
 

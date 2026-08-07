@@ -91,4 +91,12 @@ describe('visual identity foundation', () => {
 
     for (const contract of requiredContracts) expect(resourceCss).toContain(contract)
   })
+
+  it('uses normal linguistic wrapping for prose in both CSS entrypoints', () => {
+    const resourceCss = readFileSync(join(frontendRoot, '..', 'resources', 'css', 'app.css'), 'utf8')
+    for (const css of [styleCss, resourceCss]) {
+      expect(css).not.toMatch(/#app,\s*h1,\s*h2,\s*h3,\s*p\s*\{[^}]*overflow-wrap:\s*anywhere/s)
+      expect(css).toMatch(/#app\s*\{[^}]*min-inline-size:\s*0/s)
+    }
+  })
 })

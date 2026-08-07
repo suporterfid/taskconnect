@@ -10,6 +10,7 @@ describe('Docker-only browser toolchain', () => {
     const dockerfile = readFileSync(resolve(repositoryRoot, 'docker/node/Dockerfile'), 'utf8')
     const releaseDockerfile = readFileSync(resolve(repositoryRoot, 'docker/release/Dockerfile'), 'utf8')
     const releaseValidator = readFileSync(resolve(repositoryRoot, 'scripts/validate-release.sh'), 'utf8')
+    const dockerignore = readFileSync(resolve(repositoryRoot, '.dockerignore'), 'utf8')
     const wrapper = readFileSync(resolve(repositoryRoot, 'scripts/tc.ps1'), 'utf8')
     const packageJson = JSON.parse(
       readFileSync(resolve(repositoryRoot, 'frontend/package.json'), 'utf8'),
@@ -26,8 +27,28 @@ describe('Docker-only browser toolchain', () => {
     expect(wrapper).toContain("'e2e' { Invoke-E2E -E2EArgs $VerbArgs }")
     expect(wrapper).toContain("Invoke-Compose -ComposeArgs @('up', '-d', '--build', 'mysql', 'mailpit', 'receiver', 'app')")
     expect(wrapper).toContain("Invoke-Compose -ComposeArgs @('run', '--rm', '--no-deps', 'app', 'bash', 'scripts/validate-release.sh', 'dist')")
+    expect(wrapper).toContain('function Clear-ReleaseOutput')
+    expect(wrapper).toContain("@('app', 'taskconnect-release.zip', 'taskconnect-release.zip.sha256')")
+    expect(wrapper).toContain('[IO.FileAttributes]::ReparsePoint')
+    expect(wrapper).toContain('Remove-Item -LiteralPath $targetPath')
     expect(releaseDockerfile).toContain('sha256sum taskconnect-release.zip > taskconnect-release.zip.sha256')
     expect(releaseValidator).toContain('$APP/public/build/.vite/manifest.json')
+    expect(releaseDockerfile).toContain('/release/app/public/build/licenses/INTER-LICENSE.txt')
+    expect(releaseDockerfile).toMatch(/rm -rf[\s\\]*[^;]*\bfrontend\b/s)
+    expect(releaseValidator).toContain('$APP/public/build/licenses/INTER-LICENSE.txt')
+    for (const excluded of [
+      '.superpowers',
+      'output',
+      'frontend/e2e',
+      'frontend/**/*.spec.ts',
+      'frontend/test-results',
+      'frontend/playwright-report',
+    ]) {
+      expect(dockerignore).toContain(`\n${excluded}\n`)
+    }
+    for (const forbidden of ['frontend', '.superpowers', 'output']) {
+      expect(releaseValidator).toContain(`$APP/${forbidden}`)
+    }
   })
 
   it('keeps browser evidence outside version control', () => {

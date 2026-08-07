@@ -195,13 +195,15 @@
         font-family: var(--font-ui);
     }
 
-    #app,
+    #app {
+        min-inline-size: 0;
+    }
+
     h1,
     h2,
     h3,
     p {
-        min-inline-size: 0;
-        overflow-wrap: anywhere;
+        overflow-wrap: break-word;
     }
 
     :focus-visible {

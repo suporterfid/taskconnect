@@ -57,10 +57,11 @@ class ReleaseSecretScanTest extends TestCase
     {
         $root = sys_get_temp_dir().'/tc-release-scan-'.uniqid('', true);
         $app = $root.'/app';
-        mkdir($app.'/public/build', 0777, true);
+        mkdir($app.'/public/build/licenses', 0777, true);
         mkdir($app.'/vendor', 0777, true);
         file_put_contents($app.'/artisan', "#!/usr/bin/env php\n<?php\n");
         file_put_contents($app.'/public/build/manifest.json', '{}');
+        file_put_contents($app.'/public/build/licenses/INTER-LICENSE.txt', 'SIL Open Font License 1.1');
 
         return $root;
     }

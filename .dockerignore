@@ -26,3 +26,9 @@ yarn-error.log*
 pnpm-debug.log*
 .DS_Store
 Thumbs.db
+.superpowers
+output
+frontend/e2e
+frontend/**/*.spec.ts
+frontend/test-results
+frontend/playwright-report

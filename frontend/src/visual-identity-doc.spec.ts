@@ -66,7 +66,7 @@ describe('visual identity adoption document', () => {
       '`forced-colors`',
       '`en-XA`',
       '`ar-XB`',
-      '2Ã—',
+      '2×',
       '30%',
       'Arabic',
       'Hebrew',
@@ -79,12 +79,15 @@ describe('visual identity adoption document', () => {
       '1200px',
       '320 CSS px',
       '200%',
-      '44Ã—44',
+      '44×44',
     ]
 
     for (const contract of requiredContracts) {
       expect(identity, `missing ${contract}`).toContain(contract)
     }
+
+    expect(identity).toContain('Português')
+    expect(identity, 'document must not contain mojibake or replacement characters').not.toMatch(/[ÃÂâ�]/)
   })
 
   it('governs every shared component family and the email exception', () => {

@@ -37,12 +37,17 @@ WORKDIR /release
 
 COPY --from=vendor /app /release/app
 COPY --from=frontend /app/public/build /release/app/public/build
+COPY --from=frontend /app/frontend/src/assets/fonts/inter/INTER-LICENSE.txt /release/app/public/build/licenses/INTER-LICENSE.txt
 
 RUN cd /release/app \
     && rm -rf \
         node_modules \
-        frontend/node_modules \
+        frontend \
         tests \
+        .superpowers \
+        output \
+        test-results \
+        playwright-report \
         .git \
         .github \
         docker \

@@ -32,7 +32,7 @@ withDefaults(
 </template>
 
 <style scoped>
-:global([dir='rtl']) .app-icon--directional {
+:global([dir='rtl'] .app-icon--directional) {
   transform: scaleX(-1);
 }
 </style>

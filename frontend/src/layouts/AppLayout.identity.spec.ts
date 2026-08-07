@@ -74,11 +74,13 @@ describe('AppLayout structural directionality contract', () => {
     expect(layoutSource).toContain('--safe-inline-end: env(safe-area-inset-right)')
     expect(layoutSource).toContain('--safe-block-start: env(safe-area-inset-top)')
     expect(layoutSource).toContain('--safe-block-end: env(safe-area-inset-bottom)')
-    expect(layoutSource).toContain(":global([dir='rtl']) .app-shell")
+    expect(layoutSource).toContain(":global([dir='rtl'] .app-shell)")
     expect(layoutSource).toContain('--safe-inline-start: env(safe-area-inset-right)')
     expect(layoutSource).toContain('inset-inline-start: 0')
     expect(layoutSource).toContain('border-inline-end')
-    expect(layoutSource).toContain(":global([dir='rtl']) .app-sidebar--closed")
+    expect(layoutSource).toContain(":global([dir='rtl'] .app-sidebar--closed)")
+    expect(layoutSource).not.toContain(":global([dir='rtl']) .app-shell")
+    expect(layoutSource).not.toContain(":global([dir='rtl']) .app-sidebar--closed")
     expect(layoutSource).toMatch(/\.app-sidebar\s*\{[^}]*padding-block-start:[^}]*--safe-block-start/s)
     expect(layoutSource).toMatch(/\.app-sidebar\s*\{[^}]*padding-block-end:[^}]*--safe-block-end/s)
     expect(layoutSource).toMatch(/\.app-header\s*\{[^}]*padding-block-start:[^}]*--safe-block-start/s)
@@ -87,7 +89,8 @@ describe('AppLayout structural directionality contract', () => {
 
   it('allows expanded navigation labels to wrap without widening the mobile canvas', () => {
     expect(layoutSource).toMatch(/\.nav-item\s*\{[^}]*min-inline-size:\s*0/s)
-    expect(layoutSource).toMatch(/\.nav-item\s*\{[^}]*overflow-wrap:\s*anywhere/s)
+    expect(layoutSource).toMatch(/\.nav-item\s*\{[^}]*white-space:\s*normal/s)
+    expect(layoutSource).toMatch(/\.nav-item\s*\{[^}]*overflow-wrap:\s*normal/s)
   })
 
   it('removes the closed mobile sidebar from focus navigation and restores it when open or desktop', async () => {

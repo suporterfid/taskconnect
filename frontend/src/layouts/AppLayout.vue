@@ -271,7 +271,7 @@ function onLocaleChange(event: Event): void {
   --safe-block-end: env(safe-area-inset-bottom);
 }
 
-:global([dir='rtl']) .app-shell {
+:global([dir='rtl'] .app-shell) {
   --safe-inline-start: env(safe-area-inset-right);
   --safe-inline-end: env(safe-area-inset-left);
 }
@@ -292,14 +292,15 @@ function onLocaleChange(event: Event): void {
   transform: translateX(-100%);
 }
 
-:global([dir='rtl']) .app-sidebar--closed {
+:global([dir='rtl'] .app-sidebar--closed) {
   transform: translateX(100%);
 }
 
 .nav-item {
   min-inline-size: 0;
   border-inline-start: 4px solid transparent;
-  overflow-wrap: anywhere;
+  white-space: normal;
+  overflow-wrap: normal;
 }
 
 .app-header {
