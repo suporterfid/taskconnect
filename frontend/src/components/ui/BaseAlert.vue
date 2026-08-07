@@ -25,17 +25,17 @@ const toneIcon: Record<Tone, keyof typeof semanticIcons> = {
 }
 
 const toneClasses: Record<Tone, string> = {
-  success: 'border-success/30 bg-success/10 text-success',
-  warning: 'border-warning/30 bg-warning/10 text-warning',
-  danger: 'border-danger/30 bg-danger/10 text-danger',
-  info: 'border-info/30 bg-info/10 text-info',
+  success: 'status-success border-[var(--color-success-border)] bg-[var(--color-success-bg)] text-[var(--color-success-fg)]',
+  warning: 'status-warning border-[var(--color-warning-border)] bg-[var(--color-warning-bg)] text-[var(--color-warning-fg)]',
+  danger: 'status-danger border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] text-[var(--color-danger-fg)]',
+  info: 'status-info border-[var(--color-info-border)] bg-[var(--color-info-bg)] text-[var(--color-info-fg)]',
   neutral: 'border-border bg-surface-emphasis text-text',
 }
 </script>
 
 <template>
-  <div :role="role" class="flex items-start gap-2 rounded-lg border p-4 text-sm" :class="toneClasses[tone]">
+  <div :role="role" class="flex items-start gap-2 rounded-lg border p-4 text-sm break-words" :class="toneClasses[tone]">
     <AppIcon :icon="semanticIcons[toneIcon[tone]]" :size="16" class="mt-0.5" />
-    <div><slot /></div>
+    <div class="min-w-0"><slot /></div>
   </div>
 </template>

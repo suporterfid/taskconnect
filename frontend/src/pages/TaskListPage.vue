@@ -222,9 +222,9 @@ function scheduleLabel(task: Task): string {
 
 <template>
   <div>
-    <div class="mb-8 flex items-start justify-between gap-4">
+    <div class="page-header">
       <PageHeader :title="$t('tasks.title')" :subtitle="$t('tasks.subtitle')" />
-      <RouterLink to="/tasks/new" class="rounded-md bg-action px-4 py-2 text-sm font-medium text-white hover:bg-action-hover">
+      <RouterLink to="/tasks/new" class="action-link">
         {{ $t('tasks.create') }}
       </RouterLink>
     </div>
@@ -283,7 +283,7 @@ function scheduleLabel(task: Task): string {
       <p>{{ $t('tasks.empty') }}</p>
       <RouterLink
         to="/tasks/new"
-        class="mt-4 inline-block rounded-md bg-action px-4 py-2 text-sm font-medium text-white hover:bg-action-hover"
+        class="action-link mt-4"
       >
         {{ $t('tasks.emptyCta') }}
       </RouterLink>
@@ -308,11 +308,11 @@ function scheduleLabel(task: Task): string {
         {{ actionError }}
       </BaseAlert>
 
-      <div class="overflow-x-auto rounded-lg border border-border">
+      <div class="table-scroll" role="region" tabindex="0" :aria-label="$t('common.table.scrollRegion')">
         <table class="min-w-full divide-y divide-border">
           <thead class="bg-surface">
             <tr>
-              <th class="w-10 px-4 py-3 text-left">
+              <th class="w-10 px-4 py-3 text-start">
                 <input
                   type="checkbox"
                   class="rounded"
@@ -321,37 +321,37 @@ function scheduleLabel(task: Task): string {
                   @change="toggleSelectAll"
                 />
               </th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">
                 <button type="button" class="link" @click="toggleSort('name')">
                   {{ $t('common.name') }}{{ sortIndicator('name') }}
                 </button>
               </th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">
                 {{ $t('common.status') }}
               </th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">
                 {{ $t('tasks.fields.taskType') }}
               </th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">
                 {{ $t('tasks.fields.priority') }}
               </th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">
                 {{ $t('tasks.fields.egressProfile') }}
               </th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">
                 {{ $t('tasks.detail.schedule') }}
               </th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">
                 <button type="button" class="link" @click="toggleSort('next_run_at')">
                   {{ $t('tasks.detail.nextRun') }}{{ sortIndicator('next_run_at') }}
                 </button>
               </th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">
                 <button type="button" class="link" @click="toggleSort('last_run_at')">
                   {{ $t('tasks.detail.lastRunState') }}{{ sortIndicator('last_run_at') }}
                 </button>
               </th>
-              <th class="px-4 py-3 text-right text-sm font-medium text-muted">
+              <th class="px-4 py-3 text-end text-sm font-medium text-muted">
                 {{ $t('common.actions') }}
               </th>
             </tr>
@@ -403,7 +403,7 @@ function scheduleLabel(task: Task): string {
                 />
                 <span v-else class="text-sm text-muted">—</span>
               </td>
-              <td class="space-x-3 px-4 py-3 text-right text-sm">
+              <td class="[&>*+*]:ms-3 px-4 py-3 text-end text-sm">
                 <RouterLink :to="`/tasks/${task.id}`" class="link text-action-text">
                   {{ $t('tasks.view') }}
                 </RouterLink>

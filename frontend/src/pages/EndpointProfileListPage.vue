@@ -63,14 +63,14 @@ async function onTest(profile: EndpointProfile): Promise<void> {
 
 <template>
   <div>
-    <div class="mb-8 flex items-start justify-between gap-4">
+    <div class="page-header">
       <PageHeader
         :title="$t('endpointProfiles.title')"
         :subtitle="$t('endpointProfiles.subtitle')"
       />
       <RouterLink
         to="/endpoint-profiles/new"
-        class="shrink-0 rounded-md bg-action px-4 py-2 text-sm font-medium text-white hover:bg-action-hover"
+        class="action-link shrink-0"
       >
         {{ $t('endpointProfiles.create') }}
       </RouterLink>
@@ -100,23 +100,23 @@ async function onTest(profile: EndpointProfile): Promise<void> {
         {{ $t('endpointProfiles.create') }}
       </RouterLink>
     </EmptyState>
-    <div v-else class="overflow-hidden rounded-lg border border-border">
+    <div v-else class="table-scroll" role="region" tabindex="0" :aria-label="$t('common.table.scrollRegion')">
       <table class="min-w-full divide-y divide-border">
         <thead class="bg-surface">
           <tr>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('common.name') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('endpointProfiles.method') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('endpointProfiles.detail.baseUrl') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('common.status') }}
             </th>
-            <th class="px-4 py-3 text-right text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-end text-sm font-medium text-muted">
               {{ $t('common.actions') }}
             </th>
           </tr>
@@ -143,7 +143,7 @@ async function onTest(profile: EndpointProfile): Promise<void> {
                 :icon="profile.enabled ? semanticIcons.success : semanticIcons.neutral"
               />
             </td>
-            <td class="space-x-3 px-4 py-3 text-right text-sm">
+            <td class="[&>*+*]:ms-3 px-4 py-3 text-end text-sm">
               <button
                 type="button"
                 class="link text-action-text disabled:opacity-60"

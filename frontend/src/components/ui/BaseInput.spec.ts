@@ -12,14 +12,16 @@ describe('BaseInput', () => {
     expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['hello@example.com'])
   })
 
-  it('switches to the danger border when aria-invalid is set', () => {
+  it('adds a non-color invalid cue while retaining the strong boundary', () => {
     const wrapper = mount(BaseInput, { props: { ariaInvalid: 'true' } })
-    expect(wrapper.get('input').classes()).toContain('border-danger')
+    expect(wrapper.get('input').classes()).toEqual(
+      expect.arrayContaining(['border-border-strong', 'invalid-control']),
+    )
   })
 
-  it('defaults to the neutral border', () => {
+  it('defaults to the strong control boundary', () => {
     const wrapper = mount(BaseInput)
-    expect(wrapper.get('input').classes()).toContain('border-border')
+    expect(wrapper.get('input').classes()).toContain('border-border-strong')
   })
 })
 

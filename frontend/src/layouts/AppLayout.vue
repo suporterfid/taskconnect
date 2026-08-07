@@ -26,6 +26,21 @@ const mobileSidebarMode = useMediaQuery('(max-width: 767px)')
 const sidebarSuppressed = computed(
   () => mobileSidebarMode.value && !mobileNavOpen.value,
 )
+const wideDataRouteNames = new Set([
+  'api-keys',
+  'audit-logs',
+  'dlq',
+  'endpoint-profiles',
+  'environments',
+  'members',
+  'pipelines',
+  'pipelines-detail',
+  'runs',
+  'secrets',
+  'settings',
+  'tasks',
+])
+const isWideDataView = computed(() => wideDataRouteNames.has(String(route.name ?? '')))
 
 watch(
   () => route.path,
@@ -174,7 +189,7 @@ function onLocaleChange(event: Event): void {
     </aside>
 
     <div class="flex min-w-0 flex-1 flex-col">
-      <header class="app-header flex flex-wrap items-center gap-4 border-b border-border bg-surface">
+      <header class="app-header sticky top-0 z-10 flex flex-wrap items-center gap-4 border-b border-border bg-surface">
         <button
           type="button"
           class="min-h-11 min-w-11 rounded-md p-2 text-muted hover:bg-surface-emphasis hover:text-text md:hidden"
@@ -189,7 +204,7 @@ function onLocaleChange(event: Event): void {
         <label class="flex min-w-0 flex-wrap items-center gap-2 text-sm">
           <span class="text-muted">{{ $t('common.tenant.label') }}</span>
           <select
-            class="min-h-11 max-w-full min-w-0 rounded-md border border-border bg-surface px-2 py-1 text-sm text-text"
+            class="min-h-11 max-w-full min-w-0 rounded-md border border-border-strong bg-surface px-2 py-1 text-sm text-text"
             :value="tenant.currentTenantId ?? ''"
             @change="onTenantChange"
           >
@@ -205,7 +220,7 @@ function onLocaleChange(event: Event): void {
         <label class="flex min-w-0 flex-wrap items-center gap-2 text-sm">
           <span class="text-muted">{{ $t('common.environment.label') }}</span>
           <select
-            class="min-h-11 max-w-full min-w-0 rounded-md border border-border bg-surface px-2 py-1 text-sm text-text"
+            class="min-h-11 max-w-full min-w-0 rounded-md border border-border-strong bg-surface px-2 py-1 text-sm text-text"
             :value="tenant.currentEnvironmentId ?? ''"
             @change="onEnvironmentChange"
           >
@@ -225,7 +240,7 @@ function onLocaleChange(event: Event): void {
         <label class="ms-auto flex min-w-0 flex-wrap items-center gap-2 text-sm">
           <span class="text-muted">{{ $t('common.locale.label') }}</span>
           <select
-            class="min-h-11 max-w-full min-w-0 rounded-md border border-border bg-surface px-2 py-1 text-sm text-text"
+            class="min-h-11 max-w-full min-w-0 rounded-md border border-border-strong bg-surface px-2 py-1 text-sm text-text"
             :value="localeStore.currentLocale"
             @change="onLocaleChange"
           >
@@ -237,7 +252,11 @@ function onLocaleChange(event: Event): void {
         <ThemeSelect />
       </header>
 
-      <main id="main-content" class="app-main flex-1">
+      <main
+        id="main-content"
+        class="app-main flex-1"
+        :class="{ 'app-main--wide': isWideDataView }"
+      >
         <RouterView />
       </main>
     </div>
@@ -289,10 +308,47 @@ function onLocaleChange(event: Event): void {
 }
 
 .app-main {
+  box-sizing: border-box;
+  inline-size: 100%;
+  max-inline-size: var(--container-reading);
+  min-inline-size: 0;
+  margin-inline: auto;
   padding-block-start: var(--space-6);
   padding-block-end: max(var(--space-6), var(--safe-block-end));
   padding-inline-start: max(var(--space-6), var(--safe-inline-start));
   padding-inline-end: max(var(--space-6), var(--safe-inline-end));
+}
+
+.app-main--wide {
+  max-inline-size: var(--container-app);
+}
+
+.app-main :global(:focus) {
+  scroll-margin-block: calc(var(--space-16) + var(--safe-block-start));
+}
+
+@media (max-width: 479px) {
+  .app-header {
+    gap: var(--space-2);
+    padding-inline-start: max(var(--space-4), var(--safe-inline-start));
+    padding-inline-end: max(var(--space-4), var(--safe-inline-end));
+  }
+
+  .app-header > :global(label) {
+    flex: 1 1 100%;
+  }
+
+  .app-main {
+    padding-inline-start: max(var(--space-4), var(--safe-inline-start));
+    padding-inline-end: max(var(--space-4), var(--safe-inline-end));
+  }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+  .app-main {
+    padding-inline-start: max(var(--space-5), var(--safe-inline-start));
+    padding-inline-end: max(var(--space-5), var(--safe-inline-end));
+  }
 }
 
 @media (min-width: 768px) {

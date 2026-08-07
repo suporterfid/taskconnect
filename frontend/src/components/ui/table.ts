@@ -1,8 +1,7 @@
 /**
- * Documented class recipe for tables (§7, §4.4, §10) — a component wasn't
- * built because every existing table (DlqPage, TaskListPage, RunListPage, …)
- * has a different column shape, and replacing those call sites is out of
- * scope here (#91/#92/#93). This gives them one recipe to converge on.
+ * Shared class and attribute recipe for tables. Existing data views keep
+ * their own column shapes while converging on one labelled, focusable scroll
+ * region that prevents page-wide horizontal overflow.
  *
  * - `wrapper`: horizontal-scroll container so a wide table scrolls instead
  *   of breaking the page layout at 200% zoom (§10).
@@ -15,9 +14,15 @@
  * See #89.
  */
 export const tableClasses = {
-  wrapper: 'overflow-x-auto',
+  wrapper: 'table-scroll',
   table: 'min-w-full divide-y divide-border',
-  th: 'px-3 py-2 text-left text-sm font-medium text-muted',
+  th: 'px-3 py-2 text-start text-sm font-medium text-muted',
   td: 'px-3 py-2 text-sm text-text',
   numeric: 'tabular-nums',
+} as const
+
+/** Apply with a localized `aria-label` to every labelled horizontal-scroll region. */
+export const tableRegionAttributes = {
+  role: 'region',
+  tabindex: 0,
 } as const

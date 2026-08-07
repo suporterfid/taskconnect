@@ -176,7 +176,7 @@ async function onRemove(member: Member): Promise<void> {
 
 <template>
   <div>
-    <div class="mb-8 flex items-start justify-between gap-4">
+    <div class="page-header">
       <PageHeader
         :title="$t('settings.members.title')"
         :subtitle="$t('settings.members.subtitle')"
@@ -278,20 +278,20 @@ async function onRemove(member: Member): Promise<void> {
         {{ $t('settings.members.invite') }}
       </BaseButton>
     </EmptyState>
-    <div v-else class="overflow-hidden rounded-lg border border-border">
+    <div v-else class="table-scroll" role="region" tabindex="0" :aria-label="$t('common.table.scrollRegion')">
       <table class="min-w-full divide-y divide-border">
         <thead class="bg-surface">
           <tr>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('settings.members.fields.name') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('settings.members.fields.email') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('settings.members.fields.role') }}
             </th>
-            <th class="px-4 py-3 text-right text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-end text-sm font-medium text-muted">
               {{ $t('common.actions') }}
             </th>
           </tr>
@@ -307,7 +307,7 @@ async function onRemove(member: Member): Promise<void> {
                 :icon="roleIcon(member.role)"
               />
             </td>
-            <td class="space-x-3 px-4 py-3 text-right text-sm">
+            <td class="[&>*+*]:ms-3 px-4 py-3 text-end text-sm">
               <button type="button" class="link text-action-text" @click="openEdit(member)">
                 {{ $t('common.edit') }}
               </button>

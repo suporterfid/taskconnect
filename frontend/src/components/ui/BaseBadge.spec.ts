@@ -23,7 +23,7 @@ describe('BaseBadge', () => {
 
   it('renders the danger tone', () => {
     const wrapper = mount(BaseBadge, { props: { label: 'Failed', tone: 'danger' } })
-    expect(wrapper.classes()).toContain('text-danger')
+    expect(wrapper.classes()).toContain('status-danger')
   })
 
   it('treats its optional icon as decorative, since the label already carries the meaning', () => {

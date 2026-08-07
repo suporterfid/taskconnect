@@ -59,7 +59,7 @@ function Invoke-ComposerWithRetry {
     $delaySeconds = 5
 
     while ($attempt -le $maxAttempts) {
-        $exitCode = Invoke-ComposeCore @('run', '--rm') + $envArgs + @('app', 'composer') + $ComposerArgs
+        $exitCode = Invoke-ComposeCore -CoreArgs (@('run', '--rm') + $envArgs + @('app', 'composer') + $ComposerArgs)
         if ($exitCode -eq 0) {
             return
         }
@@ -116,7 +116,7 @@ function Invoke-Bootstrap {
     Invoke-Compose @('up', '-d', '--build', 'mysql', 'mailpit', 'receiver')
     Invoke-Compose @('up', '-d', '--wait', 'mysql')
 
-    Invoke-ComposerWithRetry @('install')
+    Invoke-ComposerWithRetry -ComposerArgs @('install')
 
     $hasArtisan = (Invoke-ComposeCore @('run', '--rm', 'app', 'test', '-f', 'artisan')) -eq 0
     if ($hasArtisan) {
@@ -139,22 +139,22 @@ function Invoke-Bootstrap {
 }
 
 function Invoke-Composer {
-    param([string[]]$Args)
+    param([string[]]$ComposerArgs)
 
-    if ($Args.Count -gt 0 -and $Args[0] -eq 'install') {
-        $installArgs = if ($Args.Count -gt 1) { $Args[1..($Args.Count - 1)] } else { @() }
-        Invoke-ComposerWithRetry @('install') + $installArgs
+    if ($ComposerArgs.Count -gt 0 -and $ComposerArgs[0] -eq 'install') {
+        $installArgs = if ($ComposerArgs.Count -gt 1) { $ComposerArgs[1..($ComposerArgs.Count - 1)] } else { @() }
+        Invoke-ComposerWithRetry -ComposerArgs (@('install') + $installArgs)
         return
     }
 
     Write-PackagistWarning
     $envArgs = Get-ComposerEnvArgs
-    Invoke-Compose @('run', '--rm') + $envArgs + @('app', 'composer') + $Args
+    Invoke-Compose -ComposeArgs (@('run', '--rm') + $envArgs + @('app', 'composer') + $ComposerArgs)
 }
 
 function Invoke-Artisan {
-    param([string[]]$Args)
-    Invoke-Compose @('run', '--rm', 'app', 'php', 'artisan') + $Args
+    param([string[]]$ArtisanArgs)
+    Invoke-Compose -ComposeArgs (@('run', '--rm', 'app', 'php', 'artisan') + $ArtisanArgs)
 }
 
 function Invoke-Npm {
@@ -164,20 +164,20 @@ function Invoke-Npm {
 }
 
 function Invoke-Test {
-    param([string[]]$Args)
+    param([string[]]$TestArgs)
 
-    if ((Invoke-ComposeCore @('run', '--rm', 'app', 'test', '-f', 'artisan')) -eq 0) {
-        Invoke-Compose @('run', '--rm', 'app', 'php', 'artisan', 'test') + $Args
+    if ((Invoke-ComposeCore -CoreArgs @('run', '--rm', 'app', 'test', '-f', 'artisan')) -eq 0) {
+        Invoke-Compose -ComposeArgs (@('run', '--rm', 'app', 'php', 'artisan', 'test') + $TestArgs)
         return
     }
 
-    if ((Invoke-ComposeCore @('run', '--rm', 'app', 'test', '-f', 'vendor/bin/pest')) -eq 0) {
-        Invoke-Compose @('run', '--rm', 'app', 'vendor/bin/pest') + $Args
+    if ((Invoke-ComposeCore -CoreArgs @('run', '--rm', 'app', 'test', '-f', 'vendor/bin/pest')) -eq 0) {
+        Invoke-Compose -ComposeArgs (@('run', '--rm', 'app', 'vendor/bin/pest') + $TestArgs)
         return
     }
 
-    if ((Invoke-ComposeCore @('run', '--rm', 'app', 'test', '-f', 'vendor/bin/phpunit')) -eq 0) {
-        Invoke-Compose @('run', '--rm', 'app', 'vendor/bin/phpunit') + $Args
+    if ((Invoke-ComposeCore -CoreArgs @('run', '--rm', 'app', 'test', '-f', 'vendor/bin/phpunit')) -eq 0) {
+        Invoke-Compose -ComposeArgs (@('run', '--rm', 'app', 'vendor/bin/phpunit') + $TestArgs)
         return
     }
 
@@ -259,10 +259,10 @@ switch ($Verb) {
     'up' { Invoke-Up }
     'down' { Invoke-Down -Args $VerbArgs }
     'bootstrap' { Invoke-Bootstrap }
-    'composer' { Invoke-Composer -Args $VerbArgs }
-    'artisan' { Invoke-Artisan -Args $VerbArgs }
+    'composer' { Invoke-Composer -ComposerArgs $VerbArgs }
+    'artisan' { Invoke-Artisan -ArtisanArgs $VerbArgs }
     'npm' { Invoke-Npm -NpmArgs $VerbArgs }
-    'test' { Invoke-Test -Args $VerbArgs }
+    'test' { Invoke-Test -TestArgs $VerbArgs }
     'e2e' { Invoke-E2E -Args $VerbArgs }
     'release' { Invoke-Release }
     'deploy' { Invoke-Deploy -Args $VerbArgs }

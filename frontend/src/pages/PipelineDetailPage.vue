@@ -90,15 +90,15 @@ function statusLabel(status: string): string {
       <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">
         {{ $t('pipelines.detail.nodes') }}
       </h2>
-      <div class="overflow-x-auto rounded-lg border border-border">
+      <div class="table-scroll" role="region" tabindex="0" :aria-label="$t('common.table.scrollRegion')">
         <table class="min-w-full divide-y divide-border">
           <thead class="bg-surface">
             <tr>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('pipelines.detail.nodeKey') }}</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('pipelines.detail.taskType') }}</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('pipelines.detail.status') }}</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('pipelines.detail.task') }}</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('pipelines.detail.run') }}</th>
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('pipelines.detail.nodeKey') }}</th>
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('pipelines.detail.taskType') }}</th>
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('pipelines.detail.status') }}</th>
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('pipelines.detail.task') }}</th>
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('pipelines.detail.run') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-border bg-surface">

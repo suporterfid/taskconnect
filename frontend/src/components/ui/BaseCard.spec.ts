@@ -11,11 +11,11 @@ describe('BaseCard', () => {
 
   it('uses the surface-emphasis tone plus a stronger border when selected', () => {
     const wrapper = mount(BaseCard, { props: { selected: true } })
-    expect(wrapper.classes()).toEqual(expect.arrayContaining(['bg-surface-emphasis', 'border-border-strong']))
+    expect(wrapper.classes()).toEqual(expect.arrayContaining(['bg-[var(--color-bg-selected)]', 'border-border-strong']))
   })
 
   it('defaults to the plain surface tone', () => {
     const wrapper = mount(BaseCard)
-    expect(wrapper.classes()).toEqual(expect.arrayContaining(['bg-surface', 'border-border']))
+    expect(wrapper.classes()).toEqual(expect.arrayContaining(['bg-[var(--color-bg-elevated)]', 'border-border']))
   })
 })

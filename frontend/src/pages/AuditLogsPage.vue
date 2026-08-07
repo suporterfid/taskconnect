@@ -48,23 +48,23 @@ function formatWhen(value?: string | null): string {
       @retry="reload"
     />
     <EmptyState v-else-if="!data?.length" :message="$t('settings.audit.empty')" />
-    <div v-else class="overflow-hidden rounded-lg border border-border">
+    <div v-else class="table-scroll" role="region" tabindex="0" :aria-label="$t('common.table.scrollRegion')">
       <table class="min-w-full divide-y divide-border">
         <thead class="bg-surface">
           <tr>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('settings.audit.fields.when') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('settings.audit.fields.action') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('settings.audit.fields.resource') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('settings.audit.fields.actor') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('settings.audit.fields.requestId') }}
             </th>
           </tr>

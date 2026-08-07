@@ -113,7 +113,7 @@ async function onTest(): Promise<void> {
         <div class="flex flex-wrap gap-2">
           <RouterLink
             :to="`/endpoint-profiles/${data.id}/edit`"
-            class="inline-flex items-center rounded-md bg-action px-4 py-2 text-sm font-medium text-white hover:bg-action-hover"
+            class="action-link"
           >
             {{ $t('common.edit') }}
           </RouterLink>
@@ -163,8 +163,8 @@ async function onTest(): Promise<void> {
           </dt>
           <dd class="mt-1 text-sm text-text">
             {{ $t(`endpointProfiles.authModes.${data.auth_mode}`) }}
-            <span v-if="data.auth_header_name" class="ml-1 font-mono text-muted">{{ data.auth_header_name }}</span>
-            <span v-if="data.auth_query_param" class="ml-1 font-mono text-muted">?{{ data.auth_query_param }}</span>
+            <span v-if="data.auth_header_name" class="ms-1 font-mono text-muted">{{ data.auth_header_name }}</span>
+            <span v-if="data.auth_query_param" class="ms-1 font-mono text-muted">?{{ data.auth_query_param }}</span>
           </dd>
         </div>
         <div>

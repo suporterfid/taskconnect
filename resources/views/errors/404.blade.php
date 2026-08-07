@@ -1,5 +1,5 @@
 @include('errors.minimal', [
     'code' => '404',
-    'title' => 'Page not found',
-    'message' => "The page you're looking for doesn't exist or may have moved.",
+    'title' => __('errors.404.title'),
+    'message' => __('errors.404.message'),
 ])

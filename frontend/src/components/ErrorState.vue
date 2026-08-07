@@ -13,8 +13,8 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="rounded-lg border border-danger/30 bg-danger/10 p-6 text-center" role="alert">
-    <p class="flex items-center justify-center gap-2 text-danger">
+  <div class="status-danger rounded-lg border p-6 text-center break-words" role="alert">
+    <p class="flex items-center justify-center gap-2">
       <AppIcon :icon="semanticIcons.danger" :size="16" />
       {{ message }}
     </p>

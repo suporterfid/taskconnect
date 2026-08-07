@@ -1,5 +1,5 @@
 @include('errors.minimal', [
     'code' => '500',
-    'title' => 'Something went wrong',
-    'message' => 'An unexpected error occurred. Please try again in a moment.',
+    'title' => __('errors.500.title'),
+    'message' => __('errors.500.message'),
 ])

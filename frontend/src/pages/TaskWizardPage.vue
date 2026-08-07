@@ -556,7 +556,7 @@ async function onSubmit(activate: boolean): Promise<void> {
           class="rounded-full px-3 py-1 text-xs"
           :class="
             index === step
-              ? 'bg-action text-white'
+              ? 'bg-[var(--color-action-primary)] text-[var(--color-action-primary-content)] font-medium'
               : 'bg-surface-emphasis text-muted'
           "
         >
@@ -734,7 +734,7 @@ async function onSubmit(activate: boolean): Promise<void> {
               v-model.number="form.interval_minutes"
               type="number"
               min="1"
-              class="mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text"
+              class="base-control mt-1 min-h-11 w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-text"
             />
           </label>
 
@@ -748,7 +748,7 @@ async function onSubmit(activate: boolean): Promise<void> {
               type="number"
               min="0"
               max="59"
-              class="mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text"
+              class="base-control mt-1 min-h-11 w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-text"
             />
           </label>
 
@@ -800,7 +800,7 @@ async function onSubmit(activate: boolean): Promise<void> {
               type="number"
               min="1"
               max="31"
-              class="mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text"
+              class="base-control mt-1 min-h-11 w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-text"
             />
           </label>
 
@@ -831,7 +831,7 @@ async function onSubmit(activate: boolean): Promise<void> {
                 v-model.number="form.max_attempts"
                 type="number"
                 min="1"
-                class="mt-1 w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text"
+                class="base-control mt-1 min-h-11 w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-text"
               />
             </label>
             <label class="block text-sm font-medium">

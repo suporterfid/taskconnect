@@ -124,7 +124,7 @@ function formatDate(value?: string | null): string {
       <template #actions>
         <RouterLink
           to="/tasks/new"
-          class="rounded-md bg-action px-4 py-2 text-sm font-medium text-white hover:bg-action-hover"
+          class="action-link"
         >
           {{ $t('dashboard.createTask') }}
         </RouterLink>

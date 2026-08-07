@@ -70,7 +70,7 @@ function statusLabel(status: string): string {
             class="rounded-md border border-border px-4 py-3 text-sm"
           >
             <span class="font-medium text-text">{{ tpl.name }}</span>
-            <span v-if="tpl.description" class="ml-2 text-muted">{{ tpl.description }}</span>
+            <span v-if="tpl.description" class="ms-2 text-muted">{{ tpl.description }}</span>
             <span class="mt-1 block font-mono text-xs text-muted">
               {{ tpl.nodes.map((n) => n.task_type).join(' → ') }}
             </span>
@@ -83,15 +83,15 @@ function statusLabel(status: string): string {
           {{ $t('pipelines.instances') }}
         </h2>
         <EmptyState v-if="!data.instances.length" :message="$t('pipelines.empty')" />
-        <div v-else class="overflow-x-auto rounded-lg border border-border">
+        <div v-else class="table-scroll" role="region" tabindex="0" :aria-label="$t('common.table.scrollRegion')">
           <table class="min-w-full divide-y divide-border">
             <thead class="bg-surface">
               <tr>
-                <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('pipelines.columns.id') }}</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('pipelines.columns.template') }}</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('pipelines.columns.status') }}</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('pipelines.columns.nodes') }}</th>
-                <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('pipelines.columns.created') }}</th>
+                <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('pipelines.columns.id') }}</th>
+                <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('pipelines.columns.template') }}</th>
+                <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('pipelines.columns.status') }}</th>
+                <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('pipelines.columns.nodes') }}</th>
+                <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('pipelines.columns.created') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-border bg-surface">

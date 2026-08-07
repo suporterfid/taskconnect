@@ -6,7 +6,8 @@ defineProps<{ label?: string }>()
   <figure>
     <figcaption v-if="label" class="mb-1 text-sm text-muted">{{ label }}</figcaption>
     <pre
-      class="overflow-x-auto rounded-sm border border-border bg-surface p-4 font-mono text-sm text-text"
+      class="table-scroll rounded-sm bg-surface p-4 font-mono text-sm text-text"
+      tabindex="0"
     ><code><slot /></code></pre>
   </figure>
 </template>

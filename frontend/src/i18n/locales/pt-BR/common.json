@@ -15,6 +15,9 @@
   "noResults": "Nenhum resultado encontrado",
   "actions": "Ações",
   "status": "Status",
+  "table": {
+    "scrollRegion": "Tabela de dados com rolagem"
+  },
   "name": "Nome",
   "description": "Descrição",
   "createdAt": "Criado em",

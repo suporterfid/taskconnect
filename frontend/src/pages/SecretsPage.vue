@@ -176,7 +176,7 @@ function dismissPlaintext(): void {
 
 <template>
   <div>
-    <div class="mb-8 flex items-start justify-between gap-4">
+    <div class="page-header">
       <PageHeader
         :title="$t('secrets.title')"
         :subtitle="$t('secrets.subtitle')"
@@ -294,23 +294,23 @@ function dismissPlaintext(): void {
         {{ $t('secrets.create') }}
       </BaseButton>
     </EmptyState>
-    <div v-else class="overflow-x-auto rounded-lg border border-border">
+    <div v-else class="table-scroll" role="region" tabindex="0" :aria-label="$t('common.table.scrollRegion')">
       <table class="min-w-full divide-y divide-border">
         <thead class="bg-surface">
           <tr>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('secrets.fields.name') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('secrets.fields.version') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('secrets.fields.usage') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('common.updatedAt') }}
             </th>
-            <th class="px-4 py-3 text-right text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-end text-sm font-medium text-muted">
               {{ $t('common.actions') }}
             </th>
           </tr>
@@ -325,7 +325,7 @@ function dismissPlaintext(): void {
             <td class="px-4 py-3 text-sm tabular-nums text-muted">
               {{ formatDate(secret.updated_at) }}
             </td>
-            <td class="space-x-3 px-4 py-3 text-right text-sm">
+            <td class="[&>*+*]:ms-3 px-4 py-3 text-end text-sm">
               <button type="button" class="link text-action-text" @click="openRotate(secret)">
                 {{ $t('secrets.rotate') }}
               </button>

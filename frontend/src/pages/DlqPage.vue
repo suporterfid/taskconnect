@@ -102,16 +102,16 @@ function onFilter(): void {
     <EmptyState v-else-if="!data?.length" data-testid="dlq-empty" :message="$t('dlq.empty')" />
     <div v-else data-testid="dlq-table">
       <BaseAlert v-if="actionError" tone="danger" class="mb-3">{{ actionError }}</BaseAlert>
-      <div class="overflow-x-auto rounded-lg border border-border">
+      <div class="table-scroll" role="region" tabindex="0" :aria-label="$t('common.table.scrollRegion')">
         <table class="min-w-full divide-y divide-border">
           <thead class="bg-surface">
             <tr>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('dlq.columns.run') }}</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('dlq.columns.task') }}</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('dlq.columns.type') }}</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('dlq.columns.finished') }}</th>
-              <th class="px-4 py-3 text-left text-sm font-medium text-muted">{{ $t('dlq.columns.error') }}</th>
-              <th class="px-4 py-3 text-right text-sm font-medium text-muted">{{ $t('common.actions') }}</th>
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('dlq.columns.run') }}</th>
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('dlq.columns.task') }}</th>
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('dlq.columns.type') }}</th>
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('dlq.columns.finished') }}</th>
+              <th class="px-4 py-3 text-start text-sm font-medium text-muted">{{ $t('dlq.columns.error') }}</th>
+              <th class="px-4 py-3 text-end text-sm font-medium text-muted">{{ $t('common.actions') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-border bg-surface">
@@ -136,7 +136,7 @@ function onFilter(): void {
               <td class="px-4 py-3 font-mono text-xs text-muted">
                 {{ run.final_error_code || run.final_http_status || '—' }}
               </td>
-              <td class="space-x-3 px-4 py-3 text-right text-sm">
+              <td class="[&>*+*]:ms-3 px-4 py-3 text-end text-sm">
                 <RouterLink :to="`/runs/${run.id}`" class="link text-action-text" data-testid="dlq-inspect">
                   {{ $t('dlq.actions.inspect') }}
                 </RouterLink>

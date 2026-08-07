@@ -1,5 +1,5 @@
 @include('errors.minimal', [
     'code' => '403',
-    'title' => 'Access denied',
-    'message' => "You don't have permission to view this page.",
+    'title' => __('errors.403.title'),
+    'message' => __('errors.403.message'),
 ])

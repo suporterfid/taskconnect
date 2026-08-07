@@ -148,23 +148,23 @@ async function onRetry(run: TaskRun): Promise<void> {
     <ErrorState v-else-if="error" :message="error ?? $t('runs.loadError')" @retry="reload" />
     <EmptyState v-else-if="!tenant.currentTenantId || !tenant.currentEnvironmentId" :message="$t('runs.needsTenant')" />
     <EmptyState v-else-if="!filtered.length" :message="$t('runs.empty')" />
-    <div v-else class="overflow-x-auto rounded-lg border border-border">
+    <div v-else class="table-scroll" role="region" tabindex="0" :aria-label="$t('common.table.scrollRegion')">
       <table class="min-w-full divide-y divide-border">
         <thead class="bg-surface">
           <tr>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('runs.fields.id') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('runs.fields.task') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('common.status') }}
             </th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-start text-sm font-medium text-muted">
               {{ $t('runs.fields.when') }}
             </th>
-            <th class="px-4 py-3 text-right text-sm font-medium text-muted">
+            <th class="px-4 py-3 text-end text-sm font-medium text-muted">
               {{ $t('common.actions') }}
             </th>
           </tr>
@@ -188,7 +188,7 @@ async function onRetry(run: TaskRun): Promise<void> {
             <td class="px-4 py-3 text-sm tabular-nums text-muted">
               {{ displayTime(run) }}
             </td>
-            <td class="px-4 py-3 text-right text-sm">
+            <td class="px-4 py-3 text-end text-sm">
               <div class="flex flex-wrap items-center justify-end gap-3">
                 <button
                   v-if="canCancel(run.run_state)"

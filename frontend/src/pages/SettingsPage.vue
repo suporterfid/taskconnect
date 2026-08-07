@@ -406,20 +406,20 @@ function formatWhen(value?: string | null): string {
           @retry="reloadAudit"
         />
         <EmptyState v-else-if="!auditLogs?.length" :message="$t('settings.audit.empty')" />
-        <div v-else class="overflow-hidden rounded-md border border-border">
+        <div v-else class="table-scroll" role="region" tabindex="0" :aria-label="$t('common.table.scrollRegion')">
           <table class="min-w-full divide-y divide-border">
             <thead class="bg-surface-emphasis">
               <tr>
-                <th class="px-3 py-2 text-left text-sm font-medium text-muted">
+                <th class="px-3 py-2 text-start text-sm font-medium text-muted">
                   {{ $t('settings.audit.fields.when') }}
                 </th>
-                <th class="px-3 py-2 text-left text-sm font-medium text-muted">
+                <th class="px-3 py-2 text-start text-sm font-medium text-muted">
                   {{ $t('settings.audit.fields.action') }}
                 </th>
-                <th class="px-3 py-2 text-left text-sm font-medium text-muted">
+                <th class="px-3 py-2 text-start text-sm font-medium text-muted">
                   {{ $t('settings.audit.fields.resource') }}
                 </th>
-                <th class="px-3 py-2 text-left text-sm font-medium text-muted">
+                <th class="px-3 py-2 text-start text-sm font-medium text-muted">
                   {{ $t('settings.audit.fields.actor') }}
                 </th>
               </tr>

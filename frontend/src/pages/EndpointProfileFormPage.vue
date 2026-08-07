@@ -463,7 +463,7 @@ onMounted(async () => {
               type="number"
               min="1"
               max="300"
-              class="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text"
+              class="base-control min-h-11 w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-text"
               :aria-describedby="describedBy"
               :aria-invalid="ariaInvalid ? true : undefined"
             />
@@ -481,7 +481,7 @@ onMounted(async () => {
               type="number"
               min="1"
               max="600"
-              class="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text"
+              class="base-control min-h-11 w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-text"
               :aria-describedby="describedBy"
               :aria-invalid="ariaInvalid ? true : undefined"
             />

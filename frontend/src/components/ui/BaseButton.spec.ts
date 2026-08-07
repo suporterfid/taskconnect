@@ -5,10 +5,10 @@ import BaseButton from './BaseButton.vue'
 
 describe('BaseButton', () => {
   it.each([
-    ['primary', 'bg-action'],
-    ['secondary', 'border-border'],
+    ['primary', 'bg-[var(--color-action-primary)]'],
+    ['secondary', 'border-border-strong'],
     ['tertiary', 'text-action-text'],
-    ['danger', 'bg-danger-strong'],
+    ['danger', 'status-danger'],
   ] as const)('renders the %s variant', (variant, expectedClass) => {
     const wrapper = mount(BaseButton, { props: { variant }, slots: { default: 'Save' } })
     expect(wrapper.text()).toBe('Save')
@@ -17,6 +17,11 @@ describe('BaseButton', () => {
 
   it('meets the 44px minimum touch target at the default md size', () => {
     const wrapper = mount(BaseButton, { slots: { default: 'Save' } })
+    expect(wrapper.get('button').classes()).toEqual(expect.arrayContaining(['min-h-11', 'min-w-11']))
+  })
+
+  it('preserves a 44px target for visually compact table actions', () => {
+    const wrapper = mount(BaseButton, { props: { size: 'sm' }, slots: { default: 'Edit' } })
     expect(wrapper.get('button').classes()).toEqual(expect.arrayContaining(['min-h-11', 'min-w-11']))
   })
 

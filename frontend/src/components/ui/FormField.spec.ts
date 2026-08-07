@@ -56,6 +56,6 @@ describe('FormField', () => {
     })
     const input = wrapper.get('input')
     expect(input.attributes('aria-invalid')).toBe('true')
-    expect(input.classes()).toContain('border-danger')
+    expect(input.classes()).toEqual(expect.arrayContaining(['border-border-strong', 'invalid-control']))
   })
 })

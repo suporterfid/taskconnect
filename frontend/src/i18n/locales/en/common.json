@@ -15,6 +15,9 @@
   "noResults": "No results found",
   "actions": "Actions",
   "status": "Status",
+  "table": {
+    "scrollRegion": "Scrollable data table"
+  },
   "name": "Name",
   "description": "Description",
   "createdAt": "Created",
