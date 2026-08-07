@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
 withDefaults(
   defineProps<{
     modelValue?: string
@@ -13,7 +15,18 @@ withDefaults(
   { rows: 3 },
 )
 
-defineEmits<{ 'update:modelValue': [value: string] }>()
+const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
+const composing = ref(false)
+
+function emitValue(event: Event): void {
+  if (composing.value) return
+  emit('update:modelValue', (event.target as HTMLTextAreaElement).value)
+}
+
+function finishComposition(event: Event): void {
+  composing.value = false
+  emitValue(event)
+}
 </script>
 
 <template>
@@ -28,6 +41,8 @@ defineEmits<{ 'update:modelValue': [value: string] }>()
     :aria-invalid="ariaInvalid"
     class="base-control min-h-11 min-w-0 w-full rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-text placeholder:text-muted disabled:cursor-not-allowed"
     :class="ariaInvalid === 'true' ? 'invalid-control' : undefined"
-    @input="$emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
+    @compositionstart="composing = true"
+    @compositionend="finishComposition"
+    @input="emitValue"
   />
 </template>

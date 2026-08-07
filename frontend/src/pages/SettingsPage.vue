@@ -12,10 +12,12 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
 import BaseTextarea from '@/components/ui/BaseTextarea.vue'
+import BidiText from '@/components/ui/BidiText.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import FormField from '@/components/ui/FormField.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import type { SupportedLocale } from '@/i18n'
+import { formatDateTime, formatUnit } from '@/i18n/format'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { AuditLog, RetentionSettings, Tenant, User } from '@/services/types'
@@ -23,7 +25,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useLocaleStore } from '@/stores/locale'
 import { useTenantStore } from '@/stores/tenant'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const auth = useAuthStore()
 const localeStore = useLocaleStore()
 const tenant = useTenantStore()
@@ -178,17 +180,12 @@ async function onSaveAllowHosts(): Promise<void> {
 }
 
 function formatWhen(value?: string | null): string {
-  if (!value) {
-    return '—'
-  }
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return value ? formatDateTime(value, locale.value) : '—'
+}
+
+function retentionUnit(value: number | undefined, unit: 'day' | 'hour'): string {
+  if (value === undefined) return '—'
+  return formatUnit(value, unit, locale.value, (key, named) => t(key, named))
 }
 </script>
 
@@ -333,7 +330,7 @@ function formatWhen(value?: string | null): string {
               {{ $t('settings.retention.fields.payloadSnapshotsDays') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ retention.payload_snapshots_days }}
+              {{ retentionUnit(retention.payload_snapshots_days, 'day') }}
             </dd>
           </div>
           <div>
@@ -341,7 +338,7 @@ function formatWhen(value?: string | null): string {
               {{ $t('settings.retention.fields.attemptMetadataDays') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ retention.attempt_metadata_days }}
+              {{ retentionUnit(retention.attempt_metadata_days, 'day') }}
             </dd>
           </div>
           <div>
@@ -349,7 +346,7 @@ function formatWhen(value?: string | null): string {
               {{ $t('settings.retention.fields.runSummaryDays') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ retention.run_summary_days }}
+              {{ retentionUnit(retention.run_summary_days, 'day') }}
             </dd>
           </div>
           <div>
@@ -357,7 +354,7 @@ function formatWhen(value?: string | null): string {
               {{ $t('settings.retention.fields.auditLogsDays') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ retention.audit_logs_days }}
+              {{ retentionUnit(retention.audit_logs_days, 'day') }}
             </dd>
           </div>
           <div>
@@ -365,7 +362,7 @@ function formatWhen(value?: string | null): string {
               {{ $t('settings.retention.fields.apiIdempotencyHours') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ retention.api_idempotency_hours }}
+              {{ retentionUnit(retention.api_idempotency_hours, 'hour') }}
             </dd>
           </div>
           <div>
@@ -373,7 +370,7 @@ function formatWhen(value?: string | null): string {
               {{ $t('settings.retention.fields.systemHeartbeatDays') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ retention.system_heartbeat_days }}
+              {{ retentionUnit(retention.system_heartbeat_days, 'day') }}
             </dd>
           </div>
           <div>
@@ -381,7 +378,7 @@ function formatWhen(value?: string | null): string {
               {{ $t('settings.retention.fields.deadRunsDays') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ retention.dead_runs_days ?? '—' }}
+              {{ retentionUnit(retention.dead_runs_days, 'day') }}
             </dd>
           </div>
         </dl>
@@ -430,10 +427,10 @@ function formatWhen(value?: string | null): string {
                 <td class="px-3 py-2 text-sm font-medium text-text">{{ log.action }}</td>
                 <td class="px-3 py-2 text-sm text-muted">
                   {{ log.resource_type }}
-                  <span v-if="log.resource_id"> · {{ log.resource_id }}</span>
+                  <span v-if="log.resource_id"> · <BidiText :value="log.resource_id" /></span>
                 </td>
                 <td class="px-3 py-2 text-sm text-muted">
-                  {{ log.actor?.email ?? '—' }}
+                  <BidiText :value="log.actor?.email ?? '—'" />
                 </td>
               </tr>
             </tbody>

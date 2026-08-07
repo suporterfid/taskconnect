@@ -236,4 +236,34 @@ describe('Task 3 source-wide migration guard', () => {
     expect(errorShell).toContain("{{ __('errors.back') }}")
     expect(errorShell).not.toMatch(/#000000|#814dde|#1f0d69|#ebebeb|#b0b0b0/i)
   })
+
+  it('uses the production bidi primitive for mixed-direction values and directional back icons', () => {
+    const bidi = read('components/ui/BidiText.vue')
+    expect(bidi).toContain('<bdi')
+    expect(bidi).toContain('dir="auto"')
+
+    const backPages = [
+      'pages/EndpointProfileFormPage.vue',
+      'pages/EndpointProfileDetailPage.vue',
+      'pages/PipelineDetailPage.vue',
+      'pages/TaskDetailPage.vue',
+      'pages/TaskWizardPage.vue',
+      'pages/RunDetailPage.vue',
+    ]
+    for (const file of backPages) {
+      const source = read(file)
+      expect(source, file).not.toContain('←')
+      expect(source, file).toContain(':directional="true"')
+    }
+
+    const pipelineList = read('pages/PipelineListPage.vue')
+    expect(pipelineList).not.toContain('→')
+    expect(pipelineList).toContain(':directional="true"')
+  })
+
+  it('maps every reusable overlay surface to the declared semantic layer contract', () => {
+    expect(style).toMatch(/\.menu-surface,[\s\S]*\.tooltip-surface\s*\{\s*z-index:\s*var\(--layer-popover\)/)
+    expect(style).toMatch(/\.toast-surface\s*\{\s*z-index:\s*var\(--layer-toast\)/)
+    expect(style).toMatch(/\.dialog-surface\s*\{\s*z-index:\s*var\(--layer-modal\)/)
+  })
 })

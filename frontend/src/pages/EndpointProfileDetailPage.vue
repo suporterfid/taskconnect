@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { ArrowLeft } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
+import AppIcon from '@/components/AppIcon.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -12,6 +14,7 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseTextarea from '@/components/ui/BaseTextarea.vue'
+import BidiText from '@/components/ui/BidiText.vue'
 import CodeBlock from '@/components/ui/CodeBlock.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
@@ -94,7 +97,8 @@ async function onTest(): Promise<void> {
   <div>
     <div class="mb-4">
       <RouterLink to="/endpoint-profiles" class="action-link">
-        ← {{ $t('common.back') }}
+        <AppIcon :icon="ArrowLeft" :size="16" :directional="true" />
+        {{ $t('common.back') }}
       </RouterLink>
     </div>
 
@@ -133,7 +137,7 @@ async function onTest(): Promise<void> {
           <dt class="text-sm text-muted">
             {{ $t('endpointProfiles.detail.baseUrl') }}
           </dt>
-          <dd class="mt-1 break-all font-mono text-sm text-text">{{ data.base_url }}</dd>
+          <dd class="mt-1 break-all font-mono text-sm text-text"><BidiText :value="data.base_url" /></dd>
         </div>
         <div>
           <dt class="text-sm text-muted">
@@ -172,7 +176,7 @@ async function onTest(): Promise<void> {
             {{ $t('endpointProfiles.detail.secret') }}
           </dt>
           <dd class="mt-1 font-mono text-sm text-text">
-            {{ data.secret_id || $t('endpointProfiles.detail.none') }}
+            <BidiText :value="data.secret_id || $t('endpointProfiles.detail.none')" />
           </dd>
         </div>
         <div>
@@ -278,7 +282,7 @@ async function onTest(): Promise<void> {
           </p>
           <p class="break-all font-mono text-sm text-text">
             <span class="text-muted">{{ $t('endpointProfiles.test.url') }}:</span>
-            {{ testResult.request_url_redacted }}
+            <BidiText :value="testResult.request_url_redacted" />
           </p>
           <BaseAlert v-if="testResult.transport_error_code" tone="danger" role="alert">
             <span class="font-medium">{{

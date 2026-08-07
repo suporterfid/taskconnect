@@ -12,6 +12,7 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import { formatDateTime } from '@/i18n/format'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
@@ -201,17 +202,7 @@ function sortIndicator(column: string): string {
 }
 
 function formatDate(value?: string | null): string {
-  if (!value) {
-    return '—'
-  }
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return value ? formatDateTime(value, locale.value) : '—'
 }
 
 function scheduleLabel(task: Task): string {

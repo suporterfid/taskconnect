@@ -1,12 +1,16 @@
 <script setup lang="ts">
+import { ArrowRight } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import ErrorState from '@/components/ErrorState.vue'
+import AppIcon from '@/components/AppIcon.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import BidiText from '@/components/ui/BidiText.vue'
+import { formatDateTime } from '@/i18n/format'
 import { useAsyncData } from '@/composables/useAsyncData'
 import api from '@/services/api'
 import type { PipelineInstance, PipelineTemplate } from '@/services/types'
@@ -33,17 +37,7 @@ const { data, loading, error, reload } = useAsyncData(async () => {
 })
 
 function formatDate(value?: string | null): string {
-  if (!value) {
-    return '—'
-  }
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return value ? formatDateTime(value, locale.value) : '—'
 }
 
 function statusLabel(status: string): string {
@@ -71,8 +65,17 @@ function statusLabel(status: string): string {
           >
             <span class="font-medium text-text">{{ tpl.name }}</span>
             <span v-if="tpl.description" class="ms-2 text-muted">{{ tpl.description }}</span>
-            <span class="mt-1 block font-mono text-xs text-muted">
-              {{ tpl.nodes.map((n) => n.task_type).join(' → ') }}
+            <span class="mt-1 flex flex-wrap items-center gap-1 font-mono text-xs text-muted">
+              <template v-for="(node, index) in tpl.nodes" :key="`${node.task_type}-${index}`">
+                <AppIcon
+                  v-if="index > 0"
+                  :icon="ArrowRight"
+                  :size="16"
+                  :directional="true"
+                  aria-hidden="true"
+                />
+                <BidiText :value="node.task_type" />
+              </template>
             </span>
           </li>
         </ul>
@@ -102,7 +105,7 @@ function statusLabel(status: string): string {
                     class="link text-action-text"
                     data-testid="pipeline-instance-link"
                   >
-                    {{ instance.id }}
+                    <BidiText :value="instance.id" />
                   </RouterLink>
                 </td>
                 <td class="px-4 py-3 text-sm text-text">{{ instance.template_name }}</td>

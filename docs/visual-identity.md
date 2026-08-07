@@ -104,7 +104,7 @@ Lucide icons are wrapped by `AppIcon`. Icons are decorative by default; icon-onl
 
 `prefers-reduced-motion` with the `reduce` value reduces animations/transitions to 1ms, disables repeated animation and smooth scrolling, and removes skeleton shimmer. State meaning never depends on animation.
 
-Layer order is base 0, sticky header 10, sidebar overlay 20, popover/menu/tooltip 30, toast 40, dialog/scrim 50, and critical blocking overlay 60.
+Layer order is base 0, sticky header 10, sidebar overlay 20, popover/menu/tooltip 30, toast 40, dialog/scrim 50, and critical blocking overlay 60. Runtime surfaces consume these semantic layer custom properties directly; components never hard-code numeric z-index values. The navigation scrim shares the sidebar layer so it remains below the drawer, while dialog scrims use the modal layer.
 
 ## 6. Theme algorithm
 
@@ -139,13 +139,13 @@ The app shell contains a sidebar/navigation region, a top bar, page header/bread
 
 | Viewport | Shipped behavior |
 |---|---|
-| `<480px` | Single column; sidebar is an inert/hidden modal drawer until opened; header returns to document flow; 16px logical page padding plus safe areas. |
-| `480–767px` | Overlay drawer; sticky header; 20px logical page padding plus safe areas. |
-| `768–1023px` | Persistent sidebar; labeled tables scroll within their own region. |
-| `1024–1279px` | Persistent sidebar and full actions when space allows. |
-| `≥1280px` | Persistent sidebar; 1200px data views preserve 720px prose measure. |
+| `<480px` | Single column; sidebar is an inert overlay drawer; secondary top-bar controls are behind a localized, keyboard-operable overflow toggle; 16px logical page padding plus safe areas. |
+| `480–767px` | Sidebar remains an inert overlay drawer; 20px logical page padding plus safe areas. |
+| `768–1023px` | Sidebar uses collapsible overlay/rail behavior and the header menu control remains available; labeled tables scroll only in their own named region. |
+| `1024–1279px` | Sidebar is persistent but user-collapsible; collapsing exposes a named 44px restore control. |
+| `≥1280px` | Sidebar is persistent by default and user-collapsible; 1200px data views preserve 720px prose measure. |
 
-Safe-area left/right values map to logical inline start/end and swap under RTL; top/bottom map to block start/end. Closed mobile navigation uses `inert` and `aria-hidden`; opening restores keyboard access, Escape closes it, and desktop restoration removes suppression.
+Safe-area left/right values map to logical inline start/end and swap under RTL; top/bottom map to block start/end. Closed overlay or user-collapsed navigation uses `inert` and `aria-hidden`; opening restores keyboard access, Escape closes it, and the restore control receives returned focus.
 
 At 320 CSS px, required content MUST not overlap, clip, create page-wide horizontal scrolling, or become keyboard-inaccessible. Only labeled, keyboard-focusable table/code regions may scroll horizontally. At 200% text resizing, and at a separate 200% browser zoom check, controls remain visible and operable. The header is in flow under 480px so a focused terminal control cannot be obscured.
 

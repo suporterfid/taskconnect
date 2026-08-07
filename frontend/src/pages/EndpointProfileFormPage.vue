@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { ArrowLeft } from 'lucide-vue-next'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
+import AppIcon from '@/components/AppIcon.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import BaseAlert from '@/components/ui/BaseAlert.vue'
@@ -232,7 +234,8 @@ onMounted(async () => {
         :to="isEdit && id ? `/endpoint-profiles/${id}` : '/endpoint-profiles'"
         class="action-link"
       >
-        ← {{ $t('common.back') }}
+        <AppIcon :icon="ArrowLeft" :size="16" :directional="true" />
+        {{ $t('common.back') }}
       </RouterLink>
     </div>
 

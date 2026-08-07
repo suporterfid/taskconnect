@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { ArrowLeft } from 'lucide-vue-next'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
+import AppIcon from '@/components/AppIcon.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import BaseAlert from '@/components/ui/BaseAlert.vue'
@@ -11,6 +13,8 @@ import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
 import BaseTextarea from '@/components/ui/BaseTextarea.vue'
+import BidiText from '@/components/ui/BidiText.vue'
+import { formatDateTime, formatUnit } from '@/i18n/format'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type {
@@ -118,15 +122,15 @@ const localScheduleSummary = computed(() => {
     case 'once':
       return `${t('tasks.scheduleKinds.once')}: ${form.at || '—'} (${tz})`
     case 'every_n_minutes':
-      return `${t('tasks.scheduleKinds.every_n_minutes')}: ${form.interval_minutes}m`
+      return `${t('tasks.scheduleKinds.every_n_minutes')}: ${formatUnit(form.interval_minutes, 'minute', locale.value, (key, named) => t(key, named))}`
     case 'hourly_at':
-      return `${t('tasks.scheduleKinds.hourly_at')}: :${String(form.minute).padStart(2, '0')}`
+      return `${t('tasks.scheduleKinds.hourly_at')}: ${formatUnit(form.minute, 'minute', locale.value, (key, named) => t(key, named))}`
     case 'daily_at':
       return `${t('tasks.scheduleKinds.daily_at')}: ${form.time} (${tz})`
     case 'weekly_on':
       return `${t('tasks.scheduleKinds.weekly_on')}: ${form.weekdays.join(',') } @ ${form.time} (${tz})`
     case 'monthly_on_day':
-      return `${t('tasks.scheduleKinds.monthly_on_day')}: day ${form.day} @ ${form.time} (${tz})`
+      return `${t('tasks.scheduleKinds.monthly_on_day')}: ${formatUnit(form.day, 'day', locale.value, (key, named) => t(key, named))} @ ${form.time} (${tz})`
     case 'business_days_at':
       return `${t('tasks.scheduleKinds.business_days_at')}: ${form.time} (${tz})`
     case 'cron':
@@ -142,14 +146,7 @@ const reviewSchedule = computed(
 )
 
 function formatPreviewDate(value: string): string {
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return formatDateTime(value, locale.value)
 }
 
 async function refreshSchedulePreview(): Promise<void> {
@@ -539,7 +536,8 @@ async function onSubmit(activate: boolean): Promise<void> {
   <div>
     <div class="mb-4">
       <RouterLink to="/tasks" class="action-link">
-        ← {{ $t('common.back') }}
+        <AppIcon :icon="ArrowLeft" :size="16" :directional="true" />
+        {{ $t('common.back') }}
       </RouterLink>
     </div>
 
@@ -916,11 +914,11 @@ async function onSubmit(activate: boolean): Promise<void> {
           </p>
           <p>
             <strong>{{ $t('tasks.fields.url') }}:</strong>
-            {{ form.url_or_path || '—' }}
+            <BidiText :value="form.url_or_path || '—'" />
           </p>
           <p v-if="form.endpoint_profile_id">
             <strong>{{ $t('tasks.fields.endpointProfile') }}:</strong>
-            {{ selectedProfile?.name || form.endpoint_profile_id }}
+            <BidiText :value="selectedProfile?.name || form.endpoint_profile_id" />
           </p>
           <p v-if="selectedProfile">
             <strong>{{ $t('tasks.wizard.selectedAuth') }}:</strong>

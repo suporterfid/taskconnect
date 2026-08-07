@@ -126,4 +126,29 @@ describe('AppLayout structural directionality contract', () => {
     expect(layoutSource).toContain('min-h-11')
     expect(layoutSource).toContain('min-w-11')
   })
+
+  it('implements all four canonical responsive sidebar and top-bar modes', () => {
+    expect(layoutSource).toContain('@media (max-width: 479px)')
+    expect(layoutSource).toContain('@media (min-width: 480px) and (max-width: 767px)')
+    expect(layoutSource).toContain('@media (min-width: 768px) and (max-width: 1023px)')
+    expect(layoutSource).toContain('@media (min-width: 1024px) and (max-width: 1279px)')
+    expect(layoutSource).toContain('@media (min-width: 1280px)')
+    expect(layoutSource).toContain('common.topbarToggle.open')
+    expect(layoutSource).toContain('aria-controls="app-topbar-secondary"')
+    expect(layoutSource).toContain('common.navToggle.restore')
+  })
+
+  it('consumes semantic layers and selected navigation background', () => {
+    expect(layoutSource).not.toMatch(/\bz-(?:10|20|30|40|50|60)\b/)
+    expect(layoutSource).toContain('z-index: var(--layer-sidebar)')
+    expect(layoutSource).toContain('z-index: var(--layer-blocking)')
+    expect(layoutSource).toMatch(/\.nav-item\[aria-current='page'\][^}]*--color-bg-selected/s)
+  })
+
+  it('ships real bidi isolation and a full wrapping signed-in email', () => {
+    expect(layoutSource).toContain('<BidiText')
+    expect(layoutSource).toContain('auth.user.email')
+    expect(layoutSource).not.toContain('truncate')
+    expect(layoutSource).toContain('break-all')
+  })
 })

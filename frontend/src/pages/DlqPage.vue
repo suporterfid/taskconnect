@@ -10,6 +10,8 @@ import BaseAlert from '@/components/ui/BaseAlert.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import BidiText from '@/components/ui/BidiText.vue'
+import { formatDateTime } from '@/i18n/format'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
@@ -39,17 +41,7 @@ const { data, loading, error, reload } = useAsyncData(async () => {
 })
 
 function formatDate(value?: string | null): string {
-  if (!value) {
-    return '—'
-  }
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return value ? formatDateTime(value, locale.value) : '—'
 }
 
 async function onReplay(run: TaskRun): Promise<void> {
@@ -122,12 +114,12 @@ function onFilter(): void {
                   class="link text-action-text"
                   data-testid="dlq-run-link"
                 >
-                  {{ run.id }}
+                  <BidiText :value="run.id" />
                 </RouterLink>
               </td>
               <td class="px-4 py-3 text-sm">
                 <RouterLink v-if="run.task_id" :to="`/tasks/${run.task_id}`" class="link text-action-text">
-                  {{ run.task_name || run.task_id }}
+                  <BidiText :value="run.task_name || run.task_id" />
                 </RouterLink>
                 <span v-else class="text-muted">—</span>
               </td>

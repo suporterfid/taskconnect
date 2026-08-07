@@ -23,6 +23,27 @@ describe('BaseInput', () => {
     const wrapper = mount(BaseInput)
     expect(wrapper.get('input').classes()).toContain('border-border-strong')
   })
+
+  it('preserves CJK composition and emits only the committed value', async () => {
+    const wrapper = mount(BaseInput, { props: { modelValue: '' } })
+    const input = wrapper.get('input')
+    await input.trigger('compositionstart')
+    ;(input.element as HTMLInputElement).value = 'に'
+    await input.trigger('input')
+    ;(input.element as HTMLInputElement).value = '日本'
+    await input.trigger('input')
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    await input.trigger('compositionend')
+    expect(wrapper.emitted('update:modelValue')).toEqual([['日本']])
+  })
+
+  it.each(['مرحبا', 'สวัสดี', 'नमस्ते'])('emits pasted script text immediately: %s', async (value) => {
+    const wrapper = mount(BaseInput)
+    const input = wrapper.get('input')
+    ;(input.element as HTMLInputElement).value = value
+    await input.trigger('input')
+    expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([value])
+  })
 })
 
 describe('BaseSelect', () => {
@@ -45,5 +66,17 @@ describe('BaseTextarea', () => {
   it('defaults to 3 rows', () => {
     const wrapper = mount(BaseTextarea)
     expect(wrapper.get('textarea').attributes('rows')).toBe('3')
+  })
+
+  it('preserves composition and emits the final value once', async () => {
+    const wrapper = mount(BaseTextarea)
+    const textarea = wrapper.get('textarea')
+    await textarea.trigger('compositionstart')
+    ;(textarea.element as HTMLTextAreaElement).value = '漢'
+    await textarea.trigger('input')
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+    ;(textarea.element as HTMLTextAreaElement).value = '漢字'
+    await textarea.trigger('compositionend')
+    expect(wrapper.emitted('update:modelValue')).toEqual([['漢字']])
   })
 })

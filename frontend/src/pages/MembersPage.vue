@@ -10,6 +10,7 @@ import BaseBadge from '@/components/ui/BaseBadge.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
+import BidiText from '@/components/ui/BidiText.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import FormField from '@/components/ui/FormField.vue'
@@ -235,7 +236,7 @@ async function onRemove(member: Member): Promise<void> {
             <p class="font-medium text-text">
               {{ form.name }}
             </p>
-            <p class="text-sm text-muted">{{ form.email }}</p>
+            <p class="break-all text-sm text-muted"><BidiText :value="form.email" /></p>
           </div>
           <FormField id="member_role" :label="$t('settings.members.fields.role')" required>
             <template #default="{ describedBy, ariaInvalid }">
@@ -299,7 +300,7 @@ async function onRemove(member: Member): Promise<void> {
         <tbody class="divide-y divide-border bg-surface">
           <tr v-for="member in data" :key="member.id">
             <td class="px-4 py-3 font-medium text-text">{{ member.name }}</td>
-            <td class="px-4 py-3 text-sm text-muted">{{ member.email }}</td>
+            <td class="break-all px-4 py-3 text-sm text-muted"><BidiText :value="member.email" /></td>
             <td class="px-4 py-3 text-sm">
               <BaseBadge
                 :label="roleLabel(member.role)"

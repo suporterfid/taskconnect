@@ -9,6 +9,8 @@ import PageHeader from '@/components/PageHeader.vue'
 import BaseAlert from '@/components/ui/BaseAlert.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import BidiText from '@/components/ui/BidiText.vue'
+import { formatDateTime } from '@/i18n/format'
 import { useAsyncData } from '@/composables/useAsyncData'
 import api from '@/services/api'
 import type { DashboardStats } from '@/services/types'
@@ -104,17 +106,7 @@ const stats = computed(() => [
 ])
 
 function formatDate(value?: string | null): string {
-  if (!value) {
-    return '—'
-  }
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return value ? formatDateTime(value, locale.value) : '—'
 }
 </script>
 
@@ -183,7 +175,7 @@ function formatDate(value?: string | null): string {
           >
             <div class="min-w-0">
               <RouterLink :to="`/runs/${run.id}`" class="link text-sm font-medium text-action-text">
-                {{ run.task_name || run.task_id || run.id }}
+                <BidiText :value="run.task_name || run.task_id || run.id" />
               </RouterLink>
               <div class="mt-0.5">
                 <BaseBadge

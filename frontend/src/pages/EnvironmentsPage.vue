@@ -13,13 +13,14 @@ import BaseInput from '@/components/ui/BaseInput.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import FormField from '@/components/ui/FormField.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
+import { compareLocalized } from '@/i18n/format'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { Environment, EnvironmentPayload } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
 import { semanticIcons } from '@/utils/icons'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const tenant = useTenantStore()
 
 const { data, loading, error, reload } = useAsyncData(async () => {
@@ -36,7 +37,7 @@ const { data, loading, error, reload } = useAsyncData(async () => {
     if (aArchived !== bArchived) {
       return aArchived ? 1 : -1
     }
-    return a.name.localeCompare(b.name)
+    return compareLocalized(a.name, b.name, locale.value)
   })
 })
 

@@ -372,6 +372,11 @@
   }
 
   .menu-surface,
+  .tooltip-surface { z-index: var(--layer-popover); }
+  .toast-surface { z-index: var(--layer-toast); }
+  .dialog-surface { z-index: var(--layer-modal); }
+
+  .menu-surface,
   .tooltip-surface,
   .toast-surface { box-shadow: var(--shadow-2); }
   .dialog-surface { box-shadow: var(--shadow-3); }

@@ -7,6 +7,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 import BaseCard from '@/components/ui/BaseCard.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
+import { formatDateTime, formatUnit } from '@/i18n/format'
 import api from '@/services/api'
 import type { PlatformHealth } from '@/services/types'
 import { semanticIcons } from '@/utils/icons'
@@ -21,17 +22,12 @@ const { data, loading, error, reload } = useAsyncData(async () => {
 })
 
 function formatDate(value?: string | null): string {
-  if (!value) {
-    return '—'
-  }
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return value ? formatDateTime(value, locale.value) : '—'
+}
+
+function retentionUnit(value: number | undefined, unit: 'day' | 'hour'): string {
+  if (value === undefined) return '—'
+  return formatUnit(value, unit, locale.value, (key, named) => t(key, named))
 }
 
 function staleLabel(stale?: boolean): string {
@@ -155,7 +151,7 @@ function staleLabel(stale?: boolean): string {
               {{ $t('settings.retention.fields.payloadSnapshotsDays') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ data.retention.payload_snapshots_days }}
+              {{ retentionUnit(data.retention.payload_snapshots_days, 'day') }}
             </dd>
           </div>
           <div>
@@ -163,7 +159,7 @@ function staleLabel(stale?: boolean): string {
               {{ $t('settings.retention.fields.attemptMetadataDays') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ data.retention.attempt_metadata_days }}
+              {{ retentionUnit(data.retention.attempt_metadata_days, 'day') }}
             </dd>
           </div>
           <div>
@@ -171,7 +167,7 @@ function staleLabel(stale?: boolean): string {
               {{ $t('settings.retention.fields.runSummaryDays') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ data.retention.run_summary_days }}
+              {{ retentionUnit(data.retention.run_summary_days, 'day') }}
             </dd>
           </div>
           <div>
@@ -179,7 +175,7 @@ function staleLabel(stale?: boolean): string {
               {{ $t('settings.retention.fields.auditLogsDays') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ data.retention.audit_logs_days }}
+              {{ retentionUnit(data.retention.audit_logs_days, 'day') }}
             </dd>
           </div>
           <div>
@@ -187,7 +183,7 @@ function staleLabel(stale?: boolean): string {
               {{ $t('settings.retention.fields.apiIdempotencyHours') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ data.retention.api_idempotency_hours }}
+              {{ retentionUnit(data.retention.api_idempotency_hours, 'hour') }}
             </dd>
           </div>
           <div>
@@ -195,7 +191,7 @@ function staleLabel(stale?: boolean): string {
               {{ $t('settings.retention.fields.systemHeartbeatDays') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ data.retention.system_heartbeat_days }}
+              {{ retentionUnit(data.retention.system_heartbeat_days, 'day') }}
             </dd>
           </div>
           <div>
@@ -203,7 +199,7 @@ function staleLabel(stale?: boolean): string {
               {{ $t('settings.retention.fields.deadRunsDays') }}
             </dt>
             <dd class="mt-1 text-sm font-medium tabular-nums text-text">
-              {{ data.retention.dead_runs_days ?? '—' }}
+              {{ retentionUnit(data.retention.dead_runs_days, 'day') }}
             </dd>
           </div>
           </dl>

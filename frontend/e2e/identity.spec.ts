@@ -105,6 +105,7 @@ async function expectNoClippedText(page: Page): Promise<void> {
   const clipped = await page.evaluate(() =>
     Array.from(document.body.querySelectorAll<HTMLElement>('*'))
       .filter((element) => {
+        if (element.matches('.sr-only') || element.closest('[inert]')) return false
         if (element.matches('input, textarea, select')) {
           const rect = element.getBoundingClientRect()
           return rect.width <= 0 || rect.height <= 0 || element.clientWidth <= 0 || element.clientHeight <= 0
@@ -169,6 +170,8 @@ async function doubleVisibleTypography(page: Page) {
       }
     })
     const sampleAfter = getComputedStyle(sample)
+    const fontRatios = ratios.map((ratio) => ratio.fontSize).filter(Number.isFinite)
+    const lineRatios = ratios.map((ratio) => ratio.lineHeight).filter(Number.isFinite)
     const documentAfter = {
       clientWidth: document.documentElement.clientWidth,
       scrollWidth: document.documentElement.scrollWidth,
@@ -187,10 +190,10 @@ async function doubleVisibleTypography(page: Page) {
         fontSize: Number.parseFloat(sampleAfter.fontSize),
         lineHeight: Number.parseFloat(sampleAfter.lineHeight),
       },
-      minFontRatio: Math.min(...ratios.map((ratio) => ratio.fontSize)),
-      maxFontRatio: Math.max(...ratios.map((ratio) => ratio.fontSize)),
-      minLineRatio: Math.min(...ratios.map((ratio) => ratio.lineHeight)),
-      maxLineRatio: Math.max(...ratios.map((ratio) => ratio.lineHeight)),
+      minFontRatio: Math.min(...fontRatios),
+      maxFontRatio: Math.max(...fontRatios),
+      minLineRatio: Math.min(...lineRatios),
+      maxLineRatio: Math.max(...lineRatios),
       documentBefore,
       documentAfter,
     }
@@ -202,21 +205,20 @@ async function injectPseudoLocalization(page: Page, direction: 'ltr' | 'rtl'): P
     document.documentElement.lang = dir === 'rtl' ? 'ar-XB' : 'en-XA'
     document.documentElement.dir = dir
 
-    const shortTargets = document.querySelectorAll<HTMLElement>('label, button, a, option')
-    for (const target of shortTargets) {
-      if (target.children.length === 0 && target.textContent?.trim()) {
-        const value = target.textContent.trim()
-        target.textContent = dir === 'rtl' ? `\u0645\u062b\u0627\u0644 ${value} ${value}` : `[!! ${value} ${value} !!]`
-      }
-    }
-
-    const generalTargets = document.querySelectorAll<HTMLElement>('h1, p')
-    for (const target of generalTargets) {
-      if (target.children.length === 0 && target.textContent?.trim()) {
-        const value = target.textContent.trim()
-        const expansion = value.slice(0, Math.max(1, Math.ceil(value.length * 0.3)))
-        target.textContent = dir === 'rtl' ? `\u0646\u0635 \u0627\u062e\u062a\u0628\u0627\u0631\u064a ${value} ${expansion}` : `[${value} ${expansion}]`
-      }
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
+    const textNodes: Text[] = []
+    while (walker.nextNode()) textNodes.push(walker.currentNode as Text)
+    for (const node of textNodes) {
+      const parent = node.parentElement
+      const value = node.data.trim()
+      if (!parent || !value || parent.closest('script, style, code, pre, bdi, #identity-script-fixture')) continue
+      const short = Boolean(parent.closest('button, a, label, legend, option, th, [role="menuitem"], [role="tab"]'))
+      const expansion = short ? value : value.slice(0, Math.max(1, Math.ceil(value.length * 0.3)))
+      const expanded = short
+        ? (dir === 'rtl' ? `\u0645\u062b\u0627\u0644 ${value} ${value}` : `[!! ${value} ${value} !!]`)
+        : (dir === 'rtl' ? `\u0646\u0635 \u0627\u062e\u062a\u0628\u0627\u0631\u064a ${value} ${expansion}` : `[${value} ${expansion}]`)
+      node.data = node.data.replace(value, expanded)
+      parent.dataset.pseudoLocalized = short ? 'short-2x' : 'general-30'
     }
 
     const surface = document.querySelector<HTMLElement>('form')?.parentElement ?? document.body
@@ -259,16 +261,37 @@ async function injectPseudoLocalization(page: Page, direction: 'ltr' | 'rtl'): P
 async function auditInteractiveControls(page: Page, checkPairwiseOverlap = true) {
   const selector = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
   const controls = page.locator(selector)
-  const count = await controls.count()
   const geometry = await page.evaluate(({ selector, checkPairwiseOverlap }) => {
-    const elements = Array.from(document.querySelectorAll<HTMLElement>(selector)).filter((element) => {
+    const allElements = Array.from(document.querySelectorAll<HTMLElement>(selector))
+    const indexedElements = allElements
+      .map((element, sourceIndex) => ({ element, sourceIndex }))
+      .filter(({ element }) => {
+        const rect = element.getBoundingClientRect()
+        const style = getComputedStyle(element)
+        return !element.closest('[inert]')
+          && rect.width > 0
+          && rect.height > 0
+          && rect.right > 0
+          && rect.left < window.innerWidth
+          && style.visibility !== 'hidden'
+          && style.display !== 'none'
+      })
+    const elements = indexedElements.map(({ element }) => element)
+    const boxes = indexedElements.map(({ element, sourceIndex }, index) => {
       const rect = element.getBoundingClientRect()
-      const style = getComputedStyle(element)
-      return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none'
-    })
-    const boxes = elements.map((element, index) => {
-      const rect = element.getBoundingClientRect()
-      return { index, tag: element.tagName.toLowerCase(), x: rect.x, y: rect.y, width: rect.width, height: rect.height }
+      const documentedInlineOrDataException = Boolean(
+        element.closest('.table-scroll') || element.matches('[data-inline-action]'),
+      )
+      return {
+        index,
+        sourceIndex,
+        tag: element.tagName.toLowerCase(),
+        x: rect.x,
+        y: rect.y,
+        width: rect.width,
+        height: rect.height,
+        documentedInlineOrDataException,
+      }
     })
     const overlaps: Array<[number, number]> = []
     if (checkPairwiseOverlap) {
@@ -287,12 +310,16 @@ async function auditInteractiveControls(page: Page, checkPairwiseOverlap = true)
   }, { selector, checkPairwiseOverlap })
   expect(geometry.visibleCount).toBeGreaterThan(0)
   expect(geometry.boxes.every((box) => box.width > 0 && box.height > 0), JSON.stringify(geometry)).toBe(true)
+  expect(
+    geometry.boxes.every((box) => box.documentedInlineOrDataException || (box.width >= 44 && box.height >= 44)),
+    JSON.stringify(geometry),
+  ).toBe(true)
   expect(geometry.overlaps, JSON.stringify(geometry)).toEqual([])
 
   let focused = 0
-  for (let index = 0; index < count; index += 1) {
-    const control = controls.nth(index)
-    if (!await control.isVisible() || await control.isDisabled()) continue
+  for (const box of geometry.boxes) {
+    const control = controls.nth(box.sourceIndex)
+    if (await control.isDisabled()) continue
     await control.evaluate((element) => element.scrollIntoView({ block: 'center', inline: 'center' }))
     await control.focus()
     const reachability = await control.evaluate((element) => {
@@ -311,9 +338,9 @@ async function auditInteractiveControls(page: Page, checkPairwiseOverlap = true)
         unobscured: hit === element || element.contains(hit) || Boolean(hit?.contains(element)),
       }
     })
-    expect(reachability.active, JSON.stringify({ index, reachability })).toBe(true)
-    expect(reachability.inViewport, JSON.stringify({ index, reachability })).toBe(true)
-    expect(reachability.unobscured, JSON.stringify({ index, reachability })).toBe(true)
+    expect(reachability.active, JSON.stringify({ box, reachability })).toBe(true)
+    expect(reachability.inViewport, JSON.stringify({ box, reachability })).toBe(true)
+    expect(reachability.unobscured, JSON.stringify({ box, reachability })).toBe(true)
     focused += 1
   }
   expect(focused).toBe(geometry.visibleCount)
@@ -505,6 +532,70 @@ test('Chromium 200% page scale preserves form operability in the visual viewport
   await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: 1 })
 })
 
+test('Chromium 400% page scale from 1280 yields a complete 320px visual viewport', async ({ page, browserName }) => {
+  test.skip(browserName !== 'chromium', 'CDP page-scale evidence is Chromium-specific.')
+  await page.setViewportSize({ width: 1280, height: 900 })
+  await page.goto('/reset-password?token=e2e-token&email=e2e%40example.test', { waitUntil: 'networkidle' })
+  await injectPseudoLocalization(page, 'ltr')
+  const cdp = await page.context().newCDPSession(page)
+  await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: 4 })
+  await expect.poll(() => page.evaluate(() => window.visualViewport?.scale)).toBe(4)
+  const viewport = await page.evaluate(() => ({
+    scale: window.visualViewport?.scale,
+    width: window.visualViewport?.width,
+    height: window.visualViewport?.height,
+    layoutWidth: document.documentElement.clientWidth,
+  }))
+  expect(viewport).toMatchObject({ scale: 4, layoutWidth: 1280 })
+  expect(viewport.width).toBeCloseTo(320, 0)
+  const documentGeometry = await expectBoundedDocument(page)
+  await expectNoClippedText(page)
+  const controls = await auditInteractiveControls(page, false)
+  const password = page.locator('input[type="password"]').first()
+  await password.fill('Page-scale-400-operable-123!')
+  await expect(password).toHaveValue('Page-scale-400-operable-123!')
+  console.log('page-scale-400', JSON.stringify({ viewport, documentGeometry, controls }))
+  await page.screenshot({ path: resolve(evidenceDirectory, 'reset-page-scale-400.png') })
+  await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: 1 })
+})
+
+for (const width of [480, 768, 1024, 1280] as const) {
+  test(`anonymous surface supports exact 200% text resize at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/reset-password?token=e2e-token&email=e2e%40example.test', { waitUntil: 'networkidle' })
+    await injectPseudoLocalization(page, 'ltr')
+    const typography = await doubleVisibleTypography(page)
+    expect(typography.minFontRatio).toBeCloseTo(2, 5)
+    expect(typography.maxFontRatio).toBeCloseTo(2, 5)
+    await expectBoundedDocument(page)
+    await expectNoClippedText(page)
+    await auditInteractiveControls(page, false)
+    console.log(`text-resize-anonymous-${width}`, JSON.stringify(typography))
+  })
+}
+
+test('real form controls preserve composition and pasted scripts in Chromium', async ({ page }) => {
+  await page.goto('/reset-password?token=e2e-token&email=e2e%40example.test', { waitUntil: 'networkidle' })
+  const token = page.locator('#token')
+  await token.evaluate((element) => {
+    const input = element as HTMLInputElement
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '\u65e5' }))
+    input.value = '\u65e5\u672c'
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, data: '\u672c', isComposing: true }))
+  })
+  await expect(token).toHaveValue('\u65e5\u672c')
+  await token.evaluate((element) => {
+    element.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '\u65e5\u672c' }))
+  })
+  await expect(token).toHaveValue('\u65e5\u672c')
+
+  const email = page.locator('#email')
+  for (const value of ['\u0645\u0631\u062d\u0628\u0627@example.test', '\u0e2a\u0e27\u0e31\u0e2a\u0e14\u0e35@example.test', '\u0928\u092e\u0938\u094d\u0924\u0947@example.test']) {
+    await email.fill(value)
+    await expect(email).toHaveValue(value)
+  }
+})
+
 test('reduced motion and forced colors preserve visible control and focus contracts', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce', forcedColors: 'active' })
   await page.goto('/login', { waitUntil: 'networkidle' })
@@ -558,6 +649,13 @@ test('authenticated RTL shell restores drawer access and exposes keyboard table 
 
   const sidebar = page.locator('#app-sidebar')
   await expect(sidebar).toHaveAttribute('inert', '')
+  const topbarToggle = page.locator('button[aria-controls="app-topbar-secondary"]')
+  await expect(topbarToggle).toBeVisible()
+  await expect(page.locator('#app-topbar-secondary')).toBeHidden()
+  await topbarToggle.click()
+  await expect(page.locator('#app-topbar-secondary')).toBeVisible()
+  await topbarToggle.click()
+  await expect(page.locator('#app-topbar-secondary')).toBeHidden()
   const open = page.locator('button[aria-controls="app-sidebar"]')
   await open.focus()
   await expect(open).toBeFocused()
@@ -565,6 +663,44 @@ test('authenticated RTL shell restores drawer access and exposes keyboard table 
   await expect(sidebar).not.toHaveAttribute('inert', '')
   await expect(sidebar).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
   await expect(sidebar).toHaveCSS('right', '0px')
+  const layers = await page.evaluate(() => {
+    const root = getComputedStyle(document.documentElement)
+    const value = (name: string) => Number.parseInt(root.getPropertyValue(name), 10)
+    return {
+      declared: {
+        header: value('--layer-header'), sidebar: value('--layer-sidebar'),
+        popover: value('--layer-popover'), toast: value('--layer-toast'),
+        modal: value('--layer-modal'), blocking: value('--layer-blocking'),
+      },
+      rendered: {
+        header: Number.parseInt(getComputedStyle(document.querySelector<HTMLElement>('.app-header')!).zIndex, 10),
+        sidebar: Number.parseInt(getComputedStyle(document.querySelector<HTMLElement>('.app-sidebar')!).zIndex, 10),
+        scrim: Number.parseInt(getComputedStyle(document.querySelector<HTMLElement>('.app-scrim')!).zIndex, 10),
+        skip: Number.parseInt(getComputedStyle(document.querySelector<HTMLElement>('.skip-link')!).zIndex, 10),
+      },
+    }
+  })
+  expect(layers).toEqual({
+    declared: { header: 10, sidebar: 20, popover: 30, toast: 40, modal: 50, blocking: 60 },
+    rendered: { header: 10, sidebar: 20, scrim: 20, skip: 60 },
+  })
+  const selectedColors = await page.locator('[aria-current="page"]').evaluate((element) => {
+    const resolve = (token: string) => {
+      const probe = document.createElement('span')
+      probe.style.backgroundColor = `var(${token})`
+      document.body.append(probe)
+      const color = getComputedStyle(probe).backgroundColor
+      probe.remove()
+      return color
+    }
+    return {
+      actual: getComputedStyle(element).backgroundColor,
+      selected: resolve('--color-bg-selected'),
+      hover: resolve('--color-bg-hover'),
+    }
+  })
+  expect(selectedColors.actual).toBe(selectedColors.selected)
+  expect(selectedColors.selected).not.toBe(selectedColors.hover)
   const sidebarBox = await sidebar.boundingBox()
   expect(sidebarBox).not.toBeNull()
   expect(sidebarBox!.x).toBeGreaterThanOrEqual(-1)
@@ -623,4 +759,51 @@ test('authenticated representative app passes axe contrast in light and dark the
   expect(diagnostics.consoleErrors).toEqual([])
   expect(diagnostics.requestFailures).toEqual([])
   expect(diagnostics.badScriptResponses).toEqual([])
+})
+
+test('authenticated surface covers text-resize widths, shipped bidi, and directional controls', async ({ page }, testInfo) => {
+  testInfo.skip(!e2eCredentialsConfigured(), 'Set E2E_EMAIL and E2E_PASSWORD for authenticated identity proof.')
+  test.setTimeout(120_000)
+
+  const fixture = await seedTaskAndRunFixtures(String(testInfo.project.use.baseURL ?? 'http://localhost:8080'))
+  expect(fixture).not.toBeNull()
+  await loginAsE2EOperator(page)
+
+  for (const width of [480, 768, 1024, 1280] as const) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto(`/tasks/${fixture!.taskId}`, { waitUntil: 'networkidle' })
+
+    const shippedBidi = page.locator('bdi[dir="auto"]')
+    expect(await shippedBidi.count()).toBeGreaterThan(1)
+    await expect(page.locator('.action-link .app-icon--directional').first()).toBeVisible()
+    const email = page.locator('#app-sidebar bdi[dir="auto"]').first()
+    expect(await email.textContent()).toBe(process.env.E2E_EMAIL)
+    const sidebar = page.locator('#app-sidebar')
+    if (width < 1024) {
+      await expect(sidebar).toHaveAttribute('inert', '')
+      await expect(page.locator('.app-nav-toggle')).toBeVisible()
+    } else {
+      await expect(sidebar).not.toHaveAttribute('inert', '')
+      if (width === 1024) {
+        await page.locator('.app-sidebar-close').click()
+        await expect(sidebar).toHaveAttribute('inert', '')
+        const restore = page.locator('.app-nav-toggle')
+        await expect(restore).toBeVisible()
+        await expect(restore).toHaveAttribute('aria-label', /restore|restaurar/i)
+        await restore.click()
+        await expect(sidebar).not.toHaveAttribute('inert', '')
+      }
+    }
+
+    await injectPseudoLocalization(page, width < 1024 ? 'rtl' : 'ltr')
+    const typography = await doubleVisibleTypography(page)
+    expect(typography.minFontRatio).toBeCloseTo(2, 5)
+    expect(typography.maxFontRatio).toBeCloseTo(2, 5)
+    expect(typography.minLineRatio).toBeCloseTo(2, 5)
+    expect(typography.maxLineRatio).toBeCloseTo(2, 5)
+    await expectBoundedDocument(page)
+    await expectNoClippedText(page)
+    const controls = await auditInteractiveControls(page, false)
+    console.log(`text-resize-authenticated-${width}`, JSON.stringify({ typography, controls }))
+  }
 })

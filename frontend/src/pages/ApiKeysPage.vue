@@ -13,6 +13,7 @@ import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
 import CodeBlock from '@/components/ui/CodeBlock.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import { formatDateTime } from '@/i18n/format'
 import FormField from '@/components/ui/FormField.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
@@ -108,17 +109,7 @@ function keyStatus(key: ApiKey): 'active' | 'expired' | 'revoked' {
 }
 
 function formatDate(value?: string | null): string {
-  if (!value) {
-    return t('settings.apiKeys.fields.never')
-  }
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return value ? formatDateTime(value, locale.value) : t('settings.apiKeys.fields.never')
 }
 
 function environmentLabel(environmentId?: string | null): string {

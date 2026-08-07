@@ -1,14 +1,19 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import BidiText from '@/components/ui/BidiText.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
+import { formatDateTime } from '@/i18n/format'
 import api from '@/services/api'
 import type { AuditLog } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
 
 const tenant = useTenantStore()
+const { locale } = useI18n()
 
 const { data, loading, error, reload } = useAsyncData(async () => {
   if (!tenant.currentTenantId) {
@@ -22,17 +27,7 @@ const { data, loading, error, reload } = useAsyncData(async () => {
 })
 
 function formatWhen(value?: string | null): string {
-  if (!value) {
-    return '—'
-  }
-  try {
-    return new Intl.DateTimeFormat(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'medium',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return value ? formatDateTime(value, locale.value, undefined, 'medium') : '—'
 }
 </script>
 
@@ -75,13 +70,13 @@ function formatWhen(value?: string | null): string {
             <td class="px-4 py-3 text-sm font-medium text-text">{{ log.action }}</td>
             <td class="px-4 py-3 text-sm text-muted">
               {{ log.resource_type }}
-              <span v-if="log.resource_id"> · {{ log.resource_id }}</span>
+              <span v-if="log.resource_id"> · <BidiText :value="log.resource_id" /></span>
             </td>
             <td class="px-4 py-3 text-sm text-muted">
-              {{ log.actor?.email ?? '—' }}
+              <BidiText :value="log.actor?.email ?? '—'" />
             </td>
             <td class="px-4 py-3 font-mono text-xs text-muted">
-              {{ log.request_id ?? '—' }}
+              <BidiText :value="log.request_id ?? '—'" />
             </td>
           </tr>
         </tbody>

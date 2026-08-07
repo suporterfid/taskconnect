@@ -1,12 +1,16 @@
 <script setup lang="ts">
+import { ArrowLeft } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import AppIcon from '@/components/AppIcon.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
+import BidiText from '@/components/ui/BidiText.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
+import { formatDateTime } from '@/i18n/format'
 import api from '@/services/api'
 import type { PipelineInstance } from '@/services/types'
 import { useTenantStore } from '@/stores/tenant'
@@ -27,17 +31,7 @@ const { data, loading, error, reload } = useAsyncData(async () => {
 })
 
 function formatDate(value?: string | null): string {
-  if (!value) {
-    return '—'
-  }
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return value ? formatDateTime(value, locale.value) : '—'
 }
 
 function statusLabel(status: string): string {
@@ -49,7 +43,8 @@ function statusLabel(status: string): string {
   <div data-testid="pipeline-detail-page">
     <div class="mb-4">
       <RouterLink to="/pipelines" class="action-link">
-        ← {{ $t('common.back') }}
+        <AppIcon :icon="ArrowLeft" :size="16" :directional="true" />
+        {{ $t('common.back') }}
       </RouterLink>
     </div>
 
@@ -79,7 +74,7 @@ function statusLabel(status: string): string {
         </div>
         <div>
           <dt class="text-sm text-muted">{{ $t('tasks.fields.workspaceId') }}</dt>
-          <dd class="mt-1 font-mono text-sm text-text">{{ data.workspace_id || '—' }}</dd>
+          <dd class="mt-1 font-mono text-sm text-text"><BidiText :value="data.workspace_id || '—'" /></dd>
         </div>
         <div>
           <dt class="text-sm text-muted">{{ $t('common.createdAt') }}</dt>
@@ -114,13 +109,13 @@ function statusLabel(status: string): string {
               </td>
               <td class="px-4 py-3 text-sm">
                 <RouterLink v-if="node.task_id" :to="`/tasks/${node.task_id}`" class="link text-action-text">
-                  {{ node.task_id }}
+                  <BidiText :value="node.task_id" />
                 </RouterLink>
                 <span v-else class="text-muted">—</span>
               </td>
               <td class="px-4 py-3 text-sm">
                 <RouterLink v-if="node.task_run_id" :to="`/runs/${node.task_run_id}`" class="link text-action-text">
-                  {{ node.task_run_id }}
+                  <BidiText :value="node.task_run_id" />
                 </RouterLink>
                 <span v-else class="text-muted">—</span>
               </td>

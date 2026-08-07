@@ -14,6 +14,7 @@ import CodeBlock from '@/components/ui/CodeBlock.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import FormField from '@/components/ui/FormField.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
+import { formatDateTime } from '@/i18n/format'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { Secret } from '@/services/types'
@@ -51,17 +52,7 @@ const formTitle = computed(() =>
 )
 
 function formatDate(value?: string | null): string {
-  if (!value) {
-    return '—'
-  }
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return value ? formatDateTime(value, locale.value) : '—'
 }
 
 function openCreate(): void {

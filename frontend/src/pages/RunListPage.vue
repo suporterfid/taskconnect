@@ -9,7 +9,9 @@ import PageHeader from '@/components/PageHeader.vue'
 import BaseAlert from '@/components/ui/BaseAlert.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import BidiText from '@/components/ui/BidiText.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
+import { formatDateTime } from '@/i18n/format'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { RunState, TaskRun } from '@/services/types'
@@ -58,17 +60,7 @@ watch([taskIdFilter, runStateFilter], () => {
 const filtered = computed(() => data.value ?? [])
 
 function formatDate(value?: string | null): string {
-  if (!value) {
-    return '—'
-  }
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return value ? formatDateTime(value, locale.value) : '—'
 }
 
 function displayTime(run: TaskRun): string {
@@ -171,10 +163,10 @@ async function onRetry(run: TaskRun): Promise<void> {
         </thead>
         <tbody class="divide-y divide-border bg-surface">
           <tr v-for="run in filtered" :key="run.id">
-            <td class="px-4 py-3 font-mono text-sm text-text">{{ run.id }}</td>
+            <td class="px-4 py-3 font-mono text-sm text-text"><BidiText :value="run.id" /></td>
             <td class="px-4 py-3 text-sm">
               <RouterLink v-if="run.task_id" :to="`/tasks/${run.task_id}`" class="link text-action-text">
-                {{ run.task_id }}
+                <BidiText :value="run.task_id" />
               </RouterLink>
               <span v-else class="text-muted">—</span>
             </td>

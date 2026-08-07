@@ -9,6 +9,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import BaseAlert from '@/components/ui/BaseAlert.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import BidiText from '@/components/ui/BidiText.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
@@ -134,7 +135,7 @@ async function onTest(profile: EndpointProfile): Promise<void> {
               </span>
             </td>
             <td class="max-w-sm whitespace-normal break-all px-4 py-3 font-mono text-sm text-muted">
-              {{ profile.base_url }}
+                  <BidiText :value="profile.base_url" />
             </td>
             <td class="px-4 py-3 text-sm">
               <BaseBadge

@@ -18,6 +18,11 @@
   "table": {
     "scrollRegion": "Tabela de dados com rolagem"
   },
+  "units": {
+    "day": "{formattedCount} dia | {formattedCount} dias",
+    "hour": "{formattedCount} hora | {formattedCount} horas",
+    "minute": "{formattedCount} minuto | {formattedCount} minutos"
+  },
   "name": "Nome",
   "description": "Descrição",
   "createdAt": "Criado em",
@@ -61,7 +66,12 @@
   "navMain": "Principal",
   "navToggle": {
     "open": "Abrir navegação",
-    "close": "Fechar navegação"
+    "close": "Fechar navegação",
+    "restore": "Restaurar navegação"
+  },
+  "topbarToggle": {
+    "open": "Mostrar controles do workspace",
+    "close": "Ocultar controles do workspace"
   },
   "errors": {
     "requestFailed": "Falha na requisição",

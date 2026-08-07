@@ -1,15 +1,19 @@
 <script setup lang="ts">
+import { ArrowLeft } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
+import AppIcon from '@/components/AppIcon.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import BaseAlert from '@/components/ui/BaseAlert.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import BidiText from '@/components/ui/BidiText.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
+import { formatDateTime } from '@/i18n/format'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { Task, TaskRun } from '@/services/types'
@@ -43,17 +47,7 @@ const scheduleLabel = computed(() => {
 })
 
 function formatDate(value?: string | null): string {
-  if (!value) {
-    return '—'
-  }
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return value ? formatDateTime(value, locale.value) : '—'
 }
 
 async function runAction(
@@ -139,7 +133,8 @@ async function onArchive(): Promise<void> {
   <div>
     <div class="mb-4">
       <RouterLink to="/tasks" class="action-link">
-        ← {{ $t('common.back') }}
+        <AppIcon :icon="ArrowLeft" :size="16" :directional="true" />
+        {{ $t('common.back') }}
       </RouterLink>
     </div>
 
@@ -171,7 +166,7 @@ async function onArchive(): Promise<void> {
         </div>
         <div>
           <dt class="text-sm text-muted">{{ $t('tasks.fields.workspaceId') }}</dt>
-          <dd class="mt-1 font-mono text-sm text-text">{{ data.workspace_id || '—' }}</dd>
+          <dd class="mt-1 font-mono text-sm text-text"><BidiText :value="data.workspace_id || '—'" /></dd>
         </div>
         <div>
           <dt class="text-sm text-muted">{{ $t('tasks.fields.taskType') }}</dt>
@@ -221,7 +216,7 @@ async function onArchive(): Promise<void> {
         </div>
         <div>
           <dt class="text-sm text-muted">{{ $t('tasks.fields.url') }}</dt>
-          <dd class="mt-1 break-all font-mono text-sm text-text">{{ data.url_or_path || '—' }}</dd>
+          <dd class="mt-1 break-all font-mono text-sm text-text"><BidiText :value="data.url_or_path || '—'" /></dd>
         </div>
         <div v-if="data.query && Object.keys(data.query).length">
           <dt class="text-sm text-muted">{{ $t('tasks.fields.query') }}</dt>

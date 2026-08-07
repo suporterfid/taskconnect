@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { ArrowLeft } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import AppIcon from '@/components/AppIcon.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import LoadingState from '@/components/LoadingState.vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -10,8 +12,10 @@ import BaseAlert from '@/components/ui/BaseAlert.vue'
 import BaseBadge from '@/components/ui/BaseBadge.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import CodeBlock from '@/components/ui/CodeBlock.vue'
+import BidiText from '@/components/ui/BidiText.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import { useAsyncData } from '@/composables/useAsyncData'
+import { formatDateTime } from '@/i18n/format'
 import { ApiError } from '@/services/api'
 import api from '@/services/api'
 import type { TaskRun, TaskRunAttempt } from '@/services/types'
@@ -75,17 +79,7 @@ const terminalExplanation = computed(() => {
 })
 
 function formatDate(value?: string | null): string {
-  if (!value) {
-    return '—'
-  }
-  try {
-    return new Intl.DateTimeFormat(locale.value, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value))
-  } catch {
-    return value
-  }
+  return value ? formatDateTime(value, locale.value) : '—'
 }
 
 function formatJson(value: unknown): string {
@@ -135,7 +129,8 @@ async function onRetry(): Promise<void> {
   <div>
     <div class="mb-4">
       <RouterLink to="/runs" class="action-link">
-        ← {{ $t('common.back') }}
+        <AppIcon :icon="ArrowLeft" :size="16" :directional="true" />
+        {{ $t('common.back') }}
       </RouterLink>
     </div>
 
@@ -168,7 +163,7 @@ async function onRetry(): Promise<void> {
           <dt class="text-sm text-muted">{{ $t('runs.fields.task') }}</dt>
           <dd class="mt-1 text-sm">
             <RouterLink v-if="data.run.task_id" :to="`/tasks/${data.run.task_id}`" class="link text-action-text">
-              {{ data.run.task_id }}
+              <BidiText :value="data.run.task_id" />
             </RouterLink>
             <span v-else class="text-muted">—</span>
           </dd>
@@ -188,7 +183,7 @@ async function onRetry(): Promise<void> {
         <div>
           <dt class="text-sm text-muted">{{ $t('runs.detail.idempotencyKey') }}</dt>
           <dd class="mt-1 font-mono text-sm text-text" :title="data.run.idempotency_key ?? undefined">
-            {{ maskIdempotencyKey(data.run.idempotency_key) }}
+            <BidiText :value="maskIdempotencyKey(data.run.idempotency_key)" />
           </dd>
         </div>
         <div>
@@ -258,7 +253,7 @@ async function onRetry(): Promise<void> {
             <div class="sm:col-span-2">
               <dt class="text-muted">{{ $t('runs.detail.requestUrl') }}</dt>
               <dd class="mt-1 break-all font-mono text-xs text-text">
-                {{ attempt.request_url_redacted || '—' }}
+                <BidiText :value="attempt.request_url_redacted || '—'" />
               </dd>
             </div>
             <div>

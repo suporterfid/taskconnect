@@ -18,6 +18,11 @@
   "table": {
     "scrollRegion": "Scrollable data table"
   },
+  "units": {
+    "day": "{formattedCount} day | {formattedCount} days",
+    "hour": "{formattedCount} hour | {formattedCount} hours",
+    "minute": "{formattedCount} minute | {formattedCount} minutes"
+  },
   "name": "Name",
   "description": "Description",
   "createdAt": "Created",
@@ -61,7 +66,12 @@
   "navMain": "Main",
   "navToggle": {
     "open": "Open navigation",
-    "close": "Close navigation"
+    "close": "Close navigation",
+    "restore": "Restore navigation"
+  },
+  "topbarToggle": {
+    "open": "Show workspace controls",
+    "close": "Hide workspace controls"
   },
   "errors": {
     "requestFailed": "Request failed",
