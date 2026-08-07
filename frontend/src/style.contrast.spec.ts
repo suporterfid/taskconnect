@@ -4,126 +4,144 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
-// Codifies docs/visual-identity-spec.md §3.4: every documented foreground/background
-// pair must keep its measured contrast ratio. Reads the actual `--color-*` custom
-// properties out of style.css (not a hardcoded copy) so an edit to a token's palette
-// value breaks this test immediately, without needing a browser — see #98.
-
 const styleCssPath = join(dirname(fileURLToPath(import.meta.url)), 'style.css')
-const styleCss = readFileSync(styleCssPath, 'utf8')
+const frontendStyleCss = readFileSync(styleCssPath, 'utf8')
+const resourceStyleCss = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'resources', 'css', 'app.css'), 'utf8')
 
-function extractColorTokens(css: string): Record<string, string> {
-  const raw: Record<string, string> = {}
-  const declRe = /(--color-[\w-]+):\s*([^;]+);/g
-  for (const match of css.matchAll(declRe)) {
-    raw[match[1]] = match[2].trim()
-  }
+const canonicalTokens = {
+  light: {
+    '--color-bg-canvas': '#FFFFFF',
+    '--color-bg-surface': '#F7F6F3',
+    '--color-bg-elevated': '#FFFFFF',
+    '--color-bg-hover': '#EFEDEA',
+    '--color-bg-selected': '#E7F0FA',
+    '--color-text-primary': '#252525',
+    '--color-text-secondary': '#5F5F5F',
+    '--color-text-disabled': '#929292',
+    '--color-text-inverse': '#FFFFFF',
+    '--color-text-link': '#0F5EAB',
+    '--color-border-default': '#D9D7D3',
+    '--color-border-strong': '#8A8882',
+    '--color-action-primary': '#1A6DC1',
+    '--color-action-primary-hover': '#14599E',
+    '--color-action-primary-active': '#104B86',
+    '--color-action-primary-content': '#FFFFFF',
+    '--color-action-primary-subtle': '#E7F0FA',
+    '--color-focus-ring': '#1A6DC1',
+    '--color-success-fg': '#126B3A',
+    '--color-success-bg': '#F1FAF4',
+    '--color-success-border': '#7CCB98',
+    '--color-warning-fg': '#7A4A00',
+    '--color-warning-bg': '#FFF7E6',
+    '--color-warning-border': '#F0B35A',
+    '--color-danger-fg': '#B42318',
+    '--color-danger-bg': '#FFF1F0',
+    '--color-danger-border': '#F29A93',
+    '--color-info-fg': '#0F5EAB',
+    '--color-info-bg': '#EDF5FE',
+    '--color-info-border': '#85BCEB',
+  },
+  dark: {
+    '--color-bg-canvas': '#191919',
+    '--color-bg-surface': '#202020',
+    '--color-bg-elevated': '#252525',
+    '--color-bg-hover': '#2C2C2C',
+    '--color-bg-selected': '#123B60',
+    '--color-text-primary': '#F1F1EF',
+    '--color-text-secondary': '#C6C6C2',
+    '--color-text-disabled': '#888884',
+    '--color-text-inverse': '#191919',
+    '--color-text-link': '#79B8E8',
+    '--color-border-default': '#4A4A4A',
+    '--color-border-strong': '#6E6E6E',
+    '--color-action-primary': '#529CCA',
+    '--color-action-primary-hover': '#70B4DE',
+    '--color-action-primary-active': '#3E83B5',
+    '--color-action-primary-content': '#111111',
+    '--color-action-primary-subtle': '#173755',
+    '--color-focus-ring': '#79B8E8',
+    '--color-success-fg': '#7CDA9A',
+    '--color-success-bg': '#13291C',
+    '--color-success-border': '#34794C',
+    '--color-warning-fg': '#F5C775',
+    '--color-warning-bg': '#33250D',
+    '--color-warning-border': '#8D6418',
+    '--color-danger-fg': '#F4A49E',
+    '--color-danger-bg': '#381B1B',
+    '--color-danger-border': '#8E4540',
+    '--color-info-fg': '#9DCCF2',
+    '--color-info-bg': '#102B45',
+    '--color-info-border': '#3D78AA',
+  },
+} as const
 
-  const resolved: Record<string, string> = {}
-  function resolve(name: string, seen: Set<string> = new Set()): string {
-    if (resolved[name]) {
-      return resolved[name]
-    }
-    if (seen.has(name)) {
-      throw new Error(`circular --color token reference: ${name}`)
-    }
-    const value = raw[name]
-    if (!value) {
-      throw new Error(`unknown --color token: ${name}`)
-    }
-    const varMatch = value.match(/^var\((--color-[\w-]+)\)$/)
-    const result = varMatch ? resolve(varMatch[1], new Set(seen).add(name)) : value
-    resolved[name] = result
-    return result
-  }
+type Theme = keyof typeof canonicalTokens
 
-  for (const name of Object.keys(raw)) {
-    resolve(name)
-  }
-  return resolved
+function themeBlock(css: string, theme: Theme): string {
+  const selector = theme === 'light' ? /:root\s*,\s*\[data-theme=['"]light['"]\]\s*\{([\s\S]*?)\}/ : /\[data-theme=['"]dark['"]\]\s*\{([\s\S]*?)\}/
+  const match = css.match(selector)
+  if (!match) throw new Error(`missing ${theme} theme block`)
+  return match[1]
 }
 
-const tokens = extractColorTokens(styleCss)
-
-function parseColor(value: string): [number, number, number] {
-  const hex = value.match(/^#([0-9a-fA-F]{6})$/)
-  if (hex) {
-    const int = parseInt(hex[1], 16)
-    return [(int >> 16) & 255, (int >> 8) & 255, int & 255]
-  }
-  const rgb = value.match(/^rgb\((\d+)\s+(\d+)\s+(\d+)/)
-  if (rgb) {
-    return [Number(rgb[1]), Number(rgb[2]), Number(rgb[3])]
-  }
-  throw new Error(`unsupported color format: ${value}`)
+function extractTokens(block: string): Record<string, string> {
+  return Object.fromEntries(
+    [...block.matchAll(/(--color-[\w-]+):\s*(#[0-9a-fA-F]{6});/g)].map((match) => [match[1], match[2].toUpperCase()]),
+  )
 }
 
-// WCAG 2.x relative luminance + contrast ratio (https://www.w3.org/TR/WCAG21/#dfn-relative-luminance).
-function relativeLuminance([r, g, b]: [number, number, number]): number {
-  const channel = (c: number) => {
-    const s = c / 255
-    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4
-  }
-  const [rl, gl, bl] = [channel(r), channel(g), channel(b)]
-  return 0.2126 * rl + 0.7152 * gl + 0.0722 * bl
+function parseHex(value: string): [number, number, number] {
+  const int = Number.parseInt(value.slice(1), 16)
+  return [(int >> 16) & 255, (int >> 8) & 255, int & 255]
 }
 
-function contrastRatio(a: string, b: string): number {
-  const la = relativeLuminance(parseColor(tokens[a] ?? a))
-  const lb = relativeLuminance(parseColor(tokens[b] ?? b))
-  const lighter = Math.max(la, lb)
-  const darker = Math.min(la, lb)
+function relativeLuminance(value: string): number {
+  const [r, g, b] = parseHex(value).map((channel) => {
+    const srgb = channel / 255
+    return srgb <= 0.04045 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+
+function contrastRatio(foreground: string, background: string): number {
+  const foregroundLuminance = relativeLuminance(foreground)
+  const backgroundLuminance = relativeLuminance(background)
+  const lighter = Math.max(foregroundLuminance, backgroundLuminance)
+  const darker = Math.min(foregroundLuminance, backgroundLuminance)
   return (lighter + 0.05) / (darker + 0.05)
 }
 
-const NORMAL_TEXT_MIN = 4.5
+const textPairs = [
+  ['--color-text-primary', '--color-bg-canvas'],
+  ['--color-text-primary', '--color-bg-surface'],
+  ['--color-text-secondary', '--color-bg-canvas'],
+  ['--color-text-secondary', '--color-bg-surface'],
+  ['--color-text-link', '--color-bg-canvas'],
+  ['--color-text-link', '--color-bg-surface'],
+  ['--color-action-primary-content', '--color-action-primary'],
+  ['--color-success-fg', '--color-success-bg'],
+  ['--color-warning-fg', '--color-warning-bg'],
+  ['--color-danger-fg', '--color-danger-bg'],
+  ['--color-info-fg', '--color-info-bg'],
+] as const
 
-// Each pair is a real foreground/background combination shipped in the app today.
-// `label` documents where it's used so a failure points straight at the component.
-const pairs: Array<{ label: string; fg: string; bg: string; min: number }> = [
-  { label: 'body text on canvas', fg: '--color-text', bg: '--color-canvas', min: NORMAL_TEXT_MIN },
-  { label: 'body text on surface (cards)', fg: '--color-text', bg: '--color-surface', min: NORMAL_TEXT_MIN },
-  {
-    label: 'body text on surface-emphasis (active nav / bulk banners)',
-    fg: '--color-text',
-    bg: '--color-surface-emphasis',
-    min: NORMAL_TEXT_MIN,
-  },
-  { label: 'muted text on canvas', fg: '--color-text-muted', bg: '--color-canvas', min: NORMAL_TEXT_MIN },
-  { label: 'muted text on surface', fg: '--color-text-muted', bg: '--color-surface', min: NORMAL_TEXT_MIN },
-  {
-    label: 'muted text on surface-emphasis',
-    fg: '--color-text-muted',
-    bg: '--color-surface-emphasis',
-    min: NORMAL_TEXT_MIN,
-  },
-  {
-    label: 'white text on BaseButton primary fill',
-    fg: '--color-neutral-0',
-    bg: '--color-action',
-    min: NORMAL_TEXT_MIN,
-  },
-  { label: 'action text (links, BaseButton tertiary) on canvas', fg: '--color-action-text', bg: '--color-canvas', min: NORMAL_TEXT_MIN },
-  { label: 'action text (links, BaseButton tertiary) on surface', fg: '--color-action-text', bg: '--color-surface', min: NORMAL_TEXT_MIN },
-  {
-    label: 'white text on BaseButton danger fill',
-    fg: '--color-neutral-0',
-    bg: '--color-danger-strong',
-    min: NORMAL_TEXT_MIN,
-  },
-  { label: 'success tone on canvas', fg: '--color-success', bg: '--color-canvas', min: NORMAL_TEXT_MIN },
-  { label: 'success tone on surface', fg: '--color-success', bg: '--color-surface', min: NORMAL_TEXT_MIN },
-  { label: 'warning tone on canvas', fg: '--color-warning', bg: '--color-canvas', min: NORMAL_TEXT_MIN },
-  { label: 'warning tone on surface', fg: '--color-warning', bg: '--color-surface', min: NORMAL_TEXT_MIN },
-  { label: 'danger tone on canvas', fg: '--color-danger', bg: '--color-canvas', min: NORMAL_TEXT_MIN },
-  { label: 'danger tone on surface', fg: '--color-danger', bg: '--color-surface', min: NORMAL_TEXT_MIN },
-  { label: 'info tone on canvas', fg: '--color-info', bg: '--color-canvas', min: NORMAL_TEXT_MIN },
-  { label: 'info tone on surface', fg: '--color-info', bg: '--color-surface', min: NORMAL_TEXT_MIN },
-]
+describe.each(['light', 'dark'] as const)('%s semantic color contract', (theme) => {
+  const actual = extractTokens(themeBlock(frontendStyleCss, theme))
 
-describe('§3.4 token contrast table', () => {
-  it.each(pairs)('$label meets $min:1', ({ fg, bg, min }) => {
-    const ratio = contrastRatio(fg, bg)
-    expect(ratio).toBeGreaterThanOrEqual(min)
+  it('defines the complete canonical 30-token matrix with exact values', () => {
+    expect(actual).toEqual(canonicalTokens[theme])
+  })
+
+  it('keeps the Laravel CSS entry aligned with the frontend contract', () => {
+    expect(extractTokens(themeBlock(resourceStyleCss, theme))).toEqual(canonicalTokens[theme])
+  })
+
+  it.each(textPairs)('%s on %s meets 4.5:1', (foreground, background) => {
+    expect(contrastRatio(actual[foreground], actual[background])).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('provides a 3:1 strong control boundary and focus indicator', () => {
+    expect(contrastRatio(actual['--color-border-strong'], actual['--color-bg-canvas'])).toBeGreaterThanOrEqual(3)
+    expect(contrastRatio(actual['--color-focus-ring'], actual['--color-bg-canvas'])).toBeGreaterThanOrEqual(3)
   })
 })

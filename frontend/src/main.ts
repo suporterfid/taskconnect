@@ -4,7 +4,10 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import i18n, { updateDocumentLang } from './i18n'
 import router from './router'
+import { initializeTheme } from './theme'
 import './style.css'
+
+initializeTheme()
 
 const app = createApp(App)
 

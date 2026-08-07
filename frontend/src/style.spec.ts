@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -39,5 +39,56 @@ describe('semantic color token guard', () => {
     }
 
     expect(actual).toEqual(legacyAllowlist)
+  })
+})
+
+describe('visual identity foundation', () => {
+  const frontendRoot = join(sourceRoot, '..')
+  const styleCss = readFileSync(join(sourceRoot, 'style.css'), 'utf8')
+
+  it('loads the external no-flash bootstrap before application rendering in both shells', () => {
+    const viteShell = readFileSync(join(frontendRoot, 'index.html'), 'utf8')
+    const bladeShell = readFileSync(join(frontendRoot, '..', 'resources', 'views', 'app.blade.php'), 'utf8')
+
+    expect(viteShell).toContain('<script vite-ignore src="%BASE_URL%theme-init.js"></script>')
+    expect(viteShell.indexOf('theme-init.js')).toBeLessThan(viteShell.indexOf('/src/main.ts'))
+    expect(bladeShell).toContain("asset('build/theme-init.js')")
+    expect(bladeShell.indexOf('theme-init.js')).toBeLessThan(bladeShell.indexOf('@foreach ($cssFiles as $css)'))
+  })
+
+  it('self-hosts licensed Inter and declares multilingual editorial and code fallbacks', () => {
+    expect(existsSync(join(sourceRoot, 'assets', 'fonts', 'inter', 'inter-4.1-variable.woff2'))).toBe(true)
+    expect(existsSync(join(sourceRoot, 'assets', 'fonts', 'inter', 'INTER-LICENSE.txt'))).toBe(true)
+    expect(styleCss).toContain('font-family: "Inter"')
+    expect(styleCss).toContain('font-display: swap')
+    expect(styleCss).toContain('"Source Serif 4"')
+    expect(styleCss).toContain('"IBM Plex Mono"')
+    expect(styleCss).toContain('"Noto Sans Arabic"')
+    expect(styleCss).toContain('"Noto Sans Devanagari"')
+  })
+
+  it('defines forced-colors and reduced-motion behavior through semantic focus rules', () => {
+    expect(styleCss).toMatch(/@media\s*\(forced-colors:\s*active\)/)
+    expect(styleCss).toContain('forced-color-adjust: auto')
+    expect(styleCss).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)/)
+    expect(styleCss).toContain('outline: 2px solid var(--color-focus-ring)')
+  })
+
+  it('keeps the complete non-color foundation available to the Laravel CSS entry', () => {
+    const resourceCss = readFileSync(join(frontendRoot, '..', 'resources', 'css', 'app.css'), 'utf8')
+    const requiredContracts = [
+      '--font-editorial:',
+      '--font-code:',
+      '--space-16: 64px',
+      '--control-target-min-size: 44px',
+      '--icon-standalone-size: 24px',
+      '--text-display-title: 44px',
+      '--leading-display-title: 52px',
+      '--shadow-0: none',
+      '--ease-exit: cubic-bezier(0.4, 0, 1, 1)',
+      '--layer-blocking: 60',
+    ]
+
+    for (const contract of requiredContracts) expect(resourceCss).toContain(contract)
   })
 })

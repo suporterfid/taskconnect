@@ -15,18 +15,18 @@ if ($env:TC_CI -eq '1' -or $env:CI -eq 'true' -or $env:GITHUB_ACTIONS -eq 'true'
 function Invoke-ComposeCore {
     param(
         [Parameter(ValueFromRemainingArguments = $true)]
-        [string[]]$Args
+        [string[]]$CoreArgs
     )
-    & $Compose @ComposeFiles @Args
+    & $Compose[0] $Compose[1] @ComposeFiles @CoreArgs | Out-Host
     return $LASTEXITCODE
 }
 
 function Invoke-Compose {
     param(
         [Parameter(ValueFromRemainingArguments = $true)]
-        [string[]]$Args
+        [string[]]$ComposeArgs
     )
-    $exitCode = Invoke-ComposeCore @Args
+    $exitCode = Invoke-ComposeCore -CoreArgs $ComposeArgs
     if ($exitCode -ne 0) {
         throw "docker compose failed with exit code $exitCode"
     }
@@ -158,8 +158,9 @@ function Invoke-Artisan {
 }
 
 function Invoke-Npm {
-    param([string[]]$Args)
-    Invoke-Compose @('--profile', 'dev', 'run', '--rm', '--service-ports', 'node', 'npm') + $Args
+    param([string[]]$NpmArgs)
+    $composeArgs = @('--profile', 'dev', 'run', '--rm', '--service-ports', 'node', 'npm') + $NpmArgs
+    Invoke-Compose -ComposeArgs $composeArgs
 }
 
 function Invoke-Test {
@@ -260,7 +261,7 @@ switch ($Verb) {
     'bootstrap' { Invoke-Bootstrap }
     'composer' { Invoke-Composer -Args $VerbArgs }
     'artisan' { Invoke-Artisan -Args $VerbArgs }
-    'npm' { Invoke-Npm -Args $VerbArgs }
+    'npm' { Invoke-Npm -NpmArgs $VerbArgs }
     'test' { Invoke-Test -Args $VerbArgs }
     'e2e' { Invoke-E2E -Args $VerbArgs }
     'release' { Invoke-Release }

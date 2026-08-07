@@ -19,7 +19,7 @@
     $jsFile = $entry['file'] ?? null;
 @endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark" style="background-color: #000; color-scheme: dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -34,7 +34,8 @@
     <link rel="icon" type="image/svg+xml" href="{{ asset('build/favicon.svg') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('build/apple-touch-icon.png') }}">
     <link rel="manifest" href="{{ asset('build/site.webmanifest') }}">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#FFFFFF">
+    <script src="{{ asset('build/theme-init.js') }}"></script>
     @foreach ($cssFiles as $css)
         <link rel="stylesheet" href="{{ asset('build/'.$css) }}">
     @endforeach

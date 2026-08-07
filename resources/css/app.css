@@ -5,78 +5,221 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-@theme static {
-    /* Keep this token contract aligned with frontend/src/style.css. */
-    --color-neutral-0: #ffffff;
-    --color-neutral-100: #ebebeb;
-    --color-neutral-200: #d3d3d3;
-    --color-neutral-300: #d0d0d0;
-    --color-neutral-500: #b0b0b0;
-    --color-neutral-950: #000000;
-    --color-purple-500: #814dde;
-    --color-purple-800: #1f0d69;
-    --color-purple-900: #1b0f46;
-    --color-purple-950: #1a0a3e;
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url('../../frontend/src/assets/fonts/inter/inter-4.1-variable.woff2') format('woff2');
+}
 
-    --color-canvas: var(--color-neutral-950);
-    --color-surface: var(--color-purple-950);
-    --color-surface-emphasis: var(--color-purple-900);
-    --color-text: var(--color-neutral-100);
-    --color-text-muted: var(--color-neutral-500);
-    --color-text-inverse: var(--color-neutral-950);
-    --color-border: rgb(208 208 208 / 24%);
-    --color-border-strong: rgb(211 211 211 / 48%);
-    --color-action: var(--color-purple-500);
-    --color-action-hover: var(--color-purple-800);
-    --color-focus: var(--color-purple-500);
-    /* Text-only accent shade — see the token comment in frontend/src/style.css (#118). */
-    --color-action-text: #9561f2;
+:root,
+[data-theme='light'] {
+    color-scheme: light;
+    --color-bg-canvas: #FFFFFF;
+    --color-bg-surface: #F7F6F3;
+    --color-bg-elevated: #FFFFFF;
+    --color-bg-hover: #EFEDEA;
+    --color-bg-selected: #E7F0FA;
+    --color-text-primary: #252525;
+    --color-text-secondary: #5F5F5F;
+    --color-text-disabled: #929292;
+    --color-text-inverse: #FFFFFF;
+    --color-text-link: #0F5EAB;
+    --color-border-default: #D9D7D3;
+    --color-border-strong: #8A8882;
+    --color-action-primary: #1A6DC1;
+    --color-action-primary-hover: #14599E;
+    --color-action-primary-active: #104B86;
+    --color-action-primary-content: #FFFFFF;
+    --color-action-primary-subtle: #E7F0FA;
+    --color-focus-ring: #1A6DC1;
+    --color-success-fg: #126B3A;
+    --color-success-bg: #F1FAF4;
+    --color-success-border: #7CCB98;
+    --color-warning-fg: #7A4A00;
+    --color-warning-bg: #FFF7E6;
+    --color-warning-border: #F0B35A;
+    --color-danger-fg: #B42318;
+    --color-danger-bg: #FFF1F0;
+    --color-danger-border: #F29A93;
+    --color-info-fg: #0F5EAB;
+    --color-info-bg: #EDF5FE;
+    --color-info-border: #85BCEB;
+}
 
-    /* Status tones — measured contrast ratios recorded in frontend/src/style.css. */
-    --color-success: #4ade80;
-    --color-warning: #fbbf24;
-    --color-danger: #f87171;
-    --color-danger-strong: #dc2626;
-    --color-danger-strong-hover: #b91c1c;
-    --color-info: #7dd3fc;
+[data-theme='dark'] {
+    color-scheme: dark;
+    --color-bg-canvas: #191919;
+    --color-bg-surface: #202020;
+    --color-bg-elevated: #252525;
+    --color-bg-hover: #2C2C2C;
+    --color-bg-selected: #123B60;
+    --color-text-primary: #F1F1EF;
+    --color-text-secondary: #C6C6C2;
+    --color-text-disabled: #888884;
+    --color-text-inverse: #191919;
+    --color-text-link: #79B8E8;
+    --color-border-default: #4A4A4A;
+    --color-border-strong: #6E6E6E;
+    --color-action-primary: #529CCA;
+    --color-action-primary-hover: #70B4DE;
+    --color-action-primary-active: #3E83B5;
+    --color-action-primary-content: #111111;
+    --color-action-primary-subtle: #173755;
+    --color-focus-ring: #79B8E8;
+    --color-success-fg: #7CDA9A;
+    --color-success-bg: #13291C;
+    --color-success-border: #34794C;
+    --color-warning-fg: #F5C775;
+    --color-warning-bg: #33250D;
+    --color-warning-border: #8D6418;
+    --color-danger-fg: #F4A49E;
+    --color-danger-bg: #381B1B;
+    --color-danger-border: #8E4540;
+    --color-info-fg: #9DCCF2;
+    --color-info-bg: #102B45;
+    --color-info-border: #3D78AA;
+}
 
-    --spacing: 0.25rem;
-    --container-reading: 45rem;
-    --container-app: 80rem;
+:root {
+    --font-ui: Inter, 'Noto Sans', 'Noto Sans Arabic', 'Noto Sans Hebrew', 'Noto Sans SC', 'Noto Sans TC',
+        'Noto Sans JP', 'Noto Sans KR', 'Noto Sans Thai', 'Noto Sans Devanagari', Arial, sans-serif;
+    --font-editorial: 'Source Serif 4', 'Noto Serif', 'Noto Naskh Arabic', 'Noto Serif Hebrew', 'Noto Serif SC',
+        'Noto Serif TC', 'Noto Serif JP', 'Noto Serif KR', Georgia, serif;
+    --font-code: 'IBM Plex Mono', 'Noto Sans Mono', 'Noto Sans SC', 'Noto Sans TC', 'Noto Sans JP', 'Noto Sans KR',
+        monospace;
 
-    --radius-sm: 0.25rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 0.75rem;
+    --space-0: 0;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+
+    --control-padding-inline-compact: 12px;
+    --control-padding-inline-regular: 16px;
+    --control-compact-min-block-size: 32px;
+    --control-regular-min-block-size: 40px;
+    --control-target-min-size: 44px;
+    --icon-inline-size: 16px;
+    --icon-control-size: 20px;
+    --icon-standalone-size: 24px;
+
+    --radius-inline: 2px;
+    --radius-control: 4px;
+    --radius-card: 6px;
+    --radius-dialog: 8px;
     --radius-pill: 999px;
+    --border-width-default: 1px;
+    --border-width-emphasis: 2px;
+
+    --shadow-0: none;
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.08);
+    --shadow-2: 0 4px 12px rgb(0 0 0 / 0.14);
+    --shadow-3: 0 12px 28px rgb(0 0 0 / 0.18);
 
     --duration-fast: 120ms;
     --duration-standard: 180ms;
     --duration-slow: 240ms;
     --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-exit: cubic-bezier(0.4, 0, 1, 1);
 
-    /*
-     * Matches frontend/src/style.css's token value (#87). @font-face rules
-     * aren't duplicated here: this stylesheet's only consumer today is
-     * welcome.blade.php, which isn't wired to any route (routes/web.php
-     * serves app.blade.php, the SPA shell, for every non-API path) — see
-     * #94 for the Blade shell/welcome page migration.
-     */
-    --font-sans: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-        'Helvetica Neue', Arial, sans-serif;
-    --font-mono: ui-monospace, 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+    --text-caption: 12px;
+    --leading-caption: 16px;
+    --text-compact: 14px;
+    --leading-compact: 20px;
+    --text-body: 16px;
+    --leading-body: 24px;
+    --text-section-title: 20px;
+    --leading-section-title: 28px;
+    --text-page-subheading: 24px;
+    --leading-page-subheading: 32px;
+    --text-page-title: 32px;
+    --leading-page-title: 40px;
+    --text-display-title: 44px;
+    --leading-display-title: 52px;
+
+    --container-reading: 720px;
+    --container-app: 1200px;
+    --layer-base: 0;
+    --layer-header: 10;
+    --layer-sidebar: 20;
+    --layer-popover: 30;
+    --layer-toast: 40;
+    --layer-modal: 50;
+    --layer-blocking: 60;
 }
 
-@utility text-muted {
-    color: var(--color-text-muted);
+@theme static {
+    --color-canvas: var(--color-bg-canvas);
+    --color-surface: var(--color-bg-surface);
+    --color-surface-emphasis: var(--color-bg-hover);
+    --color-text: var(--color-text-primary);
+    --color-text-muted: var(--color-text-secondary);
+    --color-border: var(--color-border-default);
+    --color-action: var(--color-action-primary);
+    --color-action-hover: var(--color-action-primary-hover);
+    --color-action-text: var(--color-text-link);
+    --color-focus: var(--color-focus-ring);
+    --color-success: var(--color-success-fg);
+    --color-warning: var(--color-warning-fg);
+    --color-danger: var(--color-danger-fg);
+    --color-danger-strong: var(--color-danger-fg);
+    --color-danger-strong-hover: var(--color-danger-border);
+    --color-info: var(--color-info-fg);
+    --font-sans: var(--font-ui);
+    --font-mono: var(--font-code);
+    --radius-sm: var(--radius-control);
+    --radius-md: var(--radius-card);
+    --radius-lg: var(--radius-dialog);
+}
+
+@utility text-inverse {
+    color: var(--color-text-inverse);
+}
+
+@utility border-border-strong {
+    border-color: var(--color-border-strong);
 }
 
 @layer base {
-    :root {
-        color-scheme: dark;
+    body {
+        background: var(--color-bg-canvas);
+        color: var(--color-text-primary);
+        font-family: var(--font-ui);
     }
 
     :focus-visible {
-        outline: 2px solid var(--color-focus);
+        outline: 2px solid var(--color-focus-ring);
         outline-offset: 2px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 1ms !important;
+    }
+}
+
+@media (forced-colors: active) {
+    *,
+    *::before,
+    *::after {
+        forced-color-adjust: auto;
+    }
+
+    :focus-visible {
+        outline-color: Highlight;
     }
 }
