@@ -4,6 +4,11 @@ export const THEME_STORAGE_KEY = 'taskconnect.theme'
 
 export type ThemePreference = 'light' | 'dark' | 'system'
 export type ResolvedTheme = Exclude<ThemePreference, 'system'>
+export interface ThemeSnapshot {
+  preference: ThemePreference | null
+  resolved: ResolvedTheme
+}
+export type ThemeSubscriber = (snapshot: ThemeSnapshot) => void
 
 type StorageLike = Pick<Storage, 'getItem' | 'setItem'>
 type ThemeMediaQuery = Pick<MediaQueryList, 'matches' | 'addEventListener' | 'removeEventListener'>
@@ -12,6 +17,7 @@ export interface ThemeController {
   readonly preference: ThemePreference | null
   readonly resolved: ResolvedTheme
   setPreference(preference: ThemePreference): void
+  subscribe(subscriber: ThemeSubscriber): () => void
   destroy(): void
 }
 
@@ -60,13 +66,19 @@ function applyTheme(document: Document, theme: ResolvedTheme): void {
 export function createThemeController(options: ThemeControllerOptions): ThemeController {
   let preference = readThemePreference(options.storage)
   let resolved = resolveTheme(preference, options.media)
+  const subscribers = new Set<ThemeSubscriber>()
 
-  const sync = () => {
+  const notify = () => {
+    const snapshot: ThemeSnapshot = { preference, resolved }
+    subscribers.forEach((subscriber) => subscriber(snapshot))
+  }
+  const sync = (shouldNotify = false) => {
     resolved = resolveTheme(preference, options.media)
     applyTheme(options.document, resolved)
+    if (shouldNotify) notify()
   }
   const handleMediaChange = () => {
-    if (preference === null || preference === 'system') sync()
+    if (preference === null || preference === 'system') sync(true)
   }
 
   options.media.addEventListener('change', handleMediaChange)
@@ -86,10 +98,15 @@ export function createThemeController(options: ThemeControllerOptions): ThemeCon
       } catch {
         // Storage can be denied by browser privacy policy; the in-memory choice still applies.
       }
-      sync()
+      sync(true)
+    },
+    subscribe(subscriber) {
+      subscribers.add(subscriber)
+      return () => subscribers.delete(subscriber)
     },
     destroy() {
       options.media.removeEventListener('change', handleMediaChange)
+      subscribers.clear()
     },
   }
 }

@@ -118,6 +118,24 @@ describe('theme preference runtime', () => {
     expect(blockedController.resolved).toBe('dark')
     blockedController.destroy()
   })
+
+  it('notifies subscribers when preference or resolved theme changes', () => {
+    const media = new MediaQueryStub(false)
+    const controller = createThemeController({ document, media, storage: createStorage() })
+    const snapshots: Array<{ preference: ThemePreference | null; resolved: 'light' | 'dark' }> = []
+    const unsubscribe = controller.subscribe((snapshot) => snapshots.push(snapshot))
+
+    controller.setPreference('system')
+    media.setDark(true)
+    unsubscribe()
+    controller.setPreference('light')
+
+    expect(snapshots).toEqual([
+      { preference: 'system', resolved: 'light' },
+      { preference: 'system', resolved: 'dark' },
+    ])
+    controller.destroy()
+  })
 })
 
 function localPreference(value: ThemePreference | null): ThemePreference | null {

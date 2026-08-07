@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue'
+import { inject, onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import {
@@ -17,10 +17,14 @@ if (!injectedController) {
 const controller = injectedController
 
 const preference = ref<ThemePreference>(controller.preference ?? 'system')
+const unsubscribe = controller.subscribe((snapshot) => {
+  preference.value = snapshot.preference ?? 'system'
+})
+
+onBeforeUnmount(unsubscribe)
 
 function onChange(event: Event): void {
   const nextPreference = (event.target as HTMLSelectElement).value as ThemePreference
-  preference.value = nextPreference
   controller.setPreference(nextPreference)
 }
 </script>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useMediaQuery } from '@vueuse/core'
 import { Menu, X } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -21,6 +22,10 @@ const localeStore = useLocaleStore()
 // ~500px, so it becomes an off-canvas drawer under the `md` breakpoint instead of
 // forcing the page to scroll horizontally.
 const mobileNavOpen = ref(false)
+const mobileSidebarMode = useMediaQuery('(max-width: 767px)')
+const sidebarSuppressed = computed(
+  () => mobileSidebarMode.value && !mobileNavOpen.value,
+)
 
 watch(
   () => route.path,
@@ -113,6 +118,8 @@ function onLocaleChange(event: Event): void {
       id="app-sidebar"
       class="app-sidebar fixed z-40 flex shrink-0 flex-col border-border bg-surface transition-transform duration-standard ease-standard md:static"
       :class="mobileNavOpen ? 'app-sidebar--open' : 'app-sidebar--closed'"
+      :inert="sidebarSuppressed ? true : undefined"
+      :aria-hidden="sidebarSuppressed ? 'true' : undefined"
       @keydown.escape="mobileNavOpen = false"
     >
       <div class="flex items-center justify-between gap-2 border-b border-border px-4 py-5">
@@ -134,7 +141,11 @@ function onLocaleChange(event: Event): void {
         </button>
       </div>
 
-      <nav class="flex-1 space-y-1 p-3" :aria-label="$t('common.navMain')">
+      <nav
+        class="min-h-0 flex-1 space-y-1 overflow-y-auto p-3"
+        :aria-label="$t('common.navMain')"
+        tabindex="0"
+      >
         <RouterLink
           v-for="item in navItems"
           :key="item.name"
@@ -237,6 +248,8 @@ function onLocaleChange(event: Event): void {
 .app-shell {
   --safe-inline-start: env(safe-area-inset-left);
   --safe-inline-end: env(safe-area-inset-right);
+  --safe-block-start: env(safe-area-inset-top);
+  --safe-block-end: env(safe-area-inset-bottom);
 }
 
 :global([dir='rtl']) .app-shell {
@@ -245,10 +258,14 @@ function onLocaleChange(event: Event): void {
 }
 
 .app-sidebar {
+  box-sizing: border-box;
   inset-block: 0;
   inset-inline-start: 0;
   inline-size: 16rem;
   border-inline-end-width: 1px;
+  padding-block-start: var(--safe-block-start);
+  padding-block-end: var(--safe-block-end);
+  padding-inline-start: var(--safe-inline-start);
   transform: translateX(0);
 }
 
@@ -265,13 +282,15 @@ function onLocaleChange(event: Event): void {
 }
 
 .app-header {
-  padding-block: var(--space-3);
+  padding-block-start: max(var(--space-3), var(--safe-block-start));
+  padding-block-end: var(--space-3);
   padding-inline-start: max(var(--space-6), var(--safe-inline-start));
   padding-inline-end: max(var(--space-6), var(--safe-inline-end));
 }
 
 .app-main {
-  padding-block: var(--space-6);
+  padding-block-start: var(--space-6);
+  padding-block-end: max(var(--space-6), var(--safe-block-end));
   padding-inline-start: max(var(--space-6), var(--safe-inline-start));
   padding-inline-end: max(var(--space-6), var(--safe-inline-end));
 }

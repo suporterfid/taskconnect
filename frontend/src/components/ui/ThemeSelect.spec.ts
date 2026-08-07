@@ -91,6 +91,16 @@ describe('ThemeSelect', () => {
     expect(document.documentElement.dataset.theme).toBe('dark')
   })
 
+  it('reflects preference changes made through another controller consumer', async () => {
+    const mounted = mountThemeSelect()
+    controller = mounted.controller
+
+    controller.setPreference('dark')
+    await mounted.wrapper.vm.$nextTick()
+
+    expect((mounted.wrapper.get('select').element as HTMLSelectElement).value).toBe('dark')
+  })
+
   it('renders the Portuguese message catalog without translating autonyms', () => {
     setLocale('pt-BR')
     const mounted = mountThemeSelect()
