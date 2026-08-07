@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { Info } from 'lucide-vue-next'
+import { ChevronLeft, Info, Settings } from 'lucide-vue-next'
+import { describe, expect, it } from 'vitest'
 
 import AppIcon from './AppIcon.vue'
 
@@ -35,5 +35,17 @@ describe('AppIcon', () => {
   it('accepts the 16/24px scale from the spec', () => {
     const wrapper = mount(AppIcon, { props: { icon: Info, size: 16 } })
     expect(wrapper.find('svg').attributes('width')).toBe('16')
+  })
+
+  it('marks only explicitly directional icons for RTL mirroring', () => {
+    const directional = mount(AppIcon, {
+      props: { icon: ChevronLeft, directional: true },
+    })
+    const neutral = mount(AppIcon, {
+      props: { icon: Settings },
+    })
+
+    expect(directional.get('svg').classes()).toContain('app-icon--directional')
+    expect(neutral.get('svg').classes()).not.toContain('app-icon--directional')
   })
 })

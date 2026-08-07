@@ -40,6 +40,13 @@
     "en": "English",
     "pt-BR": "Português (Brasil)"
   },
+  "theme": {
+    "label": "Theme",
+    "ariaLabel": "Theme preference",
+    "system": "Use system setting",
+    "light": "Light",
+    "dark": "Dark"
+  },
   "tenant": {
     "label": "Tenant",
     "select": "Select tenant"

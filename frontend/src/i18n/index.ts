@@ -76,8 +76,16 @@ export function resolveInitialLocale(): SupportedLocale {
   return DEFAULT_LOCALE
 }
 
-export function updateDocumentLang(locale: SupportedLocale): void {
+const RTL_LANGUAGE_CODES = new Set(['ar', 'he', 'fa', 'ur'])
+
+export function documentDirectionForLocale(locale: string): 'ltr' | 'rtl' {
+  const language = locale.trim().toLowerCase().split(/[-_]/, 1)[0]
+  return RTL_LANGUAGE_CODES.has(language) ? 'rtl' : 'ltr'
+}
+
+export function updateDocumentLang(locale: string): void {
   document.documentElement.lang = locale
+  document.documentElement.dir = documentDirectionForLocale(locale)
 }
 
 export const i18n = createI18n({

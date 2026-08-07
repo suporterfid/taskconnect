@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 
 import AppIcon from '@/components/AppIcon.vue'
+import ThemeSelect from '@/components/ui/ThemeSelect.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useLocaleStore } from '@/stores/locale'
 import { useTenantStore } from '@/stores/tenant'
@@ -97,7 +98,7 @@ function onLocaleChange(event: Event): void {
   <div class="app-shell flex min-h-screen bg-canvas">
     <a
       href="#main-content"
-      class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:text-text"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:start-2 focus:z-50 focus:min-h-11 focus:rounded-md focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:text-text"
     >
       {{ $t('common.skipToContent') }}
     </a>
@@ -110,13 +111,13 @@ function onLocaleChange(event: Event): void {
 
     <aside
       id="app-sidebar"
-      class="fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col border-r border-border bg-surface transition-transform duration-standard ease-standard md:static md:translate-x-0"
-      :class="mobileNavOpen ? 'translate-x-0' : '-translate-x-full'"
+      class="app-sidebar fixed z-40 flex shrink-0 flex-col border-border bg-surface transition-transform duration-standard ease-standard md:static"
+      :class="mobileNavOpen ? 'app-sidebar--open' : 'app-sidebar--closed'"
       @keydown.escape="mobileNavOpen = false"
     >
       <div class="flex items-center justify-between gap-2 border-b border-border px-4 py-5">
         <div>
-          <RouterLink to="/dashboard" class="text-lg font-semibold text-action-text">
+          <RouterLink to="/dashboard" class="inline-flex min-h-11 items-center text-lg font-semibold text-action-text">
             {{ $t('common.appName') }}
           </RouterLink>
           <p v-if="auth.user" class="mt-1 truncate text-sm text-muted">
@@ -125,7 +126,7 @@ function onLocaleChange(event: Event): void {
         </div>
         <button
           type="button"
-          class="shrink-0 rounded-md p-2 text-muted hover:bg-surface-emphasis hover:text-text md:hidden"
+          class="min-h-11 min-w-11 shrink-0 rounded-md p-2 text-muted hover:bg-surface-emphasis hover:text-text md:hidden"
           :aria-label="$t('common.navToggle.close')"
           @click="mobileNavOpen = false"
         >
@@ -139,7 +140,7 @@ function onLocaleChange(event: Event): void {
           :key="item.name"
           :to="item.to"
           :aria-current="isActive(item.to) ? 'page' : undefined"
-          class="block rounded-md border-l-4 px-3 py-2 text-sm transition-colors duration-standard ease-standard"
+          class="nav-item flex min-h-11 items-center rounded-md px-3 py-2 text-sm transition-colors duration-standard ease-standard"
           :class="
             isActive(item.to)
               ? 'border-action bg-surface-emphasis font-medium text-text'
@@ -153,7 +154,7 @@ function onLocaleChange(event: Event): void {
       <div class="border-t border-border p-3">
         <button
           type="button"
-          class="w-full rounded-md px-3 py-2 text-left text-sm text-muted hover:bg-surface-emphasis hover:text-text"
+          class="min-h-11 w-full rounded-md px-3 py-2 text-start text-sm text-muted hover:bg-surface-emphasis hover:text-text"
           @click="onLogout"
         >
           {{ $t('common.nav.logout') }}
@@ -162,10 +163,10 @@ function onLocaleChange(event: Event): void {
     </aside>
 
     <div class="flex min-w-0 flex-1 flex-col">
-      <header class="flex flex-wrap items-center gap-4 border-b border-border bg-surface px-6 py-3">
+      <header class="app-header flex flex-wrap items-center gap-4 border-b border-border bg-surface">
         <button
           type="button"
-          class="rounded-md p-2 text-muted hover:bg-surface-emphasis hover:text-text md:hidden"
+          class="min-h-11 min-w-11 rounded-md p-2 text-muted hover:bg-surface-emphasis hover:text-text md:hidden"
           :aria-label="$t('common.navToggle.open')"
           aria-controls="app-sidebar"
           :aria-expanded="mobileNavOpen"
@@ -174,10 +175,10 @@ function onLocaleChange(event: Event): void {
           <AppIcon :icon="Menu" :size="20" />
         </button>
 
-        <label class="flex items-center gap-2 text-sm">
+        <label class="flex min-w-0 flex-wrap items-center gap-2 text-sm">
           <span class="text-muted">{{ $t('common.tenant.label') }}</span>
           <select
-            class="rounded-md border border-border bg-surface px-2 py-1 text-sm text-text"
+            class="min-h-11 max-w-full min-w-0 rounded-md border border-border bg-surface px-2 py-1 text-sm text-text"
             :value="tenant.currentTenantId ?? ''"
             @change="onTenantChange"
           >
@@ -190,10 +191,10 @@ function onLocaleChange(event: Event): void {
           </select>
         </label>
 
-        <label class="flex items-center gap-2 text-sm">
+        <label class="flex min-w-0 flex-wrap items-center gap-2 text-sm">
           <span class="text-muted">{{ $t('common.environment.label') }}</span>
           <select
-            class="rounded-md border border-border bg-surface px-2 py-1 text-sm text-text"
+            class="min-h-11 max-w-full min-w-0 rounded-md border border-border bg-surface px-2 py-1 text-sm text-text"
             :value="tenant.currentEnvironmentId ?? ''"
             @change="onEnvironmentChange"
           >
@@ -210,10 +211,10 @@ function onLocaleChange(event: Event): void {
           </select>
         </label>
 
-        <label class="ml-auto flex items-center gap-2 text-sm">
+        <label class="ms-auto flex min-w-0 flex-wrap items-center gap-2 text-sm">
           <span class="text-muted">{{ $t('common.locale.label') }}</span>
           <select
-            class="rounded-md border border-border bg-surface px-2 py-1 text-sm text-text"
+            class="min-h-11 max-w-full min-w-0 rounded-md border border-border bg-surface px-2 py-1 text-sm text-text"
             :value="localeStore.currentLocale"
             @change="onLocaleChange"
           >
@@ -221,11 +222,64 @@ function onLocaleChange(event: Event): void {
             <option value="pt-BR">{{ $t('common.locale.pt-BR') }}</option>
           </select>
         </label>
+
+        <ThemeSelect />
       </header>
 
-      <main id="main-content" class="flex-1 p-6">
+      <main id="main-content" class="app-main flex-1">
         <RouterView />
       </main>
     </div>
   </div>
 </template>
+
+<style scoped>
+.app-shell {
+  --safe-inline-start: env(safe-area-inset-left);
+  --safe-inline-end: env(safe-area-inset-right);
+}
+
+:global([dir='rtl']) .app-shell {
+  --safe-inline-start: env(safe-area-inset-right);
+  --safe-inline-end: env(safe-area-inset-left);
+}
+
+.app-sidebar {
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 16rem;
+  border-inline-end-width: 1px;
+  transform: translateX(0);
+}
+
+.app-sidebar--closed {
+  transform: translateX(-100%);
+}
+
+:global([dir='rtl']) .app-sidebar--closed {
+  transform: translateX(100%);
+}
+
+.nav-item {
+  border-inline-start: 4px solid transparent;
+}
+
+.app-header {
+  padding-block: var(--space-3);
+  padding-inline-start: max(var(--space-6), var(--safe-inline-start));
+  padding-inline-end: max(var(--space-6), var(--safe-inline-end));
+}
+
+.app-main {
+  padding-block: var(--space-6);
+  padding-inline-start: max(var(--space-6), var(--safe-inline-start));
+  padding-inline-end: max(var(--space-6), var(--safe-inline-end));
+}
+
+@media (min-width: 768px) {
+  .app-sidebar {
+    position: static;
+    transform: none;
+  }
+}
+</style>

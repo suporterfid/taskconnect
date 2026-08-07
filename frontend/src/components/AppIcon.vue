@@ -13,6 +13,7 @@ withDefaults(
     icon: FunctionalComponent
     size?: 16 | 20 | 24
     label?: string
+    directional?: boolean
   }>(),
   { size: 20 },
 )
@@ -26,5 +27,12 @@ withDefaults(
     :role="label ? 'img' : undefined"
     :aria-label="label"
     class="inline-block shrink-0"
+    :class="{ 'app-icon--directional': directional }"
   />
 </template>
+
+<style scoped>
+:global([dir='rtl']) .app-icon--directional {
+  transform: scaleX(-1);
+}
+</style>

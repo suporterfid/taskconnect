@@ -1,3 +1,5 @@
+import type { InjectionKey } from 'vue'
+
 export const THEME_STORAGE_KEY = 'taskconnect.theme'
 
 export type ThemePreference = 'light' | 'dark' | 'system'
@@ -12,6 +14,10 @@ export interface ThemeController {
   setPreference(preference: ThemePreference): void
   destroy(): void
 }
+
+export const THEME_CONTROLLER_KEY: InjectionKey<ThemeController> = Symbol(
+  'taskconnect-theme-controller',
+)
 
 interface ThemeControllerOptions {
   document: Document
