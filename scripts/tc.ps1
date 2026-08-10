@@ -13,20 +13,13 @@ if ($env:TC_CI -eq '1' -or $env:CI -eq 'true' -or $env:GITHUB_ACTIONS -eq 'true'
 }
 
 function Invoke-ComposeCore {
-    param(
-        [Parameter(ValueFromRemainingArguments = $true)]
-        [string[]]$CoreArgs
-    )
-    & $Compose[0] $Compose[1] @ComposeFiles @CoreArgs | Out-Host
+    $flatArgs = @($args | ForEach-Object { $_ })
+    & $Compose[0] $Compose[1] @ComposeFiles @flatArgs | Out-Host
     return $LASTEXITCODE
 }
 
 function Invoke-Compose {
-    param(
-        [Parameter(ValueFromRemainingArguments = $true)]
-        [string[]]$ComposeArgs
-    )
-    $exitCode = Invoke-ComposeCore -CoreArgs $ComposeArgs
+    $exitCode = Invoke-ComposeCore @args
     if ($exitCode -ne 0) {
         throw "docker compose failed with exit code $exitCode"
     }
@@ -59,7 +52,7 @@ function Invoke-ComposerWithRetry {
     $delaySeconds = 5
 
     while ($attempt -le $maxAttempts) {
-        $exitCode = Invoke-ComposeCore -CoreArgs (@('run', '--rm') + $envArgs + @('app', 'composer') + $ComposerArgs)
+        $exitCode = Invoke-ComposeCore @('run', '--rm') @envArgs @('app', 'composer') @ComposerArgs
         if ($exitCode -eq 0) {
             return
         }
@@ -99,12 +92,16 @@ Verbs:
 }
 
 function Invoke-Up {
-    Invoke-Compose -ComposeArgs @('up', '-d', '--build', 'mysql', 'mailpit', 'receiver', 'app')
+    Invoke-Compose 'up' '-d' '--build' 'mysql' 'mailpit' 'receiver' 'app'
 }
 
 function Invoke-Down {
     param([string[]]$Args)
-    Invoke-Compose @('down') + $Args
+    if ($Args) {
+        Invoke-Compose 'down' @Args
+    } else {
+        Invoke-Compose 'down'
+    }
 }
 
 function Invoke-Bootstrap {
@@ -113,28 +110,28 @@ function Invoke-Bootstrap {
         Write-Output 'Created .env from .env.example'
     }
 
-    Invoke-Compose @('up', '-d', '--build', 'mysql', 'mailpit', 'receiver')
-    Invoke-Compose @('up', '-d', '--wait', 'mysql')
+    Invoke-Compose 'up' '-d' '--build' 'mysql' 'mailpit' 'receiver'
+    Invoke-Compose 'up' '-d' '--wait' 'mysql'
 
-    Invoke-ComposerWithRetry -ComposerArgs @('install')
+    Invoke-ComposerWithRetry 'install'
 
-    $hasArtisan = (Invoke-ComposeCore @('run', '--rm', 'app', 'test', '-f', 'artisan')) -eq 0
+    $hasArtisan = (Invoke-ComposeCore 'run' '--rm' 'app' 'test' '-f' 'artisan') -eq 0
     if ($hasArtisan) {
-        Invoke-Compose @('run', '--rm', 'app', 'php', 'artisan', 'key:generate', '--force')
-        Invoke-Compose @('run', '--rm', 'app', 'php', 'artisan', 'migrate', '--force')
+        Invoke-Compose 'run' '--rm' 'app' 'php' 'artisan' 'key:generate' '--force'
+        Invoke-Compose 'run' '--rm' 'app' 'php' 'artisan' 'migrate' '--force'
     }
     else {
         Write-Output 'Laravel not scaffolded yet; skipping artisan bootstrap steps.'
     }
 
     if (Test-Path 'package.json') {
-        $npmExit = Invoke-ComposeCore @('--profile', 'dev', 'run', '--rm', 'node', 'npm', 'ci')
+        $npmExit = Invoke-ComposeCore '--profile' 'dev' 'run' '--rm' 'node' 'npm' 'ci'
         if ($npmExit -ne 0) {
-            Invoke-Compose @('--profile', 'dev', 'run', '--rm', 'node', 'npm', 'install')
+            Invoke-Compose '--profile' 'dev' 'run' '--rm' 'node' 'npm' 'install'
         }
     }
 
-    Invoke-Compose @('up', '-d', '--build', 'app')
+    Invoke-Compose 'up' '-d' '--build' 'app'
     Write-Output 'Bootstrap complete.'
 }
 
@@ -143,41 +140,40 @@ function Invoke-Composer {
 
     if ($ComposerArgs.Count -gt 0 -and $ComposerArgs[0] -eq 'install') {
         $installArgs = if ($ComposerArgs.Count -gt 1) { $ComposerArgs[1..($ComposerArgs.Count - 1)] } else { @() }
-        Invoke-ComposerWithRetry -ComposerArgs (@('install') + $installArgs)
+        Invoke-ComposerWithRetry @('install') @installArgs
         return
     }
 
     Write-PackagistWarning
     $envArgs = Get-ComposerEnvArgs
-    Invoke-Compose -ComposeArgs (@('run', '--rm') + $envArgs + @('app', 'composer') + $ComposerArgs)
+    Invoke-Compose @('run', '--rm') @envArgs @('app', 'composer') @ComposerArgs
 }
 
 function Invoke-Artisan {
     param([string[]]$ArtisanArgs)
-    Invoke-Compose -ComposeArgs (@('run', '--rm', 'app', 'php', 'artisan') + $ArtisanArgs)
+    Invoke-Compose @('run', '--rm', 'app', 'php', 'artisan') @ArtisanArgs
 }
 
 function Invoke-Npm {
     param([string[]]$NpmArgs)
-    $composeArgs = @('--profile', 'dev', 'run', '--rm', '--build', '--service-ports', 'node', 'npm') + $NpmArgs
-    Invoke-Compose -ComposeArgs $composeArgs
+    Invoke-Compose @('--profile', 'dev', 'run', '--rm', '--build', '--service-ports', 'node', 'npm') @NpmArgs
 }
 
 function Invoke-Test {
     param([string[]]$TestArgs)
 
-    if ((Invoke-ComposeCore -CoreArgs @('run', '--rm', 'app', 'test', '-f', 'artisan')) -eq 0) {
-        Invoke-Compose -ComposeArgs (@('run', '--rm', 'app', 'php', 'artisan', 'test') + $TestArgs)
+    if ((Invoke-ComposeCore 'run' '--rm' 'app' 'test' '-f' 'artisan') -eq 0) {
+        Invoke-Compose @('run', '--rm', 'app', 'php', 'artisan', 'test') @TestArgs
         return
     }
 
-    if ((Invoke-ComposeCore -CoreArgs @('run', '--rm', 'app', 'test', '-f', 'vendor/bin/pest')) -eq 0) {
-        Invoke-Compose -ComposeArgs (@('run', '--rm', 'app', 'vendor/bin/pest') + $TestArgs)
+    if ((Invoke-ComposeCore 'run' '--rm' 'app' 'test' '-f' 'vendor/bin/pest') -eq 0) {
+        Invoke-Compose @('run', '--rm', 'app', 'vendor/bin/pest') @TestArgs
         return
     }
 
-    if ((Invoke-ComposeCore -CoreArgs @('run', '--rm', 'app', 'test', '-f', 'vendor/bin/phpunit')) -eq 0) {
-        Invoke-Compose -ComposeArgs (@('run', '--rm', 'app', 'vendor/bin/phpunit') + $TestArgs)
+    if ((Invoke-ComposeCore 'run' '--rm' 'app' 'test' '-f' 'vendor/bin/phpunit') -eq 0) {
+        Invoke-Compose @('run', '--rm', 'app', 'vendor/bin/phpunit') @TestArgs
         return
     }
 
@@ -201,7 +197,7 @@ function Invoke-E2E {
         '-e', "E2E_PASSWORD=$env:E2E_PASSWORD",
         '-e', "PLAYWRIGHT_BASE_URL=$(if ($env:PLAYWRIGHT_BASE_URL) { $env:PLAYWRIGHT_BASE_URL } else { 'http://app' })"
     )
-    Invoke-Compose -ComposeArgs (@('--profile', 'dev', 'run', '--rm', '--build', '--service-ports') + $envArgs + @('node', 'npm', '--prefix', 'frontend', 'run', 'e2e', '--') + $E2EArgs)
+    Invoke-Compose @('--profile', 'dev', 'run', '--rm', '--build', '--service-ports') @envArgs @('node', 'npm', '--prefix', 'frontend', 'run', 'e2e', '--') @E2EArgs
 }
 
 function Clear-ReleaseOutput {
@@ -251,7 +247,7 @@ function Invoke-Release {
         throw "Release build failed with exit code $LASTEXITCODE"
     }
     Write-Output 'Release artifact written to dist/'
-    Invoke-Compose -ComposeArgs @('run', '--rm', '--no-deps', 'app', 'bash', 'scripts/validate-release.sh', 'dist')
+    Invoke-Compose 'run' '--rm' '--no-deps' 'app' 'bash' 'scripts/validate-release.sh' 'dist'
 }
 
 function Invoke-Deploy {
@@ -280,7 +276,7 @@ function Invoke-Deploy {
 }
 
 function Invoke-Shell {
-    Invoke-Compose @('run', '--rm', 'app', 'bash')
+    Invoke-Compose 'run' '--rm' 'app' 'bash'
 }
 
 $Verb = if ($args.Count -gt 0) { $args[0] } else { 'help' }

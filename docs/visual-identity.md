@@ -1,4 +1,6 @@
-﻿
+# TaskConnect Visual Identity Specification
+
+
 
 > *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
 
@@ -19,7 +21,7 @@ CSS custom properties in `frontend/src/style.css` are the source of truth. `reso
 - **Content first:** titles, content, and the current action are more prominent than application chrome.
 - **Warm-neutral foundation:** light and dark canvases avoid glare without introducing a decorative brand tint.
 - **Restrained semantic color:** blue communicates links/actions; status colors retain status meaning and always have text or icon reinforcement.
-- **Compact visuals, reachable controls:** every pointer target is at least 44Ã—44 CSS px even when its visible control appears dense.
+- **Compact visuals, reachable controls:** every pointer target is at least 44×44 CSS px even when its visible control appears dense.
 - **International by construction:** text expansion, RTL, mixed direction, script shaping, and locale formatting are layout inputs, not later patches.
 - **Visible state:** hover, active, selected, invalid, loading, disabled, and keyboard focus are distinct without depending on motion or color alone.
 
@@ -93,7 +95,7 @@ Only weights 400, 500, 600, and 700 are supported. Tables, timestamps, timers, a
 | Spacing | `0, 4, 8, 12, 16, 20, 24, 32, 40, 48, 64px` |
 | Control inline padding | `12px` compact; `16px` regular |
 | Visual control minimum | `32px` compact; `40px` regular |
-| Pointer target | 44Ã—44 CSS px minimum |
+| Pointer target | 44×44 CSS px minimum |
 | Radii | `2px` inline, `4px` control, `6px` card, `8px` dialog, `999px` pill |
 | Borders | `1px` default; `2px` focus/error emphasis |
 | Focus | `2px solid var(--color-focus-ring)` with `2px` offset |
@@ -124,11 +126,11 @@ The blocking external bootstrap appears before application styles/scripts, preve
 
 ## 7. Structural internationalization
 
-Every user-visible string MUST use a complete vue-i18n message key in both `en` and `pt-BR`; strings are never assembled from translated fragments. Language names are autonyms (English, PortuguÃªs), never flags. Locale-aware numbers, dates, times, relative times, pluralization, lists, and sorting use `Intl` APIs and locale-aware comparison rather than English formatting.
+Every user-visible string MUST use a complete vue-i18n message key in both `en` and `pt-BR`; strings are never assembled from translated fragments. Language names are autonyms (English, Português), never flags. Locale-aware numbers, dates, times, relative times, pluralization, lists, and sorting use `Intl` APIs and locale-aware comparison rather than English formatting.
 
 Layout uses CSS logical properties for margin, padding, inset, borders, sizes, alignment, and safe areas. `main.ts` applies both `lang` and `dir`. Arabic, Hebrew, Persian, Urdu, and `ar-XB` resolve RTL; current Latin and CJK shipping locales resolve LTR. Focus order follows DOM reading order in either direction.
 
-- Short labels MUST survive 2Ã— expansion; general copy MUST survive at least 30% expansion.
+- Short labels MUST survive 2× expansion; general copy MUST survive at least 30% expansion.
 - Controls, headings, menus, buttons, errors, toasts, and tags grow or wrap; fixed text heights and silent truncation are prohibited.
 - Mixed-direction IDs, email, URLs, tokens, and code use `dir="auto"`, `<bdi>`, or bidi isolation.
 - Arabic joining and Hebrew direction remain intact; Thai and Devanagari grapheme clusters are not split.
@@ -154,7 +156,7 @@ At 320 CSS px, required content MUST not overlap, clip, create page-wide horizon
 
 ## 9. Component and state contract
 
-All controls need an accessible name, semantic HTML before ARIA, visible `:focus-visible`, a 44Ã—44 target or non-overlapping equivalent, natural wrapping, and semantic tokens in both themes.
+All controls need an accessible name, semantic HTML before ARIA, visible `:focus-visible`, a 44×44 target or non-overlapping equivalent, natural wrapping, and semantic tokens in both themes.
 
 | Family | Visual/state contract | Keyboard, accessibility, wrapping, and direction |
 |---|---|---|
@@ -201,8 +203,8 @@ Component aliases MAY exist only as direct bridges to a public semantic token. D
 - [ ] Components contain no raw palette utilities or component-specific color literals.
 - [ ] Theme startup, storage failures, explicit preference, system changes, reload, `color-scheme`, and theme-color are tested.
 - [ ] All `en` keys exist in `pt-BR`; document `lang` and `dir` update together.
-- [ ] LTR/RTL, 2Ã— labels, 30% copy, mixed-direction data, CJK, Arabic, Hebrew, Thai, Devanagari, Cyrillic, and Greek cases are covered.
-- [ ] Keyboard, focus, 44Ã—44 targets, 320 CSS px reflow, 200% text resizing, reduced motion, and forced colors pass.
+- [ ] LTR/RTL, 2× labels, 30% copy, mixed-direction data, CJK, Arabic, Hebrew, Thai, Devanagari, Cyrillic, and Greek cases are covered.
+- [ ] Keyboard, focus, 44×44 targets, 320 CSS px reflow, 200% text resizing, reduced motion, and forced colors pass.
 - [ ] Table and code overflow stays inside labeled keyboard-operable regions.
 - [ ] Frontend tests/build, backend tests, Playwright/axe, release build, and artifact audit pass before release.
 - [ ] `theme-init.js`, compiled semantic CSS, Inter and its license, English/Portuguese resources, and the Laravel error shell are present in the artifact.
