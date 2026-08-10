@@ -1,4 +1,7 @@
-# Members CRUD Implementation Plan
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 > **For agentic workers:** Implement task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -57,7 +60,7 @@
 
 - [ ] Table + role badges + Edit/Remove
 - [ ] Invite/edit inline form
-- [ ] Remove confirm → DELETE
+- [ ] Remove confirm â†’ DELETE
 
 ### Task 5: Build + deploy
 

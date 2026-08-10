@@ -1,4 +1,7 @@
-# Production Requirements
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 - PHP 8.2 or later with extensions: ctype, curl, dom, fileinfo, filter, hash, mbstring, openssl, pcre, pdo_mysql, session, tokenizer, xml, zip, intl, bcmath
 - MySQL 8.0+ (or documented MariaDB equivalent)

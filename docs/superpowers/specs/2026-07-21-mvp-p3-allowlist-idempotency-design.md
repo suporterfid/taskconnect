@@ -1,4 +1,7 @@
-# MVP P3 Design — Allowlists, Success Policy, Idempotency, E2E Smoke
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 ## Goal
 
@@ -6,10 +9,10 @@ Ship the deferred P2+ items that close remaining MVP/spec gaps without reintrodu
 
 ## Scope
 
-1. **Tenant outbound allowlists** — store `outbound_allow_hosts` on `tenants`; merge into SSRF host allowlisting (same semantics as platform/testing allowlists: may permit private DNS resolution, never bypass port/scheme policy).
-2. **Per-task success status ranges** — extend `RetryPolicy` with `success_status_ranges`; `RetryDecider::isSuccess` honors them (default still 200–299).
-3. **API Idempotency-Key** — middleware using `idempotency_keys` for task `store` and `run-now` when header present.
-4. **Playwright smoke** — wire minimal config + login-page smoke; npm script; no CI.
+1. **Tenant outbound allowlists** â€” store `outbound_allow_hosts` on `tenants`; merge into SSRF host allowlisting (same semantics as platform/testing allowlists: may permit private DNS resolution, never bypass port/scheme policy).
+2. **Per-task success status ranges** â€” extend `RetryPolicy` with `success_status_ranges`; `RetryDecider::isSuccess` honors them (default still 200â€“299).
+3. **API Idempotency-Key** â€” middleware using `idempotency_keys` for task `store` and `run-now` when header present.
+4. **Playwright smoke** â€” wire minimal config + login-page smoke; npm script; no CI.
 
 ## Deferred further
 

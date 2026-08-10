@@ -1,4 +1,7 @@
-# Notion-Inspired Visual Identity Migration Implementation Plan
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 > **For Codex:** Execute this plan with test-driven development and subagent-driven review. The canonical contract is `C:\workspace-offline\iroh\notion-inspired-visual-identity-spec.md`. GitHub issue [#132](https://github.com/suporterfid/taskconnect/issues/132) is the external source of truth.
 
@@ -45,7 +48,7 @@
 2. Implement localized theme selection using the runtime controller and expose it consistently in the app shell/settings without duplicating state.
 3. Derive `dir` from locale metadata, keep autonym language names, and replace physical left/right margin, padding, border, inset, alignment, and transform assumptions with logical equivalents.
 4. Mirror only directional navigation icons; never mirror neutral/status icons or text.
-5. Verify long Portuguese labels and synthetic RTL labels can wrap without clipping and all interactive targets remain at least 44×44 CSS px.
+5. Verify long Portuguese labels and synthetic RTL labels can wrap without clipping and all interactive targets remain at least 44Ã—44 CSS px.
 6. Run focused tests and commit.
 
 ## Task 3: Migrate the app shell and shared UI primitives
@@ -60,7 +63,7 @@
 1. Add failing source/component tests for semantic-only colors, strong form boundaries, visible focus, status role triplets, 44px standalone actions, wrapping, and logical properties.
 2. Implement the responsive shell: collapsible sidebar, top bar, breadcrumbs/page header behavior, 720px reading measure, wide data-view escape hatch, safe-area padding, 320px reflow, and 200% text resilience.
 3. Migrate buttons, links, inputs, selects, textareas, cards, lists, tables, tags, callouts/alerts, menus, dialogs, tooltips, toasts, skeletons, and empty/loading/error states to semantic tokens and accessible interaction contracts.
-4. Ensure invalid controls use a ≥3:1 essential boundary plus programmatic/text error cues; status communication must not rely on color alone.
+4. Ensure invalid controls use a â‰¥3:1 essential boundary plus programmatic/text error cues; status communication must not rely on color alone.
 5. Remove component-specific hard-coded colors and raw palette utilities from in-scope Vue/Blade surfaces; keep an explicit documented exception only if technically unavoidable.
 6. Run focused and full frontend tests, then commit.
 

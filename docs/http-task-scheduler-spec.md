@@ -1,4 +1,7 @@
-# Open-Source Multi-Tenant HTTP Task Scheduler
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 ## Product and Technical Specification
 
@@ -1940,4 +1943,4 @@ These questions do not block the MVP but should be revisited during hardening or
 
 Build the MVP as a modular Laravel monolith with a Vue 3 frontend, a MySQL-backed schedule and execution state model, encrypted secret references, strict tenant isolation, and short-lived cron executors.
 
-The implementation should optimize for predictable behavior on constrained shared hosting. It must be explicit about minute-level precision, at-least-once delivery, skipped historical occurrences, and the possibility of duplicate attempts. Reliability should come from durable database state, atomic claims, idempotency keys, bounded execution, stale-claim recovery, and comprehensive diagnostics—not from assumptions about perfect cron timing or clean process termination.
+The implementation should optimize for predictable behavior on constrained shared hosting. It must be explicit about minute-level precision, at-least-once delivery, skipped historical occurrences, and the possibility of duplicate attempts. Reliability should come from durable database state, atomic claims, idempotency keys, bounded execution, stale-claim recovery, and comprehensive diagnosticsâ€”not from assumptions about perfect cron timing or clean process termination.

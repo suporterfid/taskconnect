@@ -1,6 +1,9 @@
-# v1 Extension API contract mapping (§6.1)
+﻿
 
-The v1 Extension Spec §6.1 JSON sketch is **illustrative**. TaskConnect keeps a **v0-compatible** nested API under `/api/v1`. This document is the official mapping between the sketch and the shipped contract.
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
+
+The v1 Extension Spec Â§6.1 JSON sketch is **illustrative**. TaskConnect keeps a **v0-compatible** nested API under `/api/v1`. This document is the official mapping between the sketch and the shipped contract.
 
 **Stability rule:** do **not** rename fields or flatten routes in a breaking way without a versioned migration plan. Prefer additive aliases if consumers need sketch-literal names later.
 
@@ -9,18 +12,18 @@ The v1 Extension Spec §6.1 JSON sketch is **illustrative**. TaskConnect keeps a
 | Spec sketch | Implementation |
 |-------------|----------------|
 | `POST /api/tasks` | `POST /api/v1/tenants/{tenantId}/environments/{environmentId}/tasks` |
-| Workspace in body/`aud` | Route `{environmentId}` **is** the workspace (`Environment.public_id`, often `env_…`; GrandpaSSOn `aud` also accepts `workspace/<id>` — see `docs/architecture/workspace.md`) |
+| Workspace in body/`aud` | Route `{environmentId}` **is** the workspace (`Environment.public_id`, often `env_â€¦`; GrandpaSSOn `aud` also accepts `workspace/<id>` â€” see `docs/architecture/workspace.md`) |
 | `POST /api/pipelines/{name}/instances` | `POST /api/v1/tenants/{tenantId}/environments/{environmentId}/pipelines/{templateName}/instances` |
 
 All mutating submission endpoints require `Idempotency-Key` where documented (R2) and are subject to submit rate limits (R15).
 
 ## Task resource field mapping
 
-| Spec §6.1 | Implementation (`TaskResource` / DB) | Notes |
+| Spec Â§6.1 | Implementation (`TaskResource` / DB) | Notes |
 |-----------|--------------------------------------|-------|
-| `id` `tsk_…` | `id` (task `public_id`) | Same idea |
-| `tenant_id` `ten_…` | Route + membership context (not always echoed on task JSON) | Tenant isolation via middleware |
-| `workspace_id` `wsp_…` | `workspace_id` = Environment `public_id` (`env_…`) | Stable **alias**; DB column remains `environment_id` |
+| `id` `tsk_â€¦` | `id` (task `public_id`) | Same idea |
+| `tenant_id` `ten_â€¦` | Route + membership context (not always echoed on task JSON) | Tenant isolation via middleware |
+| `workspace_id` `wsp_â€¦` | `workspace_id` = Environment `public_id` (`env_â€¦`) | Stable **alias**; DB column remains `environment_id` |
 | `task_type` | `task_type` | R4 catalog |
 | `target_url` | `url_or_path` | Path relative to endpoint profile **or** absolute URL |
 | `method` | `method` | |
@@ -33,16 +36,16 @@ All mutating submission endpoints require `Idempotency-Key` where documented (R2
 | `coalesce_key` | `coalesce_key` | R11 |
 | `run_at` | `run_at` when schedule kind is `once`; else null + `schedule` / `next_run_at` | R16 |
 | `depends_on` / `on_success` / `on_failure` | **Pipeline template nodes only** (`docs/architecture/pipelines.md`) | Not on bare task create/update |
-| `status` `pending\|claimed\|…` | Split: task `definition_status` + run `run_state` (`pending` / `running` / `retry_wait` / `succeeded` / `dead` / `blocked` / …) | No single task-level delivery status enum |
+| `status` `pending\|claimed\|â€¦` | Split: task `definition_status` + run `run_state` (`pending` / `running` / `retry_wait` / `succeeded` / `dead` / `blocked` / â€¦) | No single task-level delivery status enum |
 | `attempts[]` embedded | Separate task-run / attempt APIs (and DLQ show) | History is run-scoped |
 
-## Callback headers (spec §6.3 vs shipped)
+## Callback headers (spec Â§6.3 vs shipped)
 
 See `docs/architecture/callback-contract.md` and GrandpaSSOn docs. Shipped delivery headers use `Idempotency-Key`, `X-Task-Run-Id`, `X-Task-Attempt` (plus optional GrandpaSSOn bearer / `X-TC-*` HMAC when R8 flags are enabled). Spec names like `X-TC-Task-Id` / `X-TC-Workspace` are not required aliases today.
 
-## Opt-in §6.1 aliases (issue #78)
+## Opt-in Â§6.1 aliases (issue #78)
 
-Any endpoint returning `TaskResource` accepts `?aliases=spec-v1` to additively mirror sketch-literal field names alongside the v0 names above. **Off by default** — omitting the query param (or any other value) returns the unchanged v0 shape.
+Any endpoint returning `TaskResource` accepts `?aliases=spec-v1` to additively mirror sketch-literal field names alongside the v0 names above. **Off by default** â€” omitting the query param (or any other value) returns the unchanged v0 shape.
 
 | Alias field | Mirrors | Semantics |
 |-------------|---------|-----------|
@@ -57,4 +60,4 @@ Both v0 field names (`url_or_path`, `body`) remain present and canonical; the al
 - Task types / `timeout_ms`: `docs/architecture/task-types.md`
 - Pipelines: `docs/architecture/pipelines.md`
 - Callbacks: `docs/architecture/callback-contract.md`
-- Spec: `docs/superpowers/specs/2026-07-22-taskconnect-v1-extension-spec.md` §6.1
+- Spec: `docs/superpowers/specs/2026-07-22-taskconnect-v1-extension-spec.md` Â§6.1

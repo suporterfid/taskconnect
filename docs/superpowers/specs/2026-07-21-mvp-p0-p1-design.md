@@ -1,8 +1,11 @@
-# MVP P0/P1 Design
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 ## Goal
 
-Close the blockers that prevent TaskConnect from meeting `docs/http-task-scheduler-spec.md` §28 for user workflow, reliability, security, and operability — without Phase 4 SaaS features.
+Close the blockers that prevent TaskConnect from meeting `docs/http-task-scheduler-spec.md` Â§28 for user workflow, reliability, security, and operability â€” without Phase 4 SaaS features.
 
 ## Constraints
 
@@ -17,10 +20,10 @@ Close the blockers that prevent TaskConnect from meeting `docs/http-task-schedul
 
 Rejected alternatives:
 
-1. **API-only MVP** — leaves §28 user workflow unmet.
-2. **Frontend-first** — would polish a broken pending-run path.
+1. **API-only MVP** â€” leaves Â§28 user workflow unmet.
+2. **Frontend-first** â€” would polish a broken pending-run path.
 
-## P0 — Core correctness
+## P0 â€” Core correctness
 
 ### 1. Pending run execution
 
@@ -40,7 +43,7 @@ Inject `FailureNotifier` into `AttemptExecutor` and call `notifyDeadRun()` when 
 
 Reject create/activate/run-now/test (and analogous secret/profile/key creates) when `environment.archived_at` is set, returning a clear 422.
 
-## P1 — Operator workflow
+## P1 â€” Operator workflow
 
 ### Frontend contracts
 

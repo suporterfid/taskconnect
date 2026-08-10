@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 This file provides guidance to Claude Code (claude.ai/code) and Cursor agents when working with code in this repository. Cursor also loads focused rules from `.cursor/rules/`; see `AGENTS.md`.
 
 ## What this is

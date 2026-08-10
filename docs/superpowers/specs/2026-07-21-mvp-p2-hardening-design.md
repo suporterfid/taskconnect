@@ -1,8 +1,11 @@
-# MVP P2 Hardening Design
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 ## Goal
 
-Close remaining MVP acceptance gaps from `docs/http-task-scheduler-spec.md` §28.2–§28.5 after P0/P1: reliability proof, API hardening, missing feature tests, and release hygiene.
+Close remaining MVP acceptance gaps from `docs/http-task-scheduler-spec.md` Â§28.2â€“Â§28.5 after P0/P1: reliability proof, API hardening, missing feature tests, and release hygiene.
 
 ## Scope (this batch)
 

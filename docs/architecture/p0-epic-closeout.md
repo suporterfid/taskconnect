@@ -1,4 +1,7 @@
-# P0 epic closeout (R1–R9)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 Epic [#16](https://github.com/suporterfid/taskconnect/issues/16) is complete. All P0 children shipped and closed:
 
@@ -14,4 +17,4 @@ Epic [#16](https://github.com/suporterfid/taskconnect/issues/16) is complete. Al
 | R8 | [#24](https://github.com/suporterfid/taskconnect/issues/24) GrandpaSSOn auth | Done |
 | R9 | [#25](https://github.com/suporterfid/taskconnect/issues/25) Secret / release hygiene | Done |
 
-§11 stop line met; P1 (#27) and P2 (#34) have also completed. Cross-repo GrandpaSSOn scope work remains on [#26](https://github.com/suporterfid/taskconnect/issues/26).
+Â§11 stop line met; P1 (#27) and P2 (#34) have also completed. Cross-repo GrandpaSSOn scope work remains on [#26](https://github.com/suporterfid/taskconnect/issues/26).

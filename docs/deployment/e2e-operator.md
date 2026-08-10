@@ -1,18 +1,30 @@
-# Playwright operator E2E (DLQ + pipelines)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 Unauthenticated smoke always runs. Authenticated journeys need credentials; fixtures (a dead
-run + a pipeline instance) are now **auto-seeded** (issue #79) — no manual setup required.
+run + a pipeline instance) are now **auto-seeded** (issue #79) â€” no manual setup required.
 
 ## Run
 
 ```bash
-# Browsers (once, in node container / host with frontend deps)
+
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 bash ./scripts/tc.sh npm --prefix frontend exec -- playwright install --with-deps chromium
 
-# Unauthenticated only (default CI-safe)
+
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 bash ./scripts/tc.sh e2e
 
-# Authenticated (login + optional DLQ/pipelines depth)
+
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 E2E_EMAIL='admin@example.com' E2E_PASSWORD='ChangeMeNow!' bash ./scripts/tc.sh e2e
 ```
 
@@ -34,17 +46,17 @@ when `E2E_*` is set. It logs in as the E2E operator via the API (Sanctum cookie 
 flow as the SPA), discovers that operator's first tenant/environment (mirroring
 `frontend/src/stores/tenant.ts`'s own selection), then:
 
-1. **Dead letter row** — calls a **test-only** seed endpoint,
-   `POST …/environments/{env}/e2e/dlq-fixture`, which directly creates a task + a `dead`
-   `TaskRun` + a terminal `TaskRunAttempt` (bypassing the scheduler — there's no HTTP-only way
+1. **Dead letter row** â€” calls a **test-only** seed endpoint,
+   `POST â€¦/environments/{env}/e2e/dlq-fixture`, which directly creates a task + a `dead`
+   `TaskRun` + a terminal `TaskRunAttempt` (bypassing the scheduler â€” there's no HTTP-only way
    to drive a real cron tick from Playwright). Gated by the `e2e.testing.only` middleware to
    `APP_ENV=local` or `testing`; 404s otherwise, so it never ships reachable on a real deploy.
-2. **Pipeline instance** — calls the real, public
-   `POST …/environments/{env}/pipelines/convert-index-publish/instances` endpoint with a
+2. **Pipeline instance** â€” calls the real, public
+   `POST â€¦/environments/{env}/pipelines/convert-index-publish/instances` endpoint with a
    `nodes` map covering every template node (see `docs/architecture/pipelines.md`).
 
 If seeding fails (e.g. the target isn't running with `APP_ENV=local`/`testing`), the suite
-fails loudly with a diagnostic error rather than silently skipping — authenticated journeys
+fails loudly with a diagnostic error rather than silently skipping â€” authenticated journeys
 are expected to **run**, not skip, whenever credentials are configured.
 
 To seed manually instead (e.g. exploring the UI by hand), hit the same two endpoints with a
@@ -59,25 +71,25 @@ bash ./scripts/tc.sh artisan tasks:dlq:list   # confirms existing dead runs
 | File | Coverage |
 |------|----------|
 | `frontend/e2e/smoke.spec.ts` | Login smoke; optional dashboard/tasks/dlq/pipelines headings |
-| `frontend/e2e/operator-extension.spec.ts` | Unauthenticated `/dlq` `/pipelines` → login |
+| `frontend/e2e/operator-extension.spec.ts` | Unauthenticated `/dlq` `/pipelines` â†’ login |
 | `frontend/e2e/dlq-pipelines.spec.ts` | Authenticated inspect + replay; pipeline instance detail |
-| `frontend/e2e/a11y.spec.ts` | WCAG 2.2 AA sweep — see below |
+| `frontend/e2e/a11y.spec.ts` | WCAG 2.2 AA sweep â€” see below |
 
 ## WCAG 2.2 AA sweep (`a11y.spec.ts`, #98)
 
 `jsdom` can't compute real color contrast (see `frontend/src/pages/login.a11y.spec.ts`'s
-disabled `color-contrast` rule), so this spec injects `axe-core` into a real Chromium page —
-the actual contrast check — via `page.addScriptTag` + `window.axe.run()`. It covers, in both
+disabled `color-contrast` rule), so this spec injects `axe-core` into a real Chromium page â€”
+the actual contrast check â€” via `page.addScriptTag` + `window.axe.run()`. It covers, in both
 `en` and `pt-BR`:
 
 - **Unauthenticated** (always runs): `/login`, `/forgot-password`, `/reset-password`.
 - **Authenticated** (needs `E2E_*`): dashboard, tasks, runs, DLQ, pipelines, settings, API
   keys, plus a task detail and run detail page seeded via
   `frontend/e2e/helpers/seed.ts#seedTaskAndRunFixtures`. Every page for a locale is checked
-  inside **one test with one login**, not one test per page — the auth routes are throttled
+  inside **one test with one login**, not one test per page â€” the auth routes are throttled
   (`throttle:10,1`, `routes/api.php`) and a test-per-page pattern with a fresh login each time
   exceeds that in a single run.
-- **200% zoom** (640×360 @ 2x device scale) and **360px narrow viewport**: asserts no
+- **200% zoom** (640Ã—360 @ 2x device scale) and **360px narrow viewport**: asserts no
   horizontal page scroll. Wide data tables may scroll within their own container (#92); the
   page body must not.
 - **Keyboard navigation**: tab order reaches the login form's fields with visible focus; the
@@ -90,6 +102,9 @@ and `surface`) is fixed: a separate `--color-action-text` token (`#9561f2`, 5.27
 this sweep and by `frontend/src/style.contrast.spec.ts`.
 
 ```bash
-# Same command as above — a11y.spec.ts runs alongside the other specs
+
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 bash ./scripts/tc.sh e2e
 ```

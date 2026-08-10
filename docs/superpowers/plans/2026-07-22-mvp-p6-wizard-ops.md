@@ -1,4 +1,7 @@
-# MVP P6 Implementation Plan
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 **Branch:** `cursor/mvp-p6-wizard-ops-722a`
 

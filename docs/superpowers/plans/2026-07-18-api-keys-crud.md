@@ -1,4 +1,7 @@
-# API Keys CRUD Implementation Plan
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 > **For agentic workers:** Implement task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -58,7 +61,7 @@
 - [ ] Table + badges + Edit/Revoke
 - [ ] Create/edit inline form with permission checklist
 - [ ] One-time plaintext reveal + copy
-- [ ] Revoke confirm → DELETE
+- [ ] Revoke confirm â†’ DELETE
 
 ### Task 5: Build + deploy
 
@@ -66,11 +69,11 @@
 - [x] Full deploy (PHP + assets)
 - [x] Fix SPA catch-all so `api-keys` is not treated as `/api` (`routes/web.php`)
 - [x] Smoke: `/api-keys` returns 200; `ApiKeysPage` asset live
-- [ ] PHP feature tests for API keys (blocked: local sqlite RefreshDatabase missing migrations — pre-existing)
+- [ ] PHP feature tests for API keys (blocked: local sqlite RefreshDatabase missing migrations â€” pre-existing)
 
 ### Task 6: Verification
 
-- [ ] Create → plaintext once → list without plaintext
+- [ ] Create â†’ plaintext once â†’ list without plaintext
 - [ ] Edit name/expiry/permissions
-- [ ] Revoke → badge; PATCH revoked fails
+- [ ] Revoke â†’ badge; PATCH revoked fails
 - [ ] List sorts active above revoked

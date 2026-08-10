@@ -1,6 +1,9 @@
-# Dependency audit notes
+﻿
 
-TaskConnect targets shared hosting without required Redis/brokers. Dependency audits are part of the §28.5 quality gate.
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
+
+TaskConnect targets shared hosting without required Redis/brokers. Dependency audits are part of the Â§28.5 quality gate.
 
 ## How to run
 
@@ -15,7 +18,7 @@ Optional production-focused frontend pass:
 bash ./scripts/tc.sh npm --prefix frontend audit --omit=dev
 ```
 
-## Current status (2026-07-22 — P9)
+## Current status (2026-07-22 â€” P9)
 
 Automated `composer audit` / `npm audit` from this agent environment could not reach Packagist/npm registries (network timeout). Treat the commands above as the source of truth on a networked workstation before tagging **v1.2.0**.
 

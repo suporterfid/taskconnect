@@ -1,4 +1,7 @@
-# v1 Extension Spec — residual literal gaps (post-#67)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 **Date:** 2026-07-22  
 **Source:** uploaded `taskconnect-spec-v1-extension_75b5.md` (cmp: differs from repo only by absence of the #66 API-mapping bullet)  
@@ -10,10 +13,10 @@
 
 | Layer | Status |
 |-------|--------|
-| MoSCoW **R1–R18** | Functionally **done** (prior epics; #67 closed) |
-| Security **S1–S10** | Functionally **done** with documented dual-mode / receiver-side verify |
-| §6.1 / §6.3 **literal** shapes | **Partial** — v0-compatible aliases; mapping doc exists |
-| §11 Playwright depth | **Partial** — specs exist; authenticated paths skip without fixtures |
+| MoSCoW **R1â€“R18** | Functionally **done** (prior epics; #67 closed) |
+| Security **S1â€“S10** | Functionally **done** with documented dual-mode / receiver-side verify |
+| Â§6.1 / Â§6.3 **literal** shapes | **Partial** â€” v0-compatible aliases; mapping doc exists |
+| Â§11 Playwright depth | **Partial** â€” specs exist; authenticated paths skip without fixtures |
 
 ## Accepted deviations (out of scope for this epic)
 
@@ -21,23 +24,23 @@ See epic #76 body and `docs/architecture/api-contract-v1.md`. Do not break v0 cl
 
 ## Implementation units
 
-### 1. [#77](https://github.com/suporterfid/taskconnect/issues/77) — Always-on §6.3 identity headers
+### 1. [#77](https://github.com/suporterfid/taskconnect/issues/77) â€” Always-on Â§6.3 identity headers
 
 **Decision:** Emit `X-TC-Task-Id` + `X-TC-Workspace` from `HttpDeliveryService` (or shared header builder) on every delivery. Keep bearer + `X-TC-Signature` / timestamp / nonce behind `GRANDPASSON_OUTBOUND_ENABLED`.
 
 **Touch:** `app/Application/Execution/HttpDeliveryService.php`, `CallbackAuthHeaderBuilder.php` (avoid duplicate headers), `docs/architecture/callback-contract.md`, `tests/Unit/Execution/HttpDeliveryServiceTest.php`.
 
-**Tests:** GSS outbound off → still has `X-TC-Task-Id` + `X-TC-Workspace` + `Idempotency-Key`.
+**Tests:** GSS outbound off â†’ still has `X-TC-Task-Id` + `X-TC-Workspace` + `Idempotency-Key`.
 
-### 2. [#78](https://github.com/suporterfid/taskconnect/issues/78) — Opt-in §6.1 aliases
+### 2. [#78](https://github.com/suporterfid/taskconnect/issues/78) â€” Opt-in Â§6.1 aliases
 
-**Decision:** Additive mirrors only (`target_url` ← `url_or_path`; optional `payload` ← `body`). Gate with query/header flag; default responses unchanged.
+**Decision:** Additive mirrors only (`target_url` â† `url_or_path`; optional `payload` â† `body`). Gate with query/header flag; default responses unchanged.
 
 **Touch:** `TaskResource` (and create/update docs), `docs/architecture/api-contract-v1.md`, feature test under `tests/Feature/Phase1/` or Tasks.
 
 **Tests:** Default JSON unchanged; alias mode includes mirrors.
 
-### 3. [#79](https://github.com/suporterfid/taskconnect/issues/79) — E2E auto-seed
+### 3. [#79](https://github.com/suporterfid/taskconnect/issues/79) â€” E2E auto-seed
 
 **Decision:** When `E2E_*` set, seed dead run + pipeline instance via API (or local-only seed) so `dlq-pipelines.spec.ts` does not skip deep steps.
 

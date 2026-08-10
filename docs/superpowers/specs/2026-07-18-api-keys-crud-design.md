@@ -1,4 +1,7 @@
-# API Keys CRUD Design
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 **Date:** 2026-07-18  
 **Status:** Approved  
@@ -12,10 +15,10 @@ The API Keys page is read-only. The API already supports create and revoke; ther
 
 - **UI approach:** Inline CRUD on a single `/api-keys` page (list + create/edit form panel), matching Environments.
 - **Editable after create:** Name, expiry, and permissions. Environment is set only on create and stays immutable.
-- **Permissions UX:** Curated checklist — Full access (`*`) plus known scopes. Selecting Full access stores `['*']` only.
+- **Permissions UX:** Curated checklist â€” Full access (`*`) plus known scopes. Selecting Full access stores `['*']` only.
 - **Revoked keys:** Remain on the list with a **Revoked** badge; view-only; no restore/unrevoke.
 - **Secret:** Plaintext shown once after create (copy + dismiss); never returned on list/update.
-- **No secret regeneration** — revoke and create a new key instead.
+- **No secret regeneration** â€” revoke and create a new key instead.
 
 ## Backend
 
@@ -24,7 +27,7 @@ Routes under `/api/v1/tenants/{tenantId}/api-keys`:
 | Method | Action |
 |--------|--------|
 | GET | List (includes revoked); active first, then revoked |
-| POST | Create `{ name, permissions, environment_id?, expires_at? }` → includes `plaintext` once |
+| POST | Create `{ name, permissions, environment_id?, expires_at? }` â†’ includes `plaintext` once |
 | PATCH | Update `{ name?, permissions?, expires_at? }` on non-revoked keys only |
 | DELETE | Revoke |
 
@@ -38,7 +41,7 @@ Align `ApiKey` with `ApiKeyResource` (`key_prefix`, permissions, environment_id,
 
 ### ApiKeysPage
 
-- Header CTA “Create API key”.
+- Header CTA â€œCreate API keyâ€.
 - Table: name, prefix, permissions, environment, last used, expires, status, actions.
 - Inline form for create/edit; environment select on create only.
 - One-time plaintext reveal panel after create.

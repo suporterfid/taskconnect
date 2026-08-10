@@ -1,4 +1,7 @@
-# Environments CRUD Implementation Plan
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 > **For agentic workers:** Implement task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -45,18 +48,18 @@
 - [ ] List table with name, slug, Active/Archived badge, Edit/Archive actions
 - [ ] Create CTA + inline form (name, optional slug)
 - [ ] Edit hydrates form; submit POST or PATCH
-- [ ] Archive with confirm → DELETE; then `tenant.fetchEnvironments`
+- [ ] Archive with confirm â†’ DELETE; then `tenant.fetchEnvironments`
 - [ ] Loading/error/empty + needs-tenant states
 
 ### Task 4: Build + deploy
 
-- [ ] `docker run … npm run build` for frontend
+- [ ] `docker run â€¦ npm run build` for frontend
 - [ ] FTPS mirror `public/build` via `taskconnect-deploy`
 - [ ] SSH `view:clear`
 - [ ] Smoke: HTML references new index hash; create/edit/archive works after hard refresh
 
 ### Task 5: Verification
 
-- [ ] Create env → appears in list and header
+- [ ] Create env â†’ appears in list and header
 - [ ] Edit name/slug
-- [ ] Archive → badge on page; gone from header; if it was current, selector moves to another active env
+- [ ] Archive â†’ badge on page; gone from header; if it was current, selector moves to another active env

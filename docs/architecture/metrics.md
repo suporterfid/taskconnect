@@ -1,6 +1,9 @@
-# Platform metrics (R18)
+﻿
 
-Prometheus-style text exposition for operators and scrapers. No sidecar, no always-on agent — scraped over HTTP from shared hosting like any other API route.
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
+
+Prometheus-style text exposition for operators and scrapers. No sidecar, no always-on agent â€” scraped over HTTP from shared hosting like any other API route.
 
 ## Endpoint
 
@@ -16,9 +19,9 @@ GET /api/v1/platform/metrics
 
 | Metric | Type | Meaning |
 |--------|------|---------|
-| `taskconnect_queue_depth{state=…}` | gauge | `pending` / `retry_wait` / `blocked` run counts |
+| `taskconnect_queue_depth{state=â€¦}` | gauge | `pending` / `retry_wait` / `blocked` run counts |
 | `taskconnect_inflight` | gauge | `running` runs |
-| `taskconnect_inflight_by_type{task_type=…}` | gauge | running runs by task type |
+| `taskconnect_inflight_by_type{task_type=â€¦}` | gauge | running runs by task type |
 | `taskconnect_dlq_size` | gauge | `dead` runs |
 | `taskconnect_attempt_duration_ms{task_type,quantile}` | summary | p50 / p95 from up to 500 recent attempts with `duration_ms` |
 | `taskconnect_attempt_duration_ms_count{task_type}` | summary count | sample size per type |
@@ -32,5 +35,5 @@ Latencies are approximate (bounded recent sample) so the endpoint stays cheap on
 ## Example scrape
 
 ```bash
-curl -H "Authorization: Bearer …" https://example.com/api/v1/platform/metrics
+curl -H "Authorization: Bearer â€¦" https://example.com/api/v1/platform/metrics
 ```

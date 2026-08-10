@@ -1,4 +1,7 @@
-# Environments CRUD Design
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 **Date:** 2026-07-18  
 **Status:** Approved  
@@ -45,7 +48,7 @@ Extend `Environment` with `archived_at`, `created_at`, `updated_at`. Add `Enviro
 
 ### EnvironmentsPage
 
-- Header CTA “New environment”.
+- Header CTA â€œNew environmentâ€.
 - Table: name, slug, status badge (Active / Archived), actions (Edit if not archived, Archive if not archived).
 - Inline form for create/edit: name + optional slug (auto-slug from name when empty on create).
 - Archive confirm dialog.
@@ -58,7 +61,7 @@ en + pt-BR: form labels, archive confirm, badges, errors. Reuse `common.save` / 
 ## Out of scope
 
 - Restore/unarchive
-- Enforcing “no new tasks/keys on archived envs” in middleware
+- Enforcing â€œno new tasks/keys on archived envsâ€ in middleware
 - Separate detail routes
 - Pagination
 

@@ -1,14 +1,17 @@
-# Dead-letter queue (R6)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 For P0, the dead-letter queue (DLQ) **is** `task_runs` with `run_state=dead`. There is no separate DLQ table.
 
 ## Operator CLI
 
 ```bash
-php artisan tasks:dlq:list [--workspace=env_…] [--type=document.convert] [--limit=50]
+php artisan tasks:dlq:list [--workspace=env_â€¦] [--type=document.convert] [--limit=50]
 php artisan tasks:dlq:show {run_public_id}
 php artisan tasks:dlq:replay {run_public_id}
-php artisan tasks:dlq:replay --type=document.convert [--workspace=env_…] [--limit=50]
+php artisan tasks:dlq:replay --type=document.convert [--workspace=env_â€¦] [--limit=50]
 ```
 
 `replay` creates a **new** Pending run with attempt count 1 and a **new** delivery `Idempotency-Key` group (see `docs/architecture/callback-contract.md`). The original dead run remains for history until retention deletes it. Replay is audited as `dlq.replayed`.
@@ -25,7 +28,7 @@ POST /api/v1/tenants/{tenant}/environments/{env}/dlq/{runId}/replay
 
 The SPA `/dlq` page lists dead runs and calls `replay` (fresh delivery idempotency group, same as the CLI).
 
-API `POST …/task-runs/{id}/retry` still reuses the same delivery key (in-run retry semantics). Prefer the DLQ CLI when the operator wants a fresh delivery group after exhaustion.
+API `POST â€¦/task-runs/{id}/retry` still reuses the same delivery key (in-run retry semantics). Prefer the DLQ CLI when the operator wants a fresh delivery group after exhaustion.
 
 ## Retention
 

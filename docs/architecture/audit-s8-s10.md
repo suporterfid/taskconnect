@@ -1,6 +1,9 @@
-# Audit (S10) and rate limits (S8)
+﻿
 
-## S10 — Workspace-scoped audit
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
+
+## S10 â€” Workspace-scoped audit
 
 `audit_logs` records operator and system security-relevant actions. Scheduler path (cron) now also emits:
 
@@ -16,13 +19,13 @@ Bodies, headers, and secrets are **not** written to audit summaries (see `AuditL
 
 Toggles (default on): `SCHEDULER_AUDIT_CLAIMS`, `SCHEDULER_AUDIT_DELIVERIES`.
 
-## S8 — Rate limiting & callback verification
+## S8 â€” Rate limiting & callback verification
 
 | Surface | Owner | Mechanism |
 |---------|-------|-----------|
-| Task/pipeline **submission** | TaskConnect | DB `rate_limit_buckets` (R15) — `docs/architecture/submit-rate-limiting.md` |
-| Egress **per-host** (public-crawl/api) | TaskConnect | DB buckets — `docs/architecture/egress-profiles.md` |
-| **Callback verification** (HMAC + freshness + nonce non-replay) | **Notes-app / receiver** | Not a TaskConnect HTTP endpoint. TC **mints** `X-TC-*` HMAC headers when GrandpaSSOn outbound is enabled; the **receiver** verifies. No TC inbound “verify callback” API → no TC verify rate limiter. |
+| Task/pipeline **submission** | TaskConnect | DB `rate_limit_buckets` (R15) â€” `docs/architecture/submit-rate-limiting.md` |
+| Egress **per-host** (public-crawl/api) | TaskConnect | DB buckets â€” `docs/architecture/egress-profiles.md` |
+| **Callback verification** (HMAC + freshness + nonce non-replay) | **Notes-app / receiver** | Not a TaskConnect HTTP endpoint. TC **mints** `X-TC-*` HMAC headers when GrandpaSSOn outbound is enabled; the **receiver** verifies. No TC inbound â€œverify callbackâ€ API â†’ no TC verify rate limiter. |
 | Inbound GSS token introspect | TaskConnect | Dual-mode middleware; failures audited. Submission still covered by R15 when creating work. |
 
 If a future shared verify helper or inbound status webhook is added to this repo, it **must** use `DatabaseRateLimiter` (no Redis).

@@ -1,5 +1,12 @@
-# Vue 3 + TypeScript + Vite
+# TaskConnect Operator SPA
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+Vue 3 + TypeScript + Vite + Pinia + Tailwind CSS frontend SPA for the TaskConnect multi-tenant HTTP task scheduler.
+
+## Development
+
+Run frontend commands through the Docker container wrapper:
+- Unit tests: `tc npm --prefix frontend run test`
+- Build & Type check: `tc npm --prefix frontend run build`
+- E2E Playwright tests: `tc npm --prefix frontend run e2e`

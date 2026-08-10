@@ -1,4 +1,7 @@
-# Secret hygiene (R9)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 ## At rest / snapshots
 
@@ -10,7 +13,7 @@
 `scripts/validate-release.sh` (invoked by `tc release`) fails the build if the release tree or zip contains:
 
 - `.env` / `.env.*` (except documentation placeholders outside the zip)
-- Private key files / PEM `BEGIN … PRIVATE KEY` blocks
-- Obvious third-party credential assignments (`AWS_SECRET_ACCESS_KEY`, `sk_live_…`, etc.)
+- Private key files / PEM `BEGIN â€¦ PRIVATE KEY` blocks
+- Obvious third-party credential assignments (`AWS_SECRET_ACCESS_KEY`, `sk_live_â€¦`, etc.)
 
 Feature coverage: `tests/Feature/ReleaseSecretScanTest.php`.

@@ -1,4 +1,7 @@
-# Egress profiles (R7)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 Named profiles select SSRF / allowlist policy **before** DNS-pinned connect.
 
@@ -12,7 +15,7 @@ Task `egress_profile` (or type default from `config/task_types.php`) is applied 
 
 Q3: `public-crawl` is shipped; only types that need public fetch (e.g. crawl) reference it by default.
 
-## §6.5 extras
+## Â§6.5 extras
 
 | Extra | Profiles | Behavior |
 |-------|----------|----------|

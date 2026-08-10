@@ -1,4 +1,7 @@
-# Members CRUD Design
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 **Date:** 2026-07-18  
 **Status:** Approved  
@@ -10,10 +13,10 @@ The Members page is read-only. Spec requires tenant admins to invite members, ch
 
 ## Decisions
 
-- **Invite model (MVP):** Immediate membership — no invitations table or accept-token flow.
+- **Invite model (MVP):** Immediate membership â€” no invitations table or accept-token flow.
   - `POST` with `{ email, name?, role }`
-  - Existing user → add membership (422 if already a member)
-  - New user → create user with random password, create membership, send password-reset link
+  - Existing user â†’ add membership (422 if already a member)
+  - New user â†’ create user with random password, create membership, send password-reset link
 - **Update:** Role only. Email/name are not edited from this surface.
 - **Remove:** Hard-delete the `tenant_memberships` row.
 - **Auth:** Tenant admin or platform admin (`actorIsTenantAdmin`). List remains available to any tenant member.
@@ -42,7 +45,7 @@ Audit events: `member.invited`, `member.role_changed`, `member.removed`.
 
 ### MembersPage
 
-- Header CTA “Invite member”.
+- Header CTA â€œInvite memberâ€.
 - Table: name, email, localized role, Edit / Remove.
 - Inline invite form: email, name, role.
 - Inline edit form: role only.

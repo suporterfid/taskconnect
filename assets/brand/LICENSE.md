@@ -1,5 +1,7 @@
 # TaskConnect mark license
 
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 The files in this directory (`mark.svg`, `mark-monochrome.svg`, `wordmark.svg`,
 `favicon.svg`, `social-card.png`) are the TaskConnect project mark. They are
 original artwork created for this project and are licensed separately from

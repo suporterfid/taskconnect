@@ -1,4 +1,7 @@
-# Manual MVP acceptance checklist (§26.4 / §28.1)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 Use this when Playwright browsers are unavailable (slim node image) or for release smoke on shared hosting.
 
@@ -18,13 +21,22 @@ Use this when Playwright browsers are unavailable (slim node image) or for relea
 10. Inspect run + attempts (redacted snapshots).
 11. Force a transient failure (receiver 5xx) and confirm retry wait / next attempt.
 12. Pause and resume the task.
-13. Switch UI locale EN ↔ pt-BR and confirm strings update.
+13. Switch UI locale EN â†” pt-BR and confirm strings update.
 
 Optional automated smoke (after `npx playwright install --with-deps chromium` in the node container):
 
 ```bash
 bash ./scripts/tc.sh e2e
-# Authenticated DLQ inspect/replay + pipeline detail:
-# see docs/deployment/e2e-operator.md
-# E2E_EMAIL=… E2E_PASSWORD=… bash ./scripts/tc.sh e2e
+
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
+
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
+
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 ```

@@ -1,4 +1,7 @@
-# MVP P4 Implementation Plan
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 **Branch:** `cursor/mvp-p4-operator-ui-e2e-722a`
 

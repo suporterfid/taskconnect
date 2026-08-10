@@ -1,4 +1,7 @@
-# Cron Configuration
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 ```cron
 * * * * * /usr/bin/php /home/account/app/artisan scheduler:execute-due >/dev/null 2>&1

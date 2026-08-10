@@ -1,16 +1,19 @@
-# Coalesce / debounce (R11)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 Bursty enqueues that share a `coalesce_key` within a **workspace** collapse to the first effective task for a configurable window.
 
 ## Behavior
 
-- Optional `coalesce_key` on `POST …/tasks` (and on pipeline node delivery configs).
+- Optional `coalesce_key` on `POST â€¦/tasks` (and on pipeline node delivery configs).
 - Lookup is scoped by `tenant_id` + `environment_id` (workspace) + `coalesce_key`.
 - Window: `SCHEDULER_COALESCE_WINDOW_SECONDS` (default **60**), measured from the first task's `created_at`.
-- Hit → **200** with the existing task and `meta.coalesced: true` (no second row).
-- Miss → **201** create with `meta.coalesced: false`.
+- Hit â†’ **200** with the existing task and `meta.coalesced: true` (no second row).
+- Miss â†’ **201** create with `meta.coalesced: false`.
 
-Distinct from R2 `Idempotency-Key`: idempotency replays the exact same request; coalesce merges **different** submits that share a semantic key (e.g. many edits → one `publish.build`).
+Distinct from R2 `Idempotency-Key`: idempotency replays the exact same request; coalesce merges **different** submits that share a semantic key (e.g. many edits â†’ one `publish.build`).
 
 ## Pipelines (R10)
 

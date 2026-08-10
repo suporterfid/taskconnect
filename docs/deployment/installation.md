@@ -1,4 +1,7 @@
-# Installation (Shared Hosting)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 1. Upload the release archive (from `tc release` / CI) and extract outside the public web root when possible.
 2. Point the site document root to `public/`.
@@ -31,7 +34,7 @@ Cleanup is driven by minute/hourly cron (`scheduler:maintenance`) using env vars
 | `RETENTION_SYSTEM_HEARTBEAT_DAYS` | 30 | Old heartbeat rows |
 | `RETENTION_DEAD_RUNS_DAYS` | 30 | Dead-letter (`run_state=dead`) runs (R6 / Q6) |
 
-Operators can view the effective values in **Settings → Retention** (read-only) or Platform Health (admins).
+Operators can view the effective values in **Settings â†’ Retention** (read-only) or Platform Health (admins).
 
 ## Application key backup
 

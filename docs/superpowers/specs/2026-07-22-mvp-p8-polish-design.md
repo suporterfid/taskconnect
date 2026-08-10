@@ -1,8 +1,11 @@
-# MVP P8 Design — Request fidelity + operator polish
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 ## Goal
 
-Close remaining high-value §9 / §18 / §21 / §22 / §28 gaps without browser-heavy e2e or the 8-step wizard rewrite.
+Close remaining high-value Â§9 / Â§18 / Â§21 / Â§22 / Â§28 gaps without browser-heavy e2e or the 8-step wizard rewrite.
 
 ## Scope
 
@@ -11,10 +14,10 @@ Close remaining high-value §9 / §18 / §21 / §22 / §28 gaps without browser-
 3. Platform health: maintenance heartbeat + degrade on stale execute/retry.
 4. Read-only retention defaults in Settings (+ docs for `RETENTION_*`).
 5. Secret rotate confirm + impact copy.
-6. §28.5 polish: i18n placeholders, 429 mapping, API key permission labels.
+6. Â§28.5 polish: i18n placeholders, 429 mapping, API key permission labels.
 
 ## Non-goals
 
-- Full cron→receiver Playwright
+- Full cronâ†’receiver Playwright
 - Standalone Auth/Request Data wizard steps
 - Notification rule builder / per-tenant retention UI

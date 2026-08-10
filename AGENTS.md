@@ -1,5 +1,7 @@
 # AGENTS.md
 
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 Guidance for AI agents working in this repository.
 
 ## Read first

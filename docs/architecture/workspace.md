@@ -1,4 +1,7 @@
-# Workspace scoping (v1 Extension R1)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 ## Alias
 
@@ -8,9 +11,9 @@ For the v1 Extension Spec, a **workspace** is the existing **Environment** recor
 |------------|----------------|
 | `workspace_id` (API) | Environment `public_id` |
 | DB FK | `environment_id` (unchanged) |
-| Routes | Still `/tenants/{tenantId}/environments/{environmentId}/…` |
+| Routes | Still `/tenants/{tenantId}/environments/{environmentId}/â€¦` |
 
-API JSON resources expose `workspace_id` alongside existing fields. Optional request body `workspace_id` on task create/update must match the route environment’s public id.
+API JSON resources expose `workspace_id` alongside existing fields. Optional request body `workspace_id` on task create/update must match the route environmentâ€™s public id.
 
 See also: [callback-contract.md](callback-contract.md) for outbound delivery idempotency headers (R3).
 
@@ -20,7 +23,7 @@ All tenant resources remain filtered by `tenant_id` **and** `environment_id`. Cr
 
 ## Audit
 
-`audit_logs.environment_id` records the workspace when the request carries an environment context (`tenant.context` middleware). List filter: `GET …/audit-logs?workspace_id={env_public_id}`.
+`audit_logs.environment_id` records the workspace when the request carries an environment context (`tenant.context` middleware). List filter: `GET â€¦/audit-logs?workspace_id={env_public_id}`.
 
 ## Claiming
 

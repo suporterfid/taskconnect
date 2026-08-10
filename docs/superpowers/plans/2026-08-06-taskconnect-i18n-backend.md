@@ -1,4 +1,7 @@
-# TaskConnect i18n backend completion Implementation Plan
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
@@ -21,7 +24,7 @@
 - Test: `tests/Feature/SetLocaleFromUserTest.php`
 - Modify: `bootstrap/app.php` (append to `$middleware->api(...)`)
 
-- [ ] Write failing test: authenticated user with `UserPreference.locale = 'pt-BR'` making a request that trips a validation error gets a `pt-BR` message for a Laravel-native rule (e.g. `required`). Build the user with `User::factory()->create()` + `UserPreference::factory()->create(['user_id' => $user->id, 'locale' => 'pt-BR'])`, act via `actingAs($user)`, hit any existing endpoint with a required field validated by Laravel's default rules, assert the 422 response's message contains the Portuguese wording (only after `lang/pt-BR/validation.php` exists — write this test after Task 2, or stub the expectation against a custom test route + `Validator::make(...)->validate()` calling `__('validation.required', ['attribute' => 'name'])` directly if no simpler existing endpoint qualifies. Prefer reusing an existing validated endpoint if one exists (check `UserPreferencesController`'s `locale` rule failure message).
+- [ ] Write failing test: authenticated user with `UserPreference.locale = 'pt-BR'` making a request that trips a validation error gets a `pt-BR` message for a Laravel-native rule (e.g. `required`). Build the user with `User::factory()->create()` + `UserPreference::factory()->create(['user_id' => $user->id, 'locale' => 'pt-BR'])`, act via `actingAs($user)`, hit any existing endpoint with a required field validated by Laravel's default rules, assert the 422 response's message contains the Portuguese wording (only after `lang/pt-BR/validation.php` exists â€” write this test after Task 2, or stub the expectation against a custom test route + `Validator::make(...)->validate()` calling `__('validation.required', ['attribute' => 'name'])` directly if no simpler existing endpoint qualifies. Prefer reusing an existing validated endpoint if one exists (check `UserPreferencesController`'s `locale` rule failure message).
 - [ ] Implement middleware:
   ```php
   <?php
@@ -45,7 +48,7 @@
       }
   }
   ```
-- [ ] Append `\App\Http\Middleware\SetLocaleFromUser::class` to the `$middleware->api(prepend: [...])` call in `bootstrap/app.php` — actually append (after auth middleware resolves the user), not prepend; add a separate `$middleware->api(append: [...])` call if `statefulApi()`/prepend ordering requires it, so this runs after `AuthenticateApiKeyOrSanctum`.
+- [ ] Append `\App\Http\Middleware\SetLocaleFromUser::class` to the `$middleware->api(prepend: [...])` call in `bootstrap/app.php` â€” actually append (after auth middleware resolves the user), not prepend; add a separate `$middleware->api(append: [...])` call if `statefulApi()`/prepend ordering requires it, so this runs after `AuthenticateApiKeyOrSanctum`.
 - [ ] Run test, verify pass.
 - [ ] Commit: `feat(i18n): set app locale from the authenticated user's preference`
 
@@ -72,8 +75,8 @@
   <?php
 
   return [
-      'account_reset_link_sent' => 'Se existir uma conta com esse e-mail, um link de redefinição foi enviado.',
-      'webhook_url_not_allowed' => 'A URL do webhook não é permitida.',
+      'account_reset_link_sent' => 'Se existir uma conta com esse e-mail, um link de redefiniÃ§Ã£o foi enviado.',
+      'webhook_url_not_allowed' => 'A URL do webhook nÃ£o Ã© permitida.',
   ];
   ```
 - [ ] Commit: `feat(i18n): scaffold lang/ with validation and messages catalogs`
@@ -111,16 +114,16 @@
 
 **Files:**
 - Modify: `frontend/src/layouts/AppLayout.vue` (`onLocaleChange`)
-- Test: `frontend/src/layouts/AppLayout.spec.ts` (new, or extend existing spec if one exists — check first)
+- Test: `frontend/src/layouts/AppLayout.spec.ts` (new, or extend existing spec if one exists â€” check first)
 
 - [ ] Write failing test: mount `AppLayout`, trigger the header locale `<select>` change, assert `api.patch` was called with `/me/preferences` and `{ locale: ... }`.
-- [ ] Update `onLocaleChange` in `AppLayout.vue` to call the same PATCH the Settings page makes (extract a shared `persistLocale(locale)` helper into `frontend/src/stores/auth.ts` or `locale.ts` if that avoids duplicating the try/catch — reuse `SettingsPage.vue`'s existing `persistPreferences` shape as the reference implementation, keeping local-store update as the immediate optimistic change and the PATCH as fire-and-forget with a console warning on failure, matching jotter's `useLocale.ts` composable pattern).
+- [ ] Update `onLocaleChange` in `AppLayout.vue` to call the same PATCH the Settings page makes (extract a shared `persistLocale(locale)` helper into `frontend/src/stores/auth.ts` or `locale.ts` if that avoids duplicating the try/catch â€” reuse `SettingsPage.vue`'s existing `persistPreferences` shape as the reference implementation, keeping local-store update as the immediate optimistic change and the PATCH as fire-and-forget with a console warning on failure, matching jotter's `useLocale.ts` composable pattern).
 - [ ] Run test, verify pass.
 - [ ] Run full frontend test suite + `npm run build`.
 - [ ] Commit: `feat(i18n): persist header locale switcher via PATCH /me/preferences`
 
 ### Final verification
-- [ ] `./scripts/tc.sh artisan test` — full backend suite green.
-- [ ] `./scripts/tc.sh npm test` — full frontend suite green.
-- [ ] `./scripts/tc.sh npm run build` — clean.
+- [ ] `./scripts/tc.sh artisan test` â€” full backend suite green.
+- [ ] `./scripts/tc.sh npm test` â€” full frontend suite green.
+- [ ] `./scripts/tc.sh npm run build` â€” clean.
 - [ ] Invoke `superpowers:finishing-a-development-branch`.

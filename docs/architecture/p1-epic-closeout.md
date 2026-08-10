@@ -1,4 +1,7 @@
-# P1 epic closeout (R10–R15)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 Epic [#27](https://github.com/suporterfid/taskconnect/issues/27) is complete. All children shipped and closed:
 

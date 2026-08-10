@@ -1,8 +1,11 @@
-# Automated Deployment (FTP + SSH)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 `tc deploy` builds the production release and publishes it to shared hosting in one
 command. It uses a throwaway Docker image (`lftp` + `ssh` + `sshpass` + `jq`), so
-you do **not** need any FTP or SSH client installed on your machine — the
+you do **not** need any FTP or SSH client installed on your machine â€” the
 Docker-only rule still holds. It works identically from Windows (PowerShell) and
 Linux/macOS (bash).
 
@@ -11,7 +14,7 @@ Linux/macOS (bash).
 1. Builds the production release tree into `dist/app` (Composer `--no-dev`,
    compiled frontend assets, dev tooling stripped).
 2. Injects a hardened root `.htaccess` that routes all traffic into `public/` and
-   blocks direct access to `.env` / source directories — so the whole app can
+   blocks direct access to `.env` / source directories â€” so the whole app can
    safely live inside `public_html`.
 3. **When SSH is enabled (recommended):** packages the tree into a single zip,
    uploads it over SFTP, extracts on the server, preserves `storage/` and `.env`,
@@ -38,20 +41,26 @@ Config reference:
 | `options.delete_remote` | `false` (safe). `true` removes remote files not present locally. |
 | `options.inject_root_htaccess` | Keep `true` for the single-folder `public_html` layout. |
 | `options.upload_env` | `true` uploads `options.env_source` to the remote `.env`. Off by default. |
-| `ssh.php_binary` | Absolute path to PHP ≥ 8.2. On Hostinger this is typically `/opt/alt/php83/usr/bin/php` (the default `php` is often 7.4). |
+| `ssh.php_binary` | Absolute path to PHP â‰¥ 8.2. On Hostinger this is typically `/opt/alt/php83/usr/bin/php` (the default `php` is often 7.4). |
 | `ssh.run_migrations` | Runs `php artisan migrate --force` after upload. |
 
-Also set the **website PHP version to 8.2+** in hPanel → Advanced → PHP Configuration, otherwise the web app will still run under 7.4 even though CLI migrations use 8.3.
+Also set the **website PHP version to 8.2+** in hPanel â†’ Advanced â†’ PHP Configuration, otherwise the web app will still run under 7.4 even though CLI migrations use 8.3.
 
 ## Deploy
 
 ```powershell
-# Windows
+
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 .\scripts\tc.ps1 deploy
 ```
 
 ```bash
-# Linux / macOS
+
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 ./scripts/tc.sh deploy      # or: make deploy
 ```
 
@@ -59,12 +68,12 @@ Also set the **website PHP version to 8.2+** in hPanel → Advanced → PHP Conf
 
 The remote `.env` is **never overwritten** by default, so before the first deploy
 create it once on the server (via hPanel File Manager or SSH) with production
-values — `APP_ENV=production`, `APP_DEBUG=false`, `APP_KEY`, `APP_URL`, and the
+values â€” `APP_ENV=production`, `APP_DEBUG=false`, `APP_KEY`, `APP_URL`, and the
 Hostinger MySQL credentials. See [installation.md](installation.md).
 
 Then:
 
-1. Run `tc deploy` — files upload and migrations run automatically over SSH.
+1. Run `tc deploy` â€” files upload and migrations run automatically over SSH.
 2. Bootstrap the first admin over SSH:
    ```bash
    ssh -p 65002 u250556264@62.72.52.123

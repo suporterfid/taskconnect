@@ -1,8 +1,11 @@
-# MVP P5 Acceptance Polish — Implementation Plan
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 > **For agentic workers:** Implement task-by-task. Steps use checkbox syntax for tracking.
 
-**Goal:** Close §28 UI/operability gaps: run diagnostics, dashboard discoverability, schedule preview, schedule_human rendering, thin authenticated Playwright.
+**Goal:** Close Â§28 UI/operability gaps: run diagnostics, dashboard discoverability, schedule preview, schedule_human rendering, thin authenticated Playwright.
 
 **Architecture:** Thin API additions (preview + run_state filter + dashboard recent runs) on existing Domain/Application services; SPA pages consume them. No queue/broker changes.
 
@@ -36,7 +39,7 @@
 
 ### Task 4: Dashboard UI polish
 
-- [ ] Create-task CTA; link stats to `/runs?run_state=…`; show recent runs list
+- [ ] Create-task CTA; link stats to `/runs?run_state=â€¦`; show recent runs list
 - [ ] i18n
 
 ### Task 5: Wizard schedule preview + schedule_human helper

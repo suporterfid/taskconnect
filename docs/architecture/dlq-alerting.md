@@ -1,4 +1,7 @@
-# DLQ alerting (R13)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 When a run settles as `dead`, TaskConnect can notify operators via email and/or a workspace webhook.
 
@@ -26,7 +29,7 @@ Webhook URLs are validated with the `public-crawl` egress profile (SSRF / privat
 
 ## Audit
 
-- `dlq.alert.email_sent` — email channel fired (`recipient_count`)
-- `dlq.alert.webhook_sent` / `dlq.alert.webhook_failed` — webhook outcome (`webhook_host`, `status_code`; full URL never logged)
+- `dlq.alert.email_sent` â€” email channel fired (`recipient_count`)
+- `dlq.alert.webhook_sent` / `dlq.alert.webhook_failed` â€” webhook outcome (`webhook_host`, `status_code`; full URL never logged)
 
 Alert failures never roll back the dead-run settlement.

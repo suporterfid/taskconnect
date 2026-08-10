@@ -1,8 +1,11 @@
-# MVP P9 Design — Acceptance closeout
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 ## Goal
 
-Close remaining list-discoverability gaps for §28 and cut a clean v1.2 quality gate.
+Close remaining list-discoverability gaps for Â§28 and cut a clean v1.2 quality gate.
 
 ## Scope
 
@@ -14,7 +17,7 @@ Close remaining list-discoverability gaps for §28 and cut a clean v1.2 quality 
 
 ## Non-goals
 
-- Full cron→receiver Playwright
+- Full cronâ†’receiver Playwright
 - 8-step wizard Auth/Request Data rewrite
 - Notification rule builder / per-tenant retention UI
 - Environment restore

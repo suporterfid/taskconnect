@@ -1,4 +1,7 @@
-# TaskConnect v1 Extension — Implementation Plan
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 **Origin:** `docs/superpowers/specs/2026-07-22-taskconnect-v1-extension-spec.md`  
 **Base authority:** `docs/http-task-scheduler-spec.md` (wins on v0 conflicts)  
@@ -7,22 +10,22 @@
 
 ## Problem frame
 
-v0 schedules tenant/environment HTTP tasks with MySQL claim leases + cron. The knowledge-platform needs workspace-scoped jobs, end-to-end idempotency, resource governance, DLQ, named egress, and GrandpaSSOn-delegated auth — **without** breaking shared-hosting constraints (no Redis/daemon).
+v0 schedules tenant/environment HTTP tasks with MySQL claim leases + cron. The knowledge-platform needs workspace-scoped jobs, end-to-end idempotency, resource governance, DLQ, named egress, and GrandpaSSOn-delegated auth â€” **without** breaking shared-hosting constraints (no Redis/daemon).
 
 ## Scope boundary
 
 | In (this plan) | Out until later phases |
 |----------------|-------------------------|
-| P0 R1–R9; P1 R10+ as issues land | Remaining P1/P2 until mirrored by issues |
+| P0 R1â€“R9; P1 R10+ as issues land | Remaining P1/P2 until mirrored by issues |
 | Docs + issues + migrations that keep v0 green | In-process convert/crawl/embed (N1) |
 
-**Original stop line (§11):** R1–R9 complete — **done**. P1 proceeds via GitHub issues (#28+).
+**Original stop line (Â§11):** R1â€“R9 complete â€” **done**. P1 proceeds via GitHub issues (#28+).
 
 ## Architecture decisions
 
 1. **Workspace = Environment (v1 alias).** Map `workspace_id` API field to existing `environment_id` / `Environment` public id. Avoid a second hierarchy until Workspace gains distinct semantics (quotas beyond env). Document alias in API resources; keep DB column `environment_id` unless a later rename migration is justified.
 2. **Task type = config + optional DB table.** Seed named types (`document.convert`, `site.crawl`, `kb.index`, `publish.build`, `note.reminder`) with priority/weight/timeout/caps/egress from `config/task_types.php` + env overrides (Q4 defaults). Persist `task_type` on tasks.
-3. **DLQ = `run_state=dead` + CLI.** No separate DLQ table for P0; artisan commands list/show/replay dead runs. Replay = new attempt group / new delivery idempotency key (per §6.6).
+3. **DLQ = `run_state=dead` + CLI.** No separate DLQ table for P0; artisan commands list/show/replay dead runs. Replay = new attempt group / new delivery idempotency key (per Â§6.6).
 4. **Egress profiles wrap `OutboundPolicy`.** Profiles `internal` | `public-crawl` | `api` select allowlists / deny rules; keep DNS-pinned transport. Ship `public-crawl` unused by default (Q3).
 5. **GrandpaSSOn is required for R8** (Q1 default: no local-only auth path). Gate R8 behind config + cross-repo `tasks:write` ticket; keep Sanctum/API-key for SPA/v0 until cutover flags allow dual mode during migration.
 6. **Delivery idempotency header:** Prefer Extension Spec `Idempotency-Key` while retaining `X-Task-Idempotency-Key` for one release if needed for compatibility.
@@ -45,13 +48,13 @@ flowchart TD
   r4 -.-> r7
 ```
 
-Implement **in order R1→R9**. Do not start R(n+1) until R(n) acceptance tests pass (spec §0). R7 can share design work with R4 (`egress_profile` on type) but claimer caps (R4) should land before profile selection is enforced on delivery.
+Implement **in order R1â†’R9**. Do not start R(n+1) until R(n) acceptance tests pass (spec Â§0). R7 can share design work with R4 (`egress_profile` on type) but claimer caps (R4) should land before profile selection is enforced on delivery.
 
 ## Gap summary (current main)
 
 | Req | Status | Notes |
 |-----|--------|-------|
-| R1 | **Done** (#17) | Environment ↔ workspace_id API alias; audit_logs.environment_id; see `docs/architecture/workspace.md` |
+| R1 | **Done** (#17) | Environment â†” workspace_id API alias; audit_logs.environment_id; see `docs/architecture/workspace.md` |
 | R2 | **Done** (#18) | Required Idempotency-Key on create/run-now; workspace-scoped; 24h TTL; 200 replay; prune via retention |
 | R3 | **Done** (#19) | Outbound `Idempotency-Key` + deprecated `X-Task-Idempotency-Key`; `docs/architecture/callback-contract.md` |
 | R4 | **Done** (#20) | `config/task_types.php` + task columns; claimer priority + weight caps; see CHANGELOG R4 |
@@ -89,7 +92,7 @@ Canonical tracking (created 2026-07-22):
 
 | Issue | Title |
 |-------|-------|
-| [#16](https://github.com/suporterfid/taskconnect/issues/16) | Epic: P0 stop line (R1–R9) — **closed** (R1–R9 done) |
+| [#16](https://github.com/suporterfid/taskconnect/issues/16) | Epic: P0 stop line (R1â€“R9) â€” **closed** (R1â€“R9 done) |
 | [#17](https://github.com/suporterfid/taskconnect/issues/17) | P0/R1 Workspace scoping |
 | [#18](https://github.com/suporterfid/taskconnect/issues/18) | P0/R2 Enqueue idempotency |
 | [#19](https://github.com/suporterfid/taskconnect/issues/19) | P0/R3 Delivery idempotency |
@@ -99,12 +102,12 @@ Canonical tracking (created 2026-07-22):
 | [#23](https://github.com/suporterfid/taskconnect/issues/23) | P0/R7 Egress profiles |
 | [#24](https://github.com/suporterfid/taskconnect/issues/24) | P0/R8 GrandpaSSOn auth |
 | [#25](https://github.com/suporterfid/taskconnect/issues/25) | P0/R9 Secret / release hygiene |
-| [#26](https://github.com/suporterfid/taskconnect/issues/26) | Cross-repo GrandpaSSOn `tasks:write` — **closed** (handed to [grandpasson#55](https://github.com/suporterfid/grandpasson/issues/55)) |
-| [#27](https://github.com/suporterfid/taskconnect/issues/27) | Epic: P1 (after P0 review) — **closed** (R10–R15 done) |
-| [#28](https://github.com/suporterfid/taskconnect/issues/28)–[#33](https://github.com/suporterfid/taskconnect/issues/33) | P1 R10–R15 |
-| [#34](https://github.com/suporterfid/taskconnect/issues/34) | Epic: P2 R16–R18 — **closed** (R16–R18 done) |
+| [#26](https://github.com/suporterfid/taskconnect/issues/26) | Cross-repo GrandpaSSOn `tasks:write` â€” **closed** (handed to [grandpasson#55](https://github.com/suporterfid/grandpasson/issues/55)) |
+| [#27](https://github.com/suporterfid/taskconnect/issues/27) | Epic: P1 (after P0 review) â€” **closed** (R10â€“R15 done) |
+| [#28](https://github.com/suporterfid/taskconnect/issues/28)â€“[#33](https://github.com/suporterfid/taskconnect/issues/33) | P1 R10â€“R15 |
+| [#34](https://github.com/suporterfid/taskconnect/issues/34) | Epic: P2 R16â€“R18 â€” **closed** (R16â€“R18 done) |
 | [#56](https://github.com/suporterfid/taskconnect/issues/56) | P2/R17 Priority preemption / refined WFQ |
-| [#35](https://github.com/suporterfid/taskconnect/issues/35) | Open questions Q1–Q6 defaults |
+| [#35](https://github.com/suporterfid/taskconnect/issues/35) | Open questions Q1â€“Q6 defaults |
 
 Spec copy: `docs/superpowers/specs/2026-07-22-taskconnect-v1-extension-spec.md`.
 

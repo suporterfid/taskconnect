@@ -1,6 +1,9 @@
-# Fairness scheduling (R12 + R17)
+﻿
 
-`scheduler:execute-due` / `retry-due` claim work **globally**, but candidates are interleaved across workspaces (`environment_id`) so one workspace’s backlog cannot monopolize a tick.
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
+
+`scheduler:execute-due` / `retry-due` claim work **globally**, but candidates are interleaved across workspaces (`environment_id`) so one workspaceâ€™s backlog cannot monopolize a tick.
 
 ## Algorithms
 

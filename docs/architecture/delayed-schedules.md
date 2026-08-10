@@ -1,20 +1,23 @@
-# Delayed `run_at` and cron schedules (R16)
+﻿
 
-TaskConnect already had structured schedule kinds (`once`, `daily_at`, …). R16 formalizes delayed reminders and optional five-field cron without requiring a queue broker.
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
+
+TaskConnect already had structured schedule kinds (`once`, `daily_at`, â€¦). R16 formalizes delayed reminders and optional five-field cron without requiring a queue broker.
 
 ## Top-level `run_at`
 
-`POST/PATCH …/tasks` accept either:
+`POST/PATCH â€¦/tasks` accept either:
 
-- `schedule` — structured config (existing), or
-- `run_at` — ISO-8601 instant for a one-shot delayed run (optional `timezone`, default `UTC`).
+- `schedule` â€” structured config (existing), or
+- `run_at` â€” ISO-8601 instant for a one-shot delayed run (optional `timezone`, default `UTC`).
 
 `run_at` synthesizes `schedule.kind = once` with `at = run_at`. When both are present, `schedule` wins.
 
 Task responses expose:
 
-- `run_at` — the once-schedule `at` when kind is `once`, else `null`
-- `schedule` / `schedule_human` — unchanged shapes
+- `run_at` â€” the once-schedule `at` when kind is `once`, else `null`
+- `schedule` / `schedule_human` â€” unchanged shapes
 
 ## Cron kind
 

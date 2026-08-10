@@ -1,4 +1,7 @@
-# Task types and concurrency (R4)
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 Named task types live in `config/task_types.php` (env overrides via `TASK_TYPE_*`). Each type carries default `priority`, `weight`, `timeout_ms`, `max_attempts`, `egress_profile`, and a **per-type concurrency cap**. A **global in-flight ceiling** (`TASK_TYPE_GLOBAL_INFLIGHT`, default 4) bounds total weight across types.
 
@@ -6,7 +9,7 @@ Named task types live in `config/task_types.php` (env overrides via `TASK_TYPE_*
 
 Tasks store `task_type`, `priority`, `weight`, `timeout_ms`, and `egress_profile`. Create/update apply catalog defaults unless the client overrides governance fields. Unknown types are rejected; omitted `task_type` uses the `default` catalog entry (priority 0).
 
-`timeout_ms` is the **delivery timeout** for outbound HTTP (`HttpDeliveryService` → DNS-pinned transport). Milliseconds are converted to whole seconds (`ceil`) for Guzzle `timeout` / `connect_timeout`, then **capped** by the tighter of endpoint-profile, egress-profile, and global `config/outbound.php` ceilings so a single task cannot exceed shared-hosting-safe bounds.
+`timeout_ms` is the **delivery timeout** for outbound HTTP (`HttpDeliveryService` â†’ DNS-pinned transport). Milliseconds are converted to whole seconds (`ceil`) for Guzzle `timeout` / `connect_timeout`, then **capped** by the tighter of endpoint-profile, egress-profile, and global `config/outbound.php` ceilings so a single task cannot exceed shared-hosting-safe bounds.
 
 `egress_profile` selects the named outbound policy (R7): `internal`, `public-crawl`, or `api`.
 

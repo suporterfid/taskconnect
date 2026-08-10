@@ -1,8 +1,11 @@
-# MVP P7 Design — Ops hardening
+﻿
+
+> *This project is part of the [IROH Initiative](https://github.com/suporterfid/iroh). See the main hub for manifesto, branding, and ecosystem index.*
+
 
 ## Goal
 
-Finish operator ops gaps: bulk task pause/resume, TLS-off warnings, failure-email prefs, schedule_kind filter, and release-zip validation — shared-hosting safe.
+Finish operator ops gaps: bulk task pause/resume, TLS-off warnings, failure-email prefs, schedule_kind filter, and release-zip validation â€” shared-hosting safe.
 
 ## Scope
 
@@ -14,6 +17,6 @@ Finish operator ops gaps: bulk task pause/resume, TLS-off warnings, failure-emai
 
 ## Non-goals
 
-- Full cron→receiver Playwright
+- Full cronâ†’receiver Playwright
 - 8-step wizard Auth/Request Data rewrite
 - Notification rule builder / per-tenant retention UI
