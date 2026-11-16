@@ -1,7 +1,7 @@
 {
   "site": "hub.taskconnect.com.br",
   "ftp": {
-    "host": "62.72.52.123",
+    "host": "186.244.148.205",
     "port": 21,
     "username": "u250556264.hub.taskconnect.com.br",
     "password": "REPLACE_WITH_FTP_PASSWORD",
@@ -11,7 +11,7 @@
   },
   "ssh": {
     "enabled": true,
-    "host": "62.72.52.123",
+    "host": "186.244.148.205",
     "port": 65002,
     "username": "u250556264",
     "password": "REPLACE_WITH_SSH_PASSWORD",

@@ -76,7 +76,7 @@ Then:
 1. Run `tc deploy` â€” files upload and migrations run automatically over SSH.
 2. Bootstrap the first admin over SSH:
    ```bash
-   ssh -p 65002 u250556264@62.72.52.123
+   ssh -p 65002 u250556264@186.244.148.205
    cd domains/hub.taskconnect.com.br/public_html
    php artisan platform:bootstrap-admin you@example.com 'StrongPassword' --name='You'
    ```
