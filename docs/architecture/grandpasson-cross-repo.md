@@ -8,7 +8,7 @@ TaskConnect R8 is **complete** in this repo (dual-mode inbound/outbound; flags d
 | Scope | TaskConnect use | Status |
 |-------|-----------------|--------|
 | `tasks:callback` | Outbound callback bearer | Specified in GrandpaSSOn extension Â§6.3; issuable when granted on the service client |
-| `tasks:write` | Inbound submission introspection | Tracked as [grandpasson#55](https://github.com/suporterfid/grandpasson/issues/55) |
+| `tasks:write` | Inbound submission introspection | Tracked as grandpasson#55 |
 
 ## Audience
 

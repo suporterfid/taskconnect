@@ -38,7 +38,7 @@ TaskConnect is developed under the **IROH Initiative**, a collection of self-hos
 - **Pipeline DAG Execution**: Chain tasks into execution graphs (`on_success`, `on_failure`, `depends_on`) with burst-coalescing and weighted round-robin workspace fairness.
 - **Encrypted Secrets & Payload Redaction**: Transparent symmetric encryption at rest for endpoint credentials, with automatic redaction in execution logs and audit snapshots.
 - **Modern Vue 3 SPA Operator UI**: Content-first, responsive management panel built with Vue 3, Vite, Pinia, and Tailwind CSS.
-- **Single Sign-On (GrandpaSSOn)**: Native integration with `suporterfid/grandpasson` for OAuth2/OIDC authentication, signed JWT tokens, and HMAC callback signature verification.
+- **Single Sign-On (GrandpaSSOn)**: Native integration with `suporterfid/grandpasson-ce` for OAuth2/OIDC authentication, signed JWT tokens, and HMAC callback signature verification.
 
 ---
 
@@ -161,7 +161,7 @@ cp .env.example .env
 
 ## Authentication & Single Sign-On (SSO)
 
-TaskConnect supports native single sign-on integration with [GrandpaSSOn](https://github.com/suporterfid/grandpasson) (`suporterfid/grandpasson`), the official central IdentityProvider for the IROH ecosystem.
+TaskConnect supports native single sign-on integration with [GrandpaSSOn](https://github.com/suporterfid/grandpasson-ce) (`suporterfid/grandpasson-ce`), the official central IdentityProvider for the IROH ecosystem.
 
 - **OIDC / OAuth2 Support**: Connect TaskConnect to GrandpaSSOn to authenticate users via centralized identity management.
 - **Signed JWT & Client Credentials**: Outbound webhook delivery supports client-credentials authentication and signed JWT headers.
@@ -173,7 +173,7 @@ TaskConnect supports native single sign-on integration with [GrandpaSSOn](https:
 
 TaskConnect seamlessly integrates with companion tools in the IROH Initiative ecosystem:
 
-* 🔐 [suporterfid/grandpasson](https://github.com/suporterfid/grandpasson) — Central Single Sign-On (SSO) IdentityProvider and OAuth2 server.
+* 🔐 [suporterfid/grandpasson-ce](https://github.com/suporterfid/grandpasson-ce) — Central Single Sign-On (SSO) IdentityProvider and OAuth2 server.
 * 📝 [suporterfid/jotter](https://github.com/suporterfid/jotter) — Self-hosted Markdown knowledge base with WebDAV sync.
 * 📄 [suporterfid/ConvertDocToMd-PHP](https://github.com/suporterfid/ConvertDocToMd-PHP) — Plain PHP DOC/DOCX/PDF to Markdown conversion utility.
 * ⚡ [suporterfid/taskconnect](https://github.com/suporterfid/taskconnect) — Multi-tenant HTTP task scheduler & webhook dispatcher (this project).
