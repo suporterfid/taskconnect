@@ -38,7 +38,7 @@ O TaskConnect é desenvolvido sob a **Iniciativa IROH**, um ecossistema de softw
 - **Execução em Pipelines DAG**: Encadeamento de tarefas em grafos de execução (`on_success`, `on_failure`, `depends_on`) com fusão de surtos (*coalescing*) e justiça por peso de workspace (*weighted round-robin*).
 - **Segredos Criptografados e Redação de Dados**: Criptografia simétrica transparente em repouso para credenciais de endpoints, com redação automática em logs de execução e snapshots de auditoria.
 - **Painel SPA Moderno em Vue 3**: Interface responsiva focada em conteúdo criada com Vue 3, Vite, Pinia e Tailwind CSS.
-- **Autenticação Unificada (GrandpaSSOn)**: Integração nativa com o `suporterfid/grandpasson` para autenticação OAuth2/OIDC, tokens JWT assinados e verificação de assinatura HMAC em callbacks.
+- **Autenticação Unificada (GrandpaSSOn)**: Integração nativa com o `suporterfid/grandpasson-ce` para autenticação OAuth2/OIDC, tokens JWT assinados e verificação de assinatura HMAC em callbacks.
 
 ---
 
@@ -161,7 +161,7 @@ cp .env.example .env
 
 ## Autenticação e Single Sign-On (SSO)
 
-O TaskConnect possui suporte nativo para autenticação unificada via [GrandpaSSOn](https://github.com/suporterfid/grandpasson) (`suporterfid/grandpasson`), o Provedor de Identidade central oficial do ecossistema IROH.
+O TaskConnect possui suporte nativo para autenticação unificada via [GrandpaSSOn](https://github.com/suporterfid/grandpasson-ce) (`suporterfid/grandpasson-ce`), o Provedor de Identidade central oficial do ecossistema IROH.
 
 - **Suporte a OIDC / OAuth2**: Conecte o TaskConnect ao GrandpaSSOn para autenticar usuários através de um login centralizado.
 - **JWT Assinado e Client Credentials**: A entrega de webhooks suporta autenticação via credenciais de cliente e cabeçalhos com JWTs assinados.
@@ -173,7 +173,7 @@ O TaskConnect possui suporte nativo para autenticação unificada via [GrandpaSS
 
 O TaskConnect integra-se perfeitamente com os demais projetos da Iniciativa IROH:
 
-* 🔐 [suporterfid/grandpasson](https://github.com/suporterfid/grandpasson) — Provedor de Identidade Central (SSO) e servidor OAuth2.
+* 🔐 [suporterfid/grandpasson-ce](https://github.com/suporterfid/grandpasson-ce) — Provedor de Identidade Central (SSO) e servidor OAuth2.
 * 📝 [suporterfid/jotter](https://github.com/suporterfid/jotter) — Base de conhecimento em Markdown autohospedada com sincronização WebDAV.
 * 📄 [suporterfid/ConvertDocToMd-PHP](https://github.com/suporterfid/ConvertDocToMd-PHP) — Conversor PHP direto de DOC/DOCX/PDF para Markdown.
 * ⚡ [suporterfid/taskconnect](https://github.com/suporterfid/taskconnect) — Agendador de tarefas HTTP multitenant & disparador de webhooks (este projeto).
